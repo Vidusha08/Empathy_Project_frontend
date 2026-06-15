@@ -18,7 +18,7 @@ export default function ChatWindow({ messages = [], isLoading = false }) {
           </div>
           <p className="font-medium text-gray-500">Start a conversation</p>
           <p className="text-sm mt-1">
-            Share how you're feeling — I'm here to help.
+            Share how you're feeling. I'm here to help.
           </p>
         </div>
       )}
