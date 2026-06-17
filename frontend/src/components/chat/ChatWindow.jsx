@@ -1,3 +1,4 @@
+//src/components/chat/chatWindow.jsx
 import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import { Loader2 } from "lucide-react";

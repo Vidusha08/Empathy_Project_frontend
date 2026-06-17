@@ -1,92 +1,119 @@
+//src/components/chat/chatMessage.jsx
 import { useState } from "react";
 import { Play, Dumbbell, ChevronDown, ChevronUp } from "lucide-react";
  
-// ─── Skill → resources map ────────────────────────────────────────────────────
-// Keys must match the `skill` string returned by the backend exactly.
-// Set value to null to suppress the panel for that skill.
+// ─────────────────────────────────────────────────────────────────────────────
+// Skill → resources map
+// Keys match backend `skill` strings EXACTLY (from skills.json).
+// Activities here are the real practice activities from skills.json.
+// null = suppress panel entirely.
+// ─────────────────────────────────────────────────────────────────────────────
 const SKILL_RESOURCES = {
-  "Self-awareness": {
-    color: "indigo",
-    videos: [
-      { label: "Understanding Your Emotions",  meta: "6–8 min" },
-      { label: "Calm Your Mind Before Exams",  meta: "5–7 min" },
-    ],
-    activities: [
-      { label: "Self-awareness check-in",  meta: "5 min · Reflective" },
-      { label: "Guided journaling prompt", meta: "Reflective writing"  },
-    ],
-  },
-  "Empathy": {
+  "Calming the Body and Mind": {
     color: "teal",
     videos: [
-      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
-      { label: "Understanding Your Emotions",    meta: "6–8 min"  },
+      { label: "Calm Your Mind Before Exams",  meta: "5–7 min" },
+      { label: "Understanding Your Emotions",  meta: "6–8 min" },
     ],
     activities: [
-      { label: "Empathy role-play exercise", meta: "Interactive practice" },
-      { label: "Today's kindness challenge", meta: "Daily activity"       },
+      { label: "Palms rubbing sensation practice", meta: "Body awareness" },
+      { label: "Chair & feet grounding",           meta: "Grounding · 3 min" },
+      { label: "Resource visualisation",           meta: "Calming · 5 min" },
     ],
   },
-  "Ethics": {
+  "Ethical Mindfulness": {
     color: "violet",
     videos: [
       { label: "Building Empathy in Daily Life", meta: "8–10 min" },
       { label: "Kindness as a Daily Practice",   meta: "4–5 min"  },
     ],
     activities: [
-      { label: "Explore an ethical scenario", meta: "Case study"          },
-      { label: "Self-awareness check-in",     meta: "5 min · Reflective"  },
-    ],
-  },
-  "Kindness": {
-    color: "pink",
-    videos: [
-      { label: "Kindness as a Daily Practice",   meta: "4–5 min"  },
-      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
-    ],
-    activities: [
-      { label: "Today's kindness challenge", meta: "Daily activity"       },
-      { label: "Empathy role-play exercise", meta: "Interactive practice" },
+      { label: "Social media anger reflection",  meta: "Values check-in" },
+      { label: "Impulse buying reflection",      meta: "Mindful pause"   },
+      { label: "Team aggression reflection",     meta: "Case study"      },
     ],
   },
   "Emotional Awareness": {
     color: "amber",
     videos: [
-      { label: "Understanding Your Emotions", meta: "6–8 min" },
-      { label: "Calm Your Mind Before Exams", meta: "5–7 min" },
+      { label: "Understanding Your Emotions",  meta: "6–8 min" },
+      { label: "Calm Your Mind Before Exams",  meta: "5–7 min" },
     ],
     activities: [
-      { label: "Help me understand my mood", meta: "Emotion check-in"  },
-      { label: "Guided journaling prompt",   meta: "Reflective writing" },
+      { label: "Daily emotion check-in",       meta: "5 min · Reflective"  },
+      { label: "Classify your emotions",       meta: "Awareness exercise"   },
+      { label: "5-second pause practice",      meta: "Quick · Daily habit"  },
     ],
   },
-  "Stress Management": {
-    color: "orange",
+  "Self Compassion": {
+    color: "rose",
     videos: [
-      { label: "Calm Your Mind Before Exams", meta: "5–7 min" },
-      { label: "Understanding Your Emotions", meta: "6–8 min" },
+      { label: "Understanding Your Emotions",    meta: "6–8 min"  },
+      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
     ],
     activities: [
-      { label: "Breathing & mindfulness",    meta: "2–3 min · Calming" },
-      { label: "Help me understand my mood", meta: "Emotion check-in"  },
+      { label: "Aspiration vs expectation reflection", meta: "Self-reflection" },
+      { label: "Letter to a friend activity",          meta: "Compassion write" },
     ],
   },
-  "Crisis Support": {
-    color: "red",
+  "Impartiality and Common Humanity": {
+    color: "sky",
     videos: [
-      { label: "Calm Your Mind Before Exams", meta: "5–7 min" },
-      { label: "Understanding Your Emotions", meta: "6–8 min" },
+      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
+      { label: "Kindness as a Daily Practice",   meta: "4–5 min"  },
     ],
     activities: [
-      { label: "Breathing & mindfulness",    meta: "2–3 min · Calming" },
-      { label: "Help me understand my mood", meta: "Emotion check-in"  },
+      { label: "Who are you? Mind map",  meta: "Identity reflection" },
+      { label: "Identity reflection",    meta: "Bias awareness"      },
     ],
   },
-  // Explicitly null — no panel shown
+  "Forgiveness and Gratitude": {
+    color: "green",
+    videos: [
+      { label: "Kindness as a Daily Practice",   meta: "4–5 min"  },
+      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
+    ],
+    activities: [
+      { label: "Forgiveness reflection",   meta: "Letting go · 10 min" },
+      { label: "Naikan gratitude practice", meta: "Gratitude · Daily"  },
+    ],
+  },
+  "Empathic Concern": {
+    color: "indigo",
+    videos: [
+      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
+      { label: "Understanding Your Emotions",    meta: "6–8 min"  },
+    ],
+    activities: [
+      { label: "Gratitude for others' success", meta: "Sympathetic joy"    },
+      { label: "Grounding when overwhelmed",    meta: "2–3 min · Calming"  },
+    ],
+  },
+  "Compassion": {
+    color: "pink",
+    videos: [
+      { label: "Building Empathy in Daily Life", meta: "8–10 min" },
+      { label: "Kindness as a Daily Practice",   meta: "4–5 min"  },
+    ],
+    activities: [
+      { label: "Personal compassion mapping",           meta: "Deep reflection" },
+      { label: "Balancing self & others compassion",   meta: "Practice · 10 min" },
+    ],
+  },
+  // Legacy / fallback keys — suppress panel 
   "General Support": null,
+  "Crisis Support":  null,   // handled by safety service separately
 };
  
-// ─── Per-color Tailwind classes ───────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Skill names that represent a real detected skill vs a generic greeting reply.
+// If the backend returns a skill NOT in this set, treat as no-skill.
+// ─────────────────────────────────────────────────────────────────────────────
+const VALID_SKILLS = new Set(Object.keys(SKILL_RESOURCES).filter(k => SKILL_RESOURCES[k] !== null));
+ 
+// ─────────────────────────────────────────────────────────────────────────────
+// Per-color Tailwind classes — orange removed, replaced with sky & rose
+// ─────────────────────────────────────────────────────────────────────────────
 const colorMap = {
   indigo: {
     wrap:     "bg-indigo-50 border-indigo-100",
@@ -115,15 +142,6 @@ const colorMap = {
     icon:     "text-violet-400",
     toggle:   "hover:bg-violet-50",
   },
-  pink: {
-    wrap:     "bg-pink-50 border-pink-100",
-    badge:    "bg-pink-100 text-pink-700",
-    heading:  "text-pink-600",
-    videoBtn: "bg-pink-600 hover:bg-pink-700 text-white",
-    actBtn:   "bg-white border border-pink-200 text-pink-700 hover:bg-pink-50",
-    icon:     "text-pink-400",
-    toggle:   "hover:bg-pink-50",
-  },
   amber: {
     wrap:     "bg-amber-50 border-amber-100",
     badge:    "bg-amber-100 text-amber-700",
@@ -133,29 +151,49 @@ const colorMap = {
     icon:     "text-amber-400",
     toggle:   "hover:bg-amber-50",
   },
-  orange: {
-    wrap:     "bg-orange-50 border-orange-100",
-    badge:    "bg-orange-100 text-orange-700",
-    heading:  "text-orange-600",
-    videoBtn: "bg-orange-500 hover:bg-orange-600 text-white",
-    actBtn:   "bg-white border border-orange-200 text-orange-700 hover:bg-orange-50",
-    icon:     "text-orange-400",
-    toggle:   "hover:bg-orange-50",
+  rose: {
+    wrap:     "bg-rose-50 border-rose-100",
+    badge:    "bg-rose-100 text-rose-700",
+    heading:  "text-rose-600",
+    videoBtn: "bg-rose-500 hover:bg-rose-600 text-white",
+    actBtn:   "bg-white border border-rose-200 text-rose-700 hover:bg-rose-50",
+    icon:     "text-rose-400",
+    toggle:   "hover:bg-rose-50",
   },
-  red: {
-    wrap:     "bg-red-50 border-red-100",
-    badge:    "bg-red-100 text-red-700",
-    heading:  "text-red-600",
-    videoBtn: "bg-red-600 hover:bg-red-700 text-white",
-    actBtn:   "bg-white border border-red-200 text-red-700 hover:bg-red-50",
-    icon:     "text-red-400",
-    toggle:   "hover:bg-red-50",
+  sky: {
+    wrap:     "bg-sky-50 border-sky-100",
+    badge:    "bg-sky-100 text-sky-700",
+    heading:  "text-sky-600",
+    videoBtn: "bg-sky-500 hover:bg-sky-600 text-white",
+    actBtn:   "bg-white border border-sky-200 text-sky-700 hover:bg-sky-50",
+    icon:     "text-sky-400",
+    toggle:   "hover:bg-sky-50",
+  },
+  green: {
+    wrap:     "bg-green-50 border-green-100",
+    badge:    "bg-green-100 text-green-700",
+    heading:  "text-green-600",
+    videoBtn: "bg-green-600 hover:bg-green-700 text-white",
+    actBtn:   "bg-white border border-green-200 text-green-700 hover:bg-green-50",
+    icon:     "text-green-400",
+    toggle:   "hover:bg-green-50",
+  },
+  pink: {
+    wrap:     "bg-pink-50 border-pink-100",
+    badge:    "bg-pink-100 text-pink-700",
+    heading:  "text-pink-600",
+    videoBtn: "bg-pink-500 hover:bg-pink-600 text-white",
+    actBtn:   "bg-white border border-pink-200 text-pink-700 hover:bg-pink-50",
+    icon:     "text-pink-400",
+    toggle:   "hover:bg-pink-50",
   },
 };
  
-// ─── Skill resources panel ────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Skill resources panel
+// ─────────────────────────────────────────────────────────────────────────────
 function SkillResources({ skill }) {
-  const [open, setOpen] = useState(true); // open by default so student sees it immediately
+  const [open, setOpen] = useState(true);
  
   const resources = SKILL_RESOURCES[skill];
   if (!resources) return null;
@@ -234,17 +272,18 @@ function SkillResources({ skill }) {
   );
 }
  
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Main ChatMessage component
+// ─────────────────────────────────────────────────────────────────────────────
 export default function ChatMessage({ message }) {
   const { role, content, timestamp, skill } = message;
   const isUser = role === "user";
  
-  // Show skill panel only on assistant messages with a recognised, non-null skill
-  const showResources =
-    !isUser &&
-    skill &&
-    skill in SKILL_RESOURCES &&
-    SKILL_RESOURCES[skill] !== null;
+  // Only show the panel when:
+  // 1. It's an assistant message
+  // 2. A skill was returned by the backend
+  // 3. That skill is in our VALID_SKILLS set (i.e. a real content skill, not a greeting catch-all)
+  const showResources = !isUser && skill && VALID_SKILLS.has(skill);
  
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
@@ -258,14 +297,14 @@ export default function ChatMessage({ message }) {
         {/* Message text */}
         <p className="text-sm leading-relaxed">{content}</p>
  
-        {/* Timestamp only — emotion badge removed from both sides */}
+        {/* Timestamp only */}
         {timestamp && (
           <p className={`text-[10px] mt-1.5 ${isUser ? "text-white/50" : "text-gray-400"}`}>
             {timestamp}
           </p>
         )}
  
-        {/* Skill resources panel — assistant only, when skill is identified */}
+        {/* Skill resources — only when a real skill is detected */}
         {showResources && <SkillResources skill={skill} />}
       </div>
     </div>

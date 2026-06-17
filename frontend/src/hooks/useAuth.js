@@ -56,7 +56,7 @@ export function useAuth() {
       setAuth(access_token, user, user.role || role);
 
       // 5. Role-based redirect
-      navigate(user.role === "admin" ? "/admin/dashboard" : "/assessment");
+      navigate(user.role === "admin" ? "/admin/dashboard" : "/chat");
 
     } catch (err) {
       setError(extractErrorMessage(err));
