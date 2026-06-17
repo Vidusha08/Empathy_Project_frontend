@@ -1,3 +1,4 @@
+//src/pages/ChatPage.jsx
 import { useState, useCallback, useRef } from "react";
 import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
