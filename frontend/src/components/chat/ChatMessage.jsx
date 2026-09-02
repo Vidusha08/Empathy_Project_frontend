@@ -1,5 +1,25 @@
 //src/components/chat/chatMessage.jsx
-import { useState } from "react";
+export default function ChatMessage({ message }) {
+  const isUser = message.role === "user";
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} px-4 py-1.5`}>
+      <div
+        className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm
+          ${isUser
+            ? "bg-indigo-600 text-white rounded-br-sm"
+            : "bg-gray-100 text-gray-800 rounded-bl-sm"
+          }`}
+      >
+        <p>{message.content}</p>
+        <p className={`text-[10px] mt-1 ${isUser ? "text-indigo-200" : "text-gray-400"}`}>
+          {message.timestamp}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/*import { useState } from "react";
 import { Play, Dumbbell, ChevronDown, ChevronUp } from "lucide-react";
  
 // ─────────────────────────────────────────────────────────────────────────────
@@ -203,7 +223,7 @@ function SkillResources({ skill }) {
   return (
     <div className={`mt-3 rounded-xl border overflow-hidden ${c.wrap}`}>
  
-      {/* Toggle header */}
+      {/* Toggle header *}
       <button
         onClick={() => setOpen((v) => !v)}
         className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-colors ${c.toggle}`}
@@ -222,11 +242,11 @@ function SkillResources({ skill }) {
         }
       </button>
  
-      {/* Expanded body */}
+      {/* Expanded body *}
       {open && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-white/60">
  
-          {/* Videos */}
+          {/* Videos *}
           <div>
             <p className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 ${c.heading}`}>
               📹 Watch
@@ -246,7 +266,7 @@ function SkillResources({ skill }) {
             </div>
           </div>
  
-          {/* Activities */}
+          {/* Activities *}
           <div>
             <p className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 ${c.heading}`}>
               🏋️ Practice
@@ -294,19 +314,19 @@ export default function ChatMessage({ message }) {
             : "bg-white text-gray-800 border border-gray-100 rounded-bl-sm"
         }`}
       >
-        {/* Message text */}
+        {/* Message text *}
         <p className="text-sm leading-relaxed">{content}</p>
  
-        {/* Timestamp only */}
+        {/* Timestamp only *}
         {timestamp && (
           <p className={`text-[10px] mt-1.5 ${isUser ? "text-white/50" : "text-gray-400"}`}>
             {timestamp}
           </p>
         )}
  
-        {/* Skill resources — only when a real skill is detected */}
+        {/* Skill resources — only when a real skill is detected *}
         {showResources && <SkillResources skill={skill} />}
       </div>
     </div>
   );
-}
+}*/
