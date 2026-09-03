@@ -12,14 +12,14 @@ import {
 
 // Mock skills content (replace with real data from API later)
 const SKILLS = [
-  { id: 1, title: "Active Listening", summary: "Learn to fully focus on what others are saying." },
-  { id: 2, title: "Emotional Awareness", summary: "Recognize and name your own emotions." },
-  { id: 3, title: "Empathy Building", summary: "Understand feelings from another's perspective." },
-  { id: 4, title: "Conflict Resolution", summary: "Navigate disagreements constructively." },
-  { id: 5, title: "Self-Regulation", summary: "Manage reactions in stressful moments." },
-  { id: 6, title: "Assertive Communication", summary: "Express needs clearly and respectfully." },
-  { id: 7, title: "Perspective Taking", summary: "See situations through another's eyes." },
-  { id: 8, title: "Stress Management", summary: "Techniques to stay calm under pressure." },
+  { id: 1, title: "Calming the Body and Mind", summary: "Simple breathing and grounding practices that settle the nervous system before working with harder emotions." },
+  { id: 2, title: "Ethical Mindfulness", summary: "Noticing your own values and intentions in the moment, so your actions stay aligned with what matters to you." },
+  { id: 3, title: "Emotional Awareness", summary: "Naming what you feel as it happens, and recognizing the same feelings as they show up in other people." },
+  { id: 4, title: "Self-Compassion", summary: "Treating your own mistakes and struggles with the same kindness you would offer a good friend." },
+  { id: 5, title: "Impartiality and Common Humanity", summary: "Extending care evenly, and remembering that everyone shares the same basic wish to be happy and free from suffering." },
+  { id: 6, title: "Forgiveness and Gratitude", summary: "Letting go of resentment at your own pace, and noticing what is already good, safe, or supportive around you." },
+  { id: 7, title: "Empathic Concern", summary: "Tuning in to someone else's distress and genuinely caring about their wellbeing, without taking it on as your own." },
+  { id: 8, title: "Compassion", summary: "Turn empathy into a wish and willingness to help." },
 ];
 
 // Hook: close a popover when clicking outside it
@@ -265,7 +265,7 @@ export default function ChatPage() {
         <div className="px-6 pt-5 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">💬</span>
-            <h1 className="text-xl font-bold text-gray-800">Empathy Guide Chatbot</h1>
+            <h1 className="text-xl font-bold text-gray-800">Chat With Your Empathy Buddy</h1>
           </div>
         </div>
 

@@ -63,7 +63,7 @@ const ContentPage = () => {
           taken one conversation at a time with your chatbot guide.
         </p>
  
-        <div className="content-page__stats">
+        {/*<div className="content-page__stats">
           <div className="content-page__stat">
             <span className="content-page__stat-number">{completedCount}</span>
             <span className="content-page__stat-label">of 8 completed</span>
@@ -73,7 +73,7 @@ const ContentPage = () => {
             <span className="content-page__stat-number">{startedCount}</span>
             <span className="content-page__stat-label">skills started</span>
           </div>
-        </div>
+        </div>*/}
       </header>
  
       <div className={`content-page__grid${loading ? ' content-page__grid--loading' : ''}`}>

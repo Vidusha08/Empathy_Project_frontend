@@ -31,9 +31,11 @@ export default function App() {
 
         <Route path="/assessment" element={<AssessmentPage />} />
 
-        {/* Land straight on chat instead of login */}
+        {/* Land straight on chat instead of login*/}
         <Route path="/" element={<Navigate to="/chat" replace />} />
         <Route path="*" element={<Navigate to="/chat" replace />} />
+        {/*<Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />*/}
       </Routes>
     </BrowserRouter>
   );
