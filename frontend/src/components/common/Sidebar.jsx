@@ -13,7 +13,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { useAuthStore } from "../../store/authStore";
+import useAuthStore from "../../store/authStore";
 
 const navItems = [
   { label: "Chat", icon: MessageSquare, path: "/chat" },
