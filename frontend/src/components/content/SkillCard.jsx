@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { skillIconMap } from './skillIcons';
+import progressApi from '../../api/progressApi';
 import './SkillCard.css';
  
 const STATUS_LABEL = {
@@ -12,8 +13,16 @@ const STATUS_LABEL = {
  
 const SkillCard = ({ skill, progress }) => {
   const Icon = skillIconMap[skill.icon];
-  const percent = Math.max(0, Math.min(100, progress?.percent ?? 0));
-  const status = progress?.status ?? 'not-started';
+  const totalObjectives = skill.totalObjectives || 5;
+  const completedCount = Array.isArray(progress?.completed_objective_ids)
+    ? progress.completed_objective_ids.length
+    : progress?.percent && progress.percent >= 100
+      ? totalObjectives
+      : progress?.percent && progress.percent > 0
+        ? Math.max(1, Math.round((progress.percent / 100) * totalObjectives))
+        : 0;
+  const percent = progress?.percent ?? progressApi.calculateSkillPercentage(progress, totalObjectives);
+  const status = progress?.status ?? (completedCount === 0 ? 'not-started' : completedCount >= totalObjectives ? 'completed' : 'in-progress');
  
   return (
     <article className="skill-card" style={{ '--accent': skill.color }}>
@@ -29,7 +38,7 @@ const SkillCard = ({ skill, progress }) => {
  
       <div className="skill-card__progress">
         <div className="skill-card__progress-row">
-          <span className="skill-card__status">{STATUS_LABEL[status]}</span>
+          <span className="skill-card__status">{STATUS_LABEL[status] || 'Not started'}</span>
           <span className="skill-card__percent">{percent}%</span>
         </div>
         <div
@@ -41,6 +50,9 @@ const SkillCard = ({ skill, progress }) => {
           aria-label={`${skill.title} progress`}
         >
           <div className="skill-card__fill" style={{ width: `${percent}%` }} />
+        </div>
+        <div className="skill-card__meta">
+          {completedCount} of {totalObjectives} objectives completed
         </div>
       </div>
  

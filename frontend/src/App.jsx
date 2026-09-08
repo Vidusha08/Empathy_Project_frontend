@@ -7,7 +7,7 @@ import ChatPage from "./pages/ChatPage";
 import ContentPage from "./pages/ContentPage";
 import AssessmentPage from "./pages/AssessmentPage";
 import QuizPage from "./pages/QuizPage";
-import ProgressReportPage from "./pages/ProgressReportPage";
+import ProgressPage from "./pages/ProgressPage";
 import Layout from "./components/common/Layout";
 import PrivateRoute from "./components/common/PrivateRoute";
 
@@ -24,7 +24,7 @@ export default function App() {
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/content" element={<ContentPage />} />
             <Route path="/quiz" element={<QuizPage />} />
-            <Route path="/progress" element={<ProgressReportPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
           </Route>
         </Route>
 
