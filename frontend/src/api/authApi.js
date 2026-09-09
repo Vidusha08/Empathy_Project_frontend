@@ -1,41 +1,46 @@
 // src/api/authApi.js
 import api from "../utils/axiosInstance";
 import { ENDPOINTS } from "../utils/constants";
-
-// Login 
+ 
+// Login
 export const loginUser = async ({ username, password }) => {
   const response = await api.post(ENDPOINTS.LOGIN, {
-    username,   // matches UserLogin.username field
-    password,   // matches UserLogin.password field
+    username, // matches backend's login field
+    password,
   });
-  // response.data = { access_token, refresh_token, token_type: "bearer" }
+  // response.data = { message, access_token, student }
   return response.data;
 };
-
-// Register 
+ 
+// Register
 export const registerUser = async (formData) => {
+  // The backend's /api/auth/register requires exactly these four fields.
+  // ageGroup, gender, and agreeToTerms aren't accepted server-side (yet),
+  // so they're intentionally left out of the payload.
   const payload = {
-    username:  formData.fullName,   // maps fullName → username
-    password:  formData.password,
-    ageGroup: formData.ageGroup,  
-    privacyConsent: formData.agreeToTerms,
+    name: formData.fullName,
+    username: formData.username,
+    email: formData.email,
+    password: formData.password,
   };
   const response = await api.post(ENDPOINTS.REGISTER, payload);
   return response.data;
 };
-
-//GET CURRENT USER
+ 
+// GET CURRENT USER
 export const getCurrentUser = async () => {
   const response = await api.get(ENDPOINTS.ME);
-  // response.data = { username: "john", role: "student" }
+  // response.data = { student: { id, name, username, email } }
   return response.data;
 };
-
-// Logout 
+ 
+// Logout
 export const logoutUser = async () => {
   try {
     await api.post(ENDPOINTS.LOGOUT);
   } catch {
-    // Swallow error — local logout always proceeds regardless
+    // The backend has no /api/auth/logout route right now, so this will
+    // 404 — swallowed on purpose. Local logout (clearing the token) always
+    // proceeds regardless.
   }
 };
