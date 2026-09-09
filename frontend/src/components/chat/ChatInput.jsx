@@ -84,3 +84,4 @@ export default function ChatInput({ onSend, isLoading = false }) {
     </div>
   );
 }
+
