@@ -14,16 +14,17 @@ export const loginUser = async ({ username, password }) => {
  
 // Register
 export const registerUser = async (formData) => {
-  // The backend's /api/auth/register requires exactly these four fields.
-  // ageGroup, gender, and agreeToTerms aren't accepted server-side (yet),
-  // so they're intentionally left out of the payload.
   const payload = {
     name: formData.fullName,
     username: formData.username,
     email: formData.email,
+    gender: formData.gender,
+    age_group: formData.ageGroup,
     password: formData.password,
   };
+
   const response = await api.post(ENDPOINTS.REGISTER, payload);
+
   return response.data;
 };
  
