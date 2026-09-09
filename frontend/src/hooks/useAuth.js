@@ -1,8 +1,8 @@
 // src/hooks/useAuth.js
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../store/authStore";
-import { loginUser, registerUser, getCurrentUser, logoutUser } from "../api/authApi";
+import useAuthStore from "../store/authStore";
+import { loginUser, registerUser, logoutUser } from "../api/authApi";
 
 //  Helper: always converts any FastAPI error shape → readable string
 const extractErrorMessage = (err) => {
@@ -35,28 +35,14 @@ export function useAuth() {
   const [error, setError] = useState(null);
 
   // Login 
-  const login = async ({ username, password, role }) => {
+  const login = async ({ username, password }) => {
     setLoading(true);
     setError(null);
     try {
-      // 1. POST JSON to /api/auth/login → { access_token, refresh_token, token_type }
-      const { access_token, refresh_token } = await loginUser({ username, password });
+      const { access_token, student } = await loginUser({ username, password });
 
-      // 2. Store tokens so interceptor can attach them immediately
-      localStorage.setItem("token", access_token);
-      localStorage.setItem("refresh_token", refresh_token); // store for later refresh
-
-      // 3. Decode username directly from JWT token
-      const tokenPayload = JSON.parse(atob(access_token.split(".")[1]));
-      const user = {
-        username: tokenPayload.username,
-        role: tokenPayload.role,
-      };
-      // 4. Save to Zustand + localStorage
-      setAuth(access_token, user, user.role || role);
-
-      // 5. Role-based redirect
-      navigate(user.role === "admin" ? "/admin/dashboard" : "/chat");
+      setAuth(student, access_token);
+      navigate("/chat");
 
     } catch (err) {
       setError(extractErrorMessage(err));
@@ -86,7 +72,7 @@ export function useAuth() {
 
   // Logout 
   const logout = async () => {
-    await authApi.logout();  // notify backend 
+    await logoutUser();      // notify backend
     localStorage.removeItem("refresh_token");
     clearAuth();             // wipe Zustand + localStorage
     navigate("/login");
