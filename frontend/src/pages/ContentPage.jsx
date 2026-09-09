@@ -1,3 +1,4 @@
+//pages/ContentPage.jsx
 import React, { useEffect, useState } from 'react';
 import SkillCard from '../components/content/SkillCard';
 import { SKILLS, MOCK_PROGRESS } from '../utils/skillsData';

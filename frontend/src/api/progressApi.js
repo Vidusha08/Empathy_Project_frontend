@@ -1,4 +1,4 @@
-
+// src/api/progressApi.js
 const API_BASE_URL = 'http://localhost:5000/api';
 
 const getToken = () => {
@@ -271,4 +271,3 @@ export {
   isObjectiveCompleted,
   calculateSkillPercentage,
 };
-

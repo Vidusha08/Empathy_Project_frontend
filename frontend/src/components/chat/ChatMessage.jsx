@@ -1,5 +1,4 @@
-// src/components/chat/ChatMessage.jsx
-
+//src/components/chat/chatMessage.jsx
 import { useState } from "react";
 import {
   Target,
