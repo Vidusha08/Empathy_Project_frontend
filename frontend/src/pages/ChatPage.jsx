@@ -5,6 +5,7 @@ import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
+import { completeObjective } from "../api/progressApi";
 import {
   BookOpen, Volume2, VolumeX, User, ChevronDown,
   LogOut, ArrowRight, Mic, Send,
@@ -204,11 +205,10 @@ export default function ChatPage() {
 
   const handleSend = useCallback(async (text) => {
     addMessage({
-      id:        Date.now(),
-      role:      "user",
-      content:   text,
+      id: Date.now(),
+      role: "user",
+      content: text,
       timestamp: ts(),
-      emotion:   "neutral",
     });
 
     setLoading(true);
@@ -222,7 +222,13 @@ export default function ChatPage() {
         content:   res.message,
         timestamp: ts(),
         emotion:   res.emotion ?? "calm",
+        status:    res.status,
         skill:     res.skill,
+        topic:     res.topic,
+        learningObjective: res.learningObjective,
+        recommendedActivity: res.recommendedActivity,
+        sourcePage: res.sourcePage,
+        interactionId: res.interactionId,
       });
     } catch (err) {
       const isUnauth = err?.response?.status === 401;
@@ -239,6 +245,25 @@ export default function ChatPage() {
       setLoading(false);
     }
   }, [addMessage, setLoading]);
+
+  const handleCompleteObjective = async (objectiveId, skillId) => {
+    try {
+      await completeObjective(objectiveId, skillId);
+      addMessage({
+        id: Date.now(),
+        role: "assistant",
+        content: "Objective marked as completed.",
+        timestamp: ts(),
+      });
+    } catch {
+      addMessage({
+        id: Date.now(),
+        role: "assistant",
+        content: "I couldn't mark that objective as completed. Please try again.",
+        timestamp: ts(),
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
@@ -271,7 +296,11 @@ export default function ChatPage() {
 
         {/* Messages */}
         <div className="flex-1 mx-5 mb-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-          <ChatWindow messages={messages} isLoading={isLoading} />
+          <ChatWindow
+            messages={messages}
+            isLoading={isLoading}
+            onCompleteObjective={handleCompleteObjective}
+          />
         </div>
 
         {/* Input */}

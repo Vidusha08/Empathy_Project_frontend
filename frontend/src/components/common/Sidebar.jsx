@@ -13,12 +13,12 @@ import {
   UserCog,
 } from "lucide-react";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { useAuthStore } from "../../store/authStore";
+import useAuthStore from "../../store/authStore";
 
 const navItems = [
   { label: "Chat", icon: MessageSquare, path: "/chat" },
   { label: "Content", icon: BookOpen, path: "/content" },
-  { label: "Chat History", icon: History, path: "/progress" },
+  { label: "Progress", icon: History, path: "/progress" },
 ];
 
 // Hook: close a popover when clicking outside it

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 
-export default function ChatWindow({ messages, isLoading }) {
+export default function ChatWindow({ messages, isLoading, onCompleteObjective }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -12,7 +12,11 @@ export default function ChatWindow({ messages, isLoading }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto py-3">
       {messages.map((msg) => (
-        <ChatMessage key={msg.id} message={msg} />
+        <ChatMessage
+          key={msg.id}
+          message={msg}
+          onCompleteObjective={onCompleteObjective}
+        />
       ))}
 
       {isLoading && (
