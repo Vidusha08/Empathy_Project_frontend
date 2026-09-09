@@ -38,7 +38,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
  
-// Response interceptor: handle 401 
+// ── Response interceptor: handle 401 ─────────────────────────────────────────
 api.interceptors.response.use(
   (res) => res,
   (error) => {
@@ -53,3 +53,29 @@ api.interceptors.response.use(
 );
  
 export default api;
+/*import axios from "axios";
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL, // FastAPI backend URL
+});
+
+// Attach JWT token to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// Handle 401 (token expired)
+api.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;*/
