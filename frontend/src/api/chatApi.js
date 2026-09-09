@@ -1,3 +1,4 @@
+// src/api/chatApi.js
 import api from "../utils/axiosInstance";
 
 export async function sendMessage(question) {
