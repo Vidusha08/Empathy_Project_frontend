@@ -1,7 +1,7 @@
 import axios from "axios";
  
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // e.g. http://localhost:8000
+  baseURL: import.meta.env.VITE_API_BASE_URL, // e.g. http://127.0.0.1:5000
 });
  
 /**
@@ -29,7 +29,7 @@ function getAccessToken() {
   return localStorage.getItem("token") ?? null;
 }
  
-// ── Request interceptor: attach Bearer token ──────────────────────────────────
+//  Request interceptor: attach Bearer token 
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
