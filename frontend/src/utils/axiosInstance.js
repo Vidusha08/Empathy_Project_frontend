@@ -1,9 +1,9 @@
 import axios from "axios";
- 
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // e.g. http://localhost:8000
+  baseURL: import.meta.env.VITE_API_BASE_URL, // e.g. http://127.0.0.1:5000
 });
- 
+
 /**
  * Read the JWT access token from wherever authStore persists it.
  *
@@ -28,8 +28,8 @@ function getAccessToken() {
   // Bare fallback (used by login flow before Zustand rehydrates)
   return localStorage.getItem("token") ?? null;
 }
- 
-// ── Request interceptor: attach Bearer token ──────────────────────────────────
+
+// Request interceptor: attach Bearer token
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
@@ -37,12 +37,22 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
- 
-// Response interceptor: handle 401 
+
+// Requests where a 401 means "these credentials were wrong" rather than
+// "your session expired" — these should NOT trigger the global redirect,
+// or the login/register page never gets a chance to show its own error.
+const AUTH_ENTRY_ROUTES = ["/auth/login", "/auth/register"];
+
+// Response interceptor: handle 401
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || "";
+    const isAuthEntryRequest = AUTH_ENTRY_ROUTES.some((path) =>
+      requestUrl.includes(path)
+    );
+
+    if (error.response?.status === 401 && !isAuthEntryRequest) {
       // Clear both possible storage locations
       localStorage.removeItem("auth-storage");
       localStorage.removeItem("token");
@@ -51,5 +61,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
- 
+
 export default api;
+
