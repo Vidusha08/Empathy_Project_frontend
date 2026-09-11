@@ -109,6 +109,7 @@ export default function ChatPage() {
         learningObjective: res.learningObjective,
         recommendedActivity: res.recommendedActivity,
         sourcePage: res.sourcePage,
+        steps: res.steps,
         interactionId: res.interactionId,
       });
     } catch (err) {

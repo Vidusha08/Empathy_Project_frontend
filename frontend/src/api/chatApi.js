@@ -17,6 +17,7 @@ export async function sendMessage(question) {
     learningObjective: context.learning_objective ?? null,
     recommendedActivity: context.recommended_activity ?? null,
     sourcePage: context.source_page ?? null,
+    steps: Array.isArray(data.steps) ? data.steps : [],
     interactionId: data.interaction_id ?? null,
   };
 }
