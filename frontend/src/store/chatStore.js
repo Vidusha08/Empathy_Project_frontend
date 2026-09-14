@@ -16,6 +16,12 @@ const useChatStore = create((set) => ({
   ],
   isLoading: false,
   addMessage: (msg) => set((state) => ({ messages: [...state.messages, msg] })),
+  markMessageHandled: (messageId) =>
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        message.id === messageId ? { ...message, flowHandled: true } : message
+      ),
+    })),
   setLoading: (val) => set({ isLoading: val }),
   clearMessages: () => set({ messages: [] }),
  
