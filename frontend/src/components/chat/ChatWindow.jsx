@@ -1,5 +1,37 @@
 //src/components/chat/chatWindow.jsx
+//src/components/chat/chatWindow.jsx
 import { useEffect, useRef } from "react";
+import ChatMessage from "./ChatMessage";
+import RabbitThinking from "./RabbitThinking";
+
+export default function ChatWindow({ messages, isLoading, onCompleteObjective }) {
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto py-3">
+      {messages.map((msg) => (
+        <ChatMessage
+          key={msg.id}
+          message={msg}
+          onCompleteObjective={onCompleteObjective}
+        />
+      ))}
+
+      {isLoading && (
+        <div className="flex justify-start px-4 py-1.5">
+          <RabbitThinking />
+        </div>
+      )}
+
+      <div ref={bottomRef} />
+    </div>
+  );
+}
+/*import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 
 export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
@@ -34,4 +66,4 @@ export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
       <div ref={bottomRef} />
     </div>
   );
-}
+}*/
