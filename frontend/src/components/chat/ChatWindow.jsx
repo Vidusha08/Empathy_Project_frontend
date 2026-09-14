@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 
-export default function ChatWindow({ messages, isLoading, onCompleteObjective }) {
+export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function ChatWindow({ messages, isLoading, onCompleteObjective })
         <ChatMessage
           key={msg.id}
           message={msg}
-          onCompleteObjective={onCompleteObjective}
+          onFlowMessage={onFlowMessage}
         />
       ))}
 
