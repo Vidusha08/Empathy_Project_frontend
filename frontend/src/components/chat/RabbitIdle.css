@@ -1,0 +1,41 @@
+/* src/components/chat/RabbitIdle.css */
+.rabbit-idle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rabbit-idle__img {
+  width: 150px;
+  height: auto;
+  animation: rabbitFloat 3s ease-in-out infinite;
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.12));
+}
+
+.rabbit-idle:hover .rabbit-idle__img {
+  transform: scale(1.05) rotate(-2deg);
+}
+
+.rabbit-idle__shadow {
+  width: 64px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  margin-top: -4px;
+  animation: shadowPulse 3s ease-in-out infinite;
+}
+
+@keyframes rabbitFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes shadowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(0.8); opacity: 0.3; }
+}
