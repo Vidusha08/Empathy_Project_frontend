@@ -69,14 +69,14 @@ export default function Sidebar() {
       }`}
       style={{ minWidth: collapsed ? "4rem" : "14rem" }}
     >
-      {/* Logo */}
+      {/* Logo Empathy Buddy */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
         <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center shadow-lg">
           <Heart size={18} className="text-white" fill="white" />
         </div>
         {!collapsed && (
           <span className="text-lg font-bold tracking-wide text-white">
-            Empathy Buddy
+            YESGuru 
           </span>
         )}
       </div>

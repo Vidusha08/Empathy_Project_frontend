@@ -143,7 +143,7 @@ export default function StudentDashboard() {
                 <MessageSquare size={12} /> Chatbot
               </span>
               <h3 className="text-base font-bold text-[#3A342B] mb-1" >
-                Talk to Empathy Buddy
+                Talk to YESGuru
               </h3>
               <p className="text-xs text-[#6B6255] mb-3">
                 Ask a question, explore a feeling, or continue where you left off.

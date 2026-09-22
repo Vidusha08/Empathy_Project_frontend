@@ -17,7 +17,7 @@ export default function RabbitThinking() {
     <div className="rabbit-thinking">
       <img
         src={rabbit}
-        alt="Empathy Buddy is thinking"
+        alt="YESGuru is thinking" //alt="Empathy Buddy is thinking"
         className={`rabbit-thinking__img rabbit-thinking__img--${phase}`}
       />
       <div className="rabbit-thinking__bubble">
