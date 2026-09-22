@@ -15,9 +15,16 @@ export async function sendMessage(question) {
     skill: context.skill ?? null,
     topic: context.topic ?? null,
     learningObjective: context.learning_objective ?? null,
+    nextIncompleteObjective: context.next_incomplete_objective ?? null,
+    progressRecommendation: context.progress_recommendation ?? null,
     recommendedActivity: context.recommended_activity ?? null,
     sourcePage: context.source_page ?? null,
     steps: Array.isArray(data.steps) ? data.steps : [],
     interactionId: data.interaction_id ?? null,
   };
+}
+
+export async function getLearningHistory() {
+  const { data } = await api.get("/api/learning-history");
+  return Array.isArray(data.interactions) ? data.interactions : [];
 }

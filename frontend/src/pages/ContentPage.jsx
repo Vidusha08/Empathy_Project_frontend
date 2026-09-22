@@ -1,57 +1,57 @@
 //pages/ContentPage.jsx
 import React, { useEffect, useState } from 'react';
-import SkillCard from '../components/content/SkillCard';
-import { SKILLS, MOCK_PROGRESS } from '../utils/skillsData';
+import { Check, Circle, LoaderCircle } from 'lucide-react';
 import progressApi from '../api/progressApi';
 import './ContentPage.css';
 
 const ContentPage = () => {
-  const [progressBySkill, setProgressBySkill] = useState(MOCK_PROGRESS);
+  const [structure, setStructure] = useState(null);
+  const [progressBySkill, setProgressBySkill] = useState({});
   const [loading, setLoading] = useState(true);
+  const [completingId, setCompletingId] = useState(null);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadProgress = async () => {
-      try {
-        const skillIds = SKILLS.map((skill) => skill.id);
-        const data = await progressApi.getAllSkillProgress(skillIds);
-
-        if (isMounted) {
-          setProgressBySkill({ ...MOCK_PROGRESS, ...(data || {}) });
-        }
-      } catch (error) {
-        console.error(
-          'Could not load skill progress. Showing fallback data.',
-          error
-        );
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadProgress();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const completedCount = SKILLS.filter(
-    (skill) => {
-      const progress = progressBySkill[skill.id];
-      const completed = progress?.completed_objective_ids?.length || 0;
-      return completed >= (skill.totalObjectives || 5);
+  const loadContent = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const curriculum = await progressApi.getProgressStructure();
+      const chapters = curriculum?.chapters || [];
+      const progress = await progressApi.getAllSkillProgress(
+        chapters.map((chapter) => chapter.chapter_id)
+      );
+      setStructure(curriculum);
+      setProgressBySkill(progress);
+    } catch (loadError) {
+      setError(loadError.message || 'Unable to load learning content.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => { void loadContent(); }, []);
+
+  const chapters = structure?.chapters || [];
+  const completedCount = chapters.filter((chapter) =>
+    progressBySkill[chapter.chapter_id]?.skill?.progress === 100
   ).length;
 
-  const startedCount = SKILLS.filter((skill) => {
-    const progress = progressBySkill[skill.id];
-    const completed = progress?.completed_objective_ids?.length || 0;
-    return completed > 0;
-  }).length;
+  const startedCount = chapters.filter((chapter) =>
+    (progressBySkill[chapter.chapter_id]?.completed_item_ids || []).length > 0
+  ).length;
+
+  const markComplete = async (skillId, itemId) => {
+    try {
+      setCompletingId(itemId);
+      await progressApi.completeItem(skillId, itemId);
+      const updated = await progressApi.getProgress(skillId);
+      setProgressBySkill((previous) => ({ ...previous, [skillId]: updated }));
+    } catch (completionError) {
+      setError(completionError.message || 'Unable to complete this item.');
+    } finally {
+      setCompletingId(null);
+    }
+  };
 
   return (
     <div className="content-page">
@@ -59,15 +59,13 @@ const ContentPage = () => {
         <h1 className="content-page__title">Your empathy skills</h1>
 
         <p className="content-page__subtitle">
-          Eight skills from UNESCO's Social Emotional Education:
-          Knowledge to Practice course, taken one conversation at a
-          time with your chatbot guide.
+          Follow each skill from objectives to completed learning items.
         </p>
 
         <div className="content-page__stats">
           <div className="content-page__stat">
             <span className="content-page__stat-number">{completedCount}</span>
-            <span className="content-page__stat-label">of {SKILLS.length} completed</span>
+            <span className="content-page__stat-label">of {chapters.length} completed</span>
           </div>
 
           <div className="content-page__stat-divider" />
@@ -84,13 +82,57 @@ const ContentPage = () => {
           loading ? ' content-page__grid--loading' : ''
         }`}
       >
-        {SKILLS.map((skill) => (
-          <SkillCard
-            key={skill.id}
-            skill={skill}
-            progress={progressBySkill[skill.id]}
-          />
-        ))}
+        {error && <p className="content-page__error">{error}</p>}
+        {loading && <p className="content-page__loading">Loading learning content...</p>}
+        {!loading && chapters.map((chapter) => {
+          const skillProgress = progressBySkill[chapter.chapter_id] || {};
+          const completedItems = new Set(skillProgress.completed_item_ids || []);
+          return (
+            <article className="learning-skill" key={chapter.chapter_id}>
+              <div className="learning-skill__heading">
+                <p className="content-page__eyebrow">Skill</p>
+                <h2>{chapter.title}</h2>
+                <p>{skillProgress.skill?.progress ?? 0}% complete</p>
+              </div>
+              <div className="learning-skill__objectives">
+                {(chapter.objectives || []).map((objective) => {
+                  const objectiveProgress = (skillProgress.objectives || []).find(
+                    (item) => item.objective_id === objective.objective_id
+                  );
+                  return (
+                    <section className="learning-objective" key={objective.objective_id}>
+                      <div className="learning-objective__heading">
+                        <h3>{objective.title}</h3>
+                        <span>{objectiveProgress?.progress ?? 0}%</span>
+                      </div>
+                      {(objective.items || []).map((item) => {
+                        const completed = completedItems.has(item.item_id);
+                        const itemType = item.type || 'learning item';
+                        return (
+                          <div className="learning-item" key={item.item_id}>
+                            <div>
+                              <span className="learning-item__type">{itemType}</span>
+                              <strong>{item.title}</strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => markComplete(chapter.chapter_id, item.item_id)}
+                              disabled={completed || completingId === item.item_id}
+                              aria-label={`${completed ? 'Completed' : 'Complete'} ${item.title}`}
+                            >
+                              {completingId === item.item_id ? <LoaderCircle className="spin" size={16} /> : completed ? <Check size={16} /> : <Circle size={16} />}
+                              {completed ? 'Completed' : 'Complete'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </section>
+                  );
+                })}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

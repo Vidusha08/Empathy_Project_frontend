@@ -25,6 +25,12 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem('auth-storage');
+      localStorage.removeItem('token');
+      localStorage.removeItem('access_token');
+      window.location.assign('/login');
+    }
     const error = new Error(data.error || data.message || `Request failed with status ${response.status}`);
     error.status = response.status;
     error.data = data;
@@ -41,6 +47,7 @@ const normalizeProgress = (response) => {
     completed_objective_ids: Array.isArray(completed)
       ? completed.map((item) => typeof item === 'object' ? item.id || item.objective_id : item)
       : [],
+    completed_item_ids: Array.isArray(progress.completed_item_ids) ? progress.completed_item_ids : [],
   };
 };
 
@@ -69,15 +76,6 @@ const getAllSkillProgress = async (skillIds = []) => {
   }, {});
 };
 
-const completeObjective = (objectiveId, skillId) => {
-  if (!objectiveId) throw new Error('objectiveId is required.');
-  if (!skillId) throw new Error('skillId is required.');
-  return apiRequest(`/objectives/${encodeURIComponent(objectiveId)}/complete`, {
-    method: 'POST',
-    body: JSON.stringify({ skill_id: skillId }),
-  });
-};
-
 const completeItem = (skillId, itemId) => {
   if (!skillId) throw new Error('skillId is required.');
   if (!itemId) throw new Error('itemId is required.');
@@ -98,13 +96,13 @@ const calculateSkillPercentage = (progress, totalObjectives) => {
 
 const progressApi = {
   getProgress, getSkillProgress, getProgressStructure, getOverallProgress,
-  getAllSkillProgress, completeObjective, completeItem,
+  getAllSkillProgress, completeItem,
   isObjectiveCompleted, calculateSkillPercentage,
 };
 
 export default progressApi;
 export {
   getProgress, getSkillProgress, getProgressStructure, getOverallProgress,
-  getAllSkillProgress, completeObjective, completeItem,
+  getAllSkillProgress, completeItem,
   isObjectiveCompleted, calculateSkillPercentage,
 };

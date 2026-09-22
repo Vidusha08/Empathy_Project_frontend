@@ -4,6 +4,7 @@ import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
+import { completeItem } from "../api/progressApi";
 import { Mic, Send } from "lucide-react";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
@@ -96,7 +97,7 @@ export default function ChatPage() {
     addMessage({ id: createId(), role: "user", content, timestamp: ts() });
   };
 
-  const addFlowStep = (step, flowAction, flowSteps, flowIndex, skill, content) => {
+  const addFlowStep = (step, flowAction, flowSteps, flowIndex, skill, content, context = {}) => {
     addMessage({
       id: createId(),
       role: "assistant",
@@ -107,6 +108,8 @@ export default function ChatPage() {
       flowAction,
       flowIndex,
       learningSteps: flowSteps,
+      recommendedActivity: context.recommendedActivity,
+      learningObjective: context.learningObjective,
     });
   };
 
@@ -117,26 +120,36 @@ export default function ChatPage() {
 
     try {
       const res = await sendMessage(text);
+      const learningContext = res.learning_context || res;
+      const skill = learningContext.skill;
+      const learningObjective = learningContext.learning_objective || learningContext.learningObjective;
+      const recommendedActivity = learningContext.recommended_activity || learningContext.recommendedActivity;
+      const progressRecommendation = learningContext.progress_recommendation || learningContext.progressRecommendation;
+      const steps = Array.isArray(res.steps) ? res.steps : [];
 
-      const hasLearningFlow = res.steps.length > 0 && res.skill;
-      const firstStep = res.steps[0];
+      const hasLearningFlow = steps.length > 0 && skill?.id;
+      const firstStep = steps[0];
 
       addMessage({
         id:        createId(),
         role:      "assistant",
-        content:   res.message || firstStep?.content,
+        content:   [res.message || learningContext.message || firstStep?.content, progressRecommendation]
+          .filter(Boolean)
+          .join("\n\n"),
         timestamp: ts(),
         emotion:   res.emotion ?? "calm",
         status:    res.status,
-        skill:     res.skill,
-        topic:     res.topic,
-        learningObjective: res.learningObjective,
-        recommendedActivity: res.recommendedActivity,
-        sourcePage: res.sourcePage,
+        skill,
+        topic:     learningContext.topic,
+        learningObjective,
+        nextIncompleteObjective: learningContext.next_incomplete_objective || learningContext.nextIncompleteObjective,
+        progressRecommendation,
+        recommendedActivity,
+        sourcePage: learningContext.source_page || learningContext.sourcePage,
         interactionId: res.interactionId,
         flowAction: hasLearningFlow ? "learn" : undefined,
         flowIndex: hasLearningFlow ? 0 : undefined,
-        learningSteps: hasLearningFlow ? res.steps : undefined,
+        learningSteps: hasLearningFlow ? steps : undefined,
       });
     } catch (err) {
       const isUnauth = err?.response?.status === 401;
@@ -154,7 +167,7 @@ export default function ChatPage() {
     }
   };
 
-  const handleFlowMessage = (text, action, sourceMessage) => {
+  const handleFlowMessage = async (text, action, sourceMessage) => {
     if (!sourceMessage || sourceMessage.flowHandled) return;
 
     markMessageHandled(sourceMessage.id);
@@ -168,6 +181,25 @@ export default function ChatPage() {
         timestamp: ts(),
       });
       return;
+    }
+
+    const skillId = sourceMessage.skill?.id || sourceMessage.skill?.skill_id || sourceMessage.skill?.chapter_id;
+    const itemId = sourceMessage.recommendedActivity?.id
+      || sourceMessage.recommendedActivity?.item_id
+      || sourceMessage.recommendedActivity?.activity_id;
+
+    if (action === "complete" && skillId && itemId) {
+      try {
+        await completeItem(skillId, itemId);
+      } catch (error) {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: error.message || "I could not save that completion yet.",
+          timestamp: ts(),
+        });
+        return;
+      }
     }
 
     const flowSteps = sourceMessage.learningSteps || [];
@@ -206,7 +238,15 @@ export default function ChatPage() {
           ? "Great! Let's check your understanding."
           : "Let's continue.";
 
-    addFlowStep(nextStep, nextAction, flowSteps, nextIndex, sourceMessage.skill, nextContent);
+    addFlowStep(
+      nextStep,
+      nextAction,
+      flowSteps,
+      nextIndex,
+      sourceMessage.skill,
+      nextContent,
+      sourceMessage,
+    );
   };
 
   return (
