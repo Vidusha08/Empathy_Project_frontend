@@ -257,7 +257,7 @@ export default function ChatPage() {
         <div className="px-6 pt-5 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">💬</span>
-            <h1 className="text-xl font-bold text-gray-800">Chat With Your Empathy Buddy</h1>
+            <h1 className="text-xl font-bold text-gray-800">Chat With YESGuru: Your Empathy & Self Counselling Guide</h1>
           </div>
         </div>
 

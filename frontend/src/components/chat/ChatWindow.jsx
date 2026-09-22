@@ -1,6 +1,7 @@
 //src/components/chat/chatWindow.jsx
 import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
+import RabbitThinking from "./RabbitThinking";
 
 export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
   const bottomRef = useRef(null);
@@ -21,13 +22,7 @@ export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
 
       {isLoading && (
         <div className="flex justify-start px-4 py-1.5">
-          <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm">
-            <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
-            </div>
-          </div>
+          <RabbitThinking />
         </div>
       )}
 
