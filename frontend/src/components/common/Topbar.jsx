@@ -1,7 +1,7 @@
 // src/components/common/Topbar.jsx
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import {
   BookOpen, Volume2, VolumeX, User, LogOut, ArrowRight,
@@ -186,18 +186,22 @@ function ProfileMenu({ displayName }) {
 export default function Topbar() {
   const user = useAuthStore((state) => state.user);
   const firstName = getFirstName(user);
+  const location = useLocation();
+  const isDashboardPage = location.pathname === "/dashboard" || location.pathname.startsWith("/dashboard/");
 
   return (
-    <div className="bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between">
-      <div>
-        <p className="text-xs text-gray-500 mb-0.5">Welcome,</p>
-        <p className="font-bold text-gray-800 text-lg leading-tight">
-          {firstName ?? "—"}
-        </p>
-      </div>
+    <div className="bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
+      {!isDashboardPage && (
+        <div>
+          <p className="text-xs text-gray-500 mb-0.5">Welcome,</p>
+          <p className="font-bold text-gray-800 text-lg leading-tight">
+            {firstName ?? "—"}
+          </p>
+        </div>
+      )}
 
       {/* Action bar: Content · Sound · Profile — icons only */}
-      <div className="flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-1">
         <ContentMenu />
         <SoundToggle />
         <ProfileMenu displayName={firstName ?? "Guest"} />

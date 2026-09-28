@@ -1,4 +1,4 @@
-// src/App.jsx
+/// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
