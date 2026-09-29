@@ -3,21 +3,10 @@ import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
+import { getSkills } from "../../api/contentApi";
 import {
   BookOpen, Volume2, VolumeX, User, LogOut, ArrowRight,
 } from "lucide-react";
-
-// Mock skills content (replace with real data from API later)
-const SKILLS = [
-  { id: 1, title: "Calming the Body and Mind", summary: "Simple breathing and grounding practices that settle the nervous system before working with harder emotions." },
-  { id: 2, title: "Ethical Mindfulness", summary: "Noticing your own values and intentions in the moment, so your actions stay aligned with what matters to you." },
-  { id: 3, title: "Emotional Awareness", summary: "Naming what you feel as it happens, and recognizing the same feelings as they show up in other people." },
-  { id: 4, title: "Self-Compassion", summary: "Treating your own mistakes and struggles with the same kindness you would offer a good friend." },
-  { id: 5, title: "Impartiality and Common Humanity", summary: "Extending care evenly, and remembering that everyone shares the same basic wish to be happy and free from suffering." },
-  { id: 6, title: "Forgiveness and Gratitude", summary: "Letting go of resentment at your own pace, and noticing what is already good, safe, or supportive around you." },
-  { id: 7, title: "Empathic Concern", summary: "Tuning in to someone else's distress and genuinely caring about their wellbeing, without taking it on as your own." },
-  { id: 8, title: "Compassion", summary: "Turn empathy into a wish and willingness to help." },
-];
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
 // This pulls just the first token for a friendlier greeting, falling back
@@ -49,11 +38,17 @@ function useOnClickOutside(refs, handler) {
 
 function ContentMenu() {
   const [open, setOpen] = useState(false);
+  const [skills, setSkills] = useState([]);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const navigate = useNavigate();
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
   useOnClickOutside([buttonRef, menuRef], () => setOpen(false));
+
+  useEffect(() => {
+    if (!open) return;
+    void getSkills().then(setSkills).catch(() => setSkills([]));
+  }, [open]);
 
   useLayoutEffect(() => {
     if (open && buttonRef.current) {
@@ -82,13 +77,13 @@ function ContentMenu() {
         >
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-sm font-semibold text-gray-800">Skills Content</p>
-            <p className="text-xs text-gray-400">8 skills available</p>
+            <p className="text-xs text-gray-400">{skills.length} skills available</p>
           </div>
           <ul className="max-h-64 overflow-y-auto divide-y divide-gray-50">
-            {SKILLS.map((skill) => (
-              <li key={skill.id} className="px-4 py-2.5 hover:bg-gray-50 transition-colors">
+            {skills.map((skill) => (
+              <li key={skill.skill_id} className="px-4 py-2.5 hover:bg-gray-50 transition-colors">
                 <p className="text-sm font-medium text-gray-800">{skill.title}</p>
-                <p className="text-xs text-gray-400 truncate">{skill.summary}</p>
+                <p className="text-xs text-gray-400 truncate">{skill.description || skill.summary}</p>
               </li>
             ))}
           </ul>

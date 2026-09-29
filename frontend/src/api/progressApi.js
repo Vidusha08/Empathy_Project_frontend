@@ -76,12 +76,12 @@ const getAllSkillProgress = async (skillIds = []) => {
   }, {});
 };
 
-const completeItem = (skillId, itemId) => {
+const completeItem = (skillId, itemId, itemType) => {
   if (!skillId) throw new Error('skillId is required.');
   if (!itemId) throw new Error('itemId is required.');
   return apiRequest('/progress/item-complete', {
     method: 'POST',
-    body: JSON.stringify({ skill_id: skillId, item_id: itemId }),
+    body: JSON.stringify({ skill_id: skillId, item_id: itemId, ...(itemType ? { item_type: itemType } : {}) }),
   });
 };
 
