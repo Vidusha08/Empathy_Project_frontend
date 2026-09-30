@@ -15,11 +15,9 @@ export const loginUser = async ({ username, password }) => {
 // Register
 export const registerUser = async (formData) => {
   const payload = {
-    name: formData.fullName,
     username: formData.username,
     email: formData.email,
     gender: formData.gender,
-    age_group: formData.ageGroup,
     password: formData.password,
   };
 
