@@ -19,14 +19,7 @@ const SKILLS = [
   { id: 8, title: "Compassion", summary: "Turn empathy into a wish and willingness to help." },
 ];
 
-// Backend returns the student's full name at user.name (e.g. "Jane Doe").
-// This pulls just the first token for a friendlier greeting, falling back
-// to username, then a generic label, if name isn't available.
-function getFirstName(user) {
-  if (user?.name) {
-    const first = user.name.trim().split(/\s+/)[0];
-    if (first) return first;
-  }
+function getUsername(user) {
   return user?.username ?? null;
 }
 
@@ -185,7 +178,7 @@ function ProfileMenu({ displayName }) {
 
 export default function Topbar() {
   const user = useAuthStore((state) => state.user);
-  const firstName = getFirstName(user);
+  const username = getUsername(user);
   const location = useLocation();
   const isDashboardPage = location.pathname === "/dashboard" || location.pathname.startsWith("/dashboard/");
 
@@ -195,16 +188,16 @@ export default function Topbar() {
         <div>
           <p className="text-xs text-gray-500 mb-0.5">Welcome,</p>
           <p className="font-bold text-gray-800 text-lg leading-tight">
-            {firstName ?? "—"}
+            {username ?? "—"}
           </p>
         </div>
-      )}
+      )}                                                                                                                                           
 
       {/* Action bar: Content · Sound · Profile — icons only */}
       <div className="ml-auto flex items-center gap-1">
         <ContentMenu />
         <SoundToggle />
-        <ProfileMenu displayName={firstName ?? "Guest"} />
+        <ProfileMenu displayName={username ?? "Guest"} />
       </div>
     </div>
   );

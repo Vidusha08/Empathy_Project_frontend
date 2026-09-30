@@ -55,9 +55,9 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [usingMock, setUsingMock] = useState(true);
 
-  const firstName = useMemo(
-    () => (user?.name || "").trim().split(/\s+/)[0] || "there",
-    [user?.name]
+  const username = useMemo(
+    () => user?.username || "there",
+    [user?.username]
   );
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function StudentDashboard() {
           <div>
             <p className="text-xs text-[#9B8E7E] font-medium mb-0.5">Welcome back</p>
             <h1 className="text-2xl md:text-3xl font-bold text-[#3A342B]" style={{ fontFamily: "'Newsreader', serif" }}>
-              Hi, {firstName} 👋
+              Hi, {username} 👋
             </h1>
             <p className="text-sm text-[#6B6255] mt-0.5">Let's keep building your empathy skills today.</p>
           </div>
@@ -285,7 +285,7 @@ export default function StudentDashboard() {
   const user = useAuthStore((state) => state.user);
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-800">Welcome back, {user?.name}</h1>
+      <h1 className="text-2xl font-bold text-gray-800">Welcome back, {user?.username}</h1>
       <div className="p-4">Student Dashboard Page</div>
       {/* TODO: skill progress cards, recent chats, etc. *}
     </div>
