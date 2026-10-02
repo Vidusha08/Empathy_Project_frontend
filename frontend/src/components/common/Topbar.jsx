@@ -11,13 +11,11 @@ import {
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
 // This pulls just the first token for a friendlier greeting, falling back
 // to username, then a generic label, if name isn't available.
-function getFirstName(user) {
-  if (user?.name) {
-    const first = user.name.trim().split(/\s+/)[0];
-    if (first) return first;
-  }
+function getUsername(user) {
   return user?.username ?? null;
 }
+
+
 
 // Hook: close a popover when clicking outside any of the given refs
 function useOnClickOutside(refs, handler) {
