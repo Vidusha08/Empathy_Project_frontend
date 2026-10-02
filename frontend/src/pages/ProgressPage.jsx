@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Circle } from "lucide-react";
-import { completeItem, getOverallProgress, getProgress, getProgressStructure } from "../api/progressApi";
+import { completeItem, completeObjective, getOverallProgress, getProgress, getProgressStructure } from "../api/progressApi";
 import "./ProgressPage.css";
 
 const valueOf = (record, ...keys) => {
@@ -48,6 +48,7 @@ function ProgressPage() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [completingObjective, setCompletingObjective] = useState(false);
   const [error, setError] = useState("");
 
   async function loadProgress() {
@@ -87,10 +88,25 @@ function ProgressPage() {
     finally { setCompleting(false); }
   }
 
+  async function markObjectiveComplete() {
+    if (!currentObjective || completingObjective) return;
+    try {
+      setCompletingObjective(true);
+      await completeObjective(path.skill, currentObjective.objective_id);
+      await loadProgress();
+      const detailData = await getProgress(path.skill);
+      setDetails((previous) => ({ ...previous, [path.skill]: detailData }));
+    } catch (err) {
+      setError(err.message || "Unable to complete this objective.");
+    } finally {
+      setCompletingObjective(false);
+    }
+  }
+
   if (loading) return <div className="progress-page"><div className="progress-loading">Loading your learning progress...</div></div>;
   if (error && !progress) return <div className="progress-page"><div className="progress-error"><h2>Unable to load progress</h2><p>{error}</p><button type="button" onClick={loadProgress}>Try Again</button></div></div>;
 
-  if (!path.skill) return <div className="progress-page"><div className="progress-header"><h1>Your Learning Progress</h1><p>Track the learning items you have completed across each skill.</p></div><ProgressSummary progress={progress} /><section className="journey-list" aria-label="Skills">{skills.map((skill, index) => { const skillProgress = skillProgressOf(progress, skillIdOf(skill)); const percentage = percentageOf(skillProgress); return <div className="journey-row" key={skillIdOf(skill)}><span className="journey-number">{String(index + 1).padStart(2, "0")}</span><span className="journey-main"><strong>{skill.title || skill.name}</strong><span>{percentage === null ? "Progress unavailable" : `${percentage}% Complete · ${statusOf(skillProgress)}`}</span>{percentage !== null && <span className="journey-track"><span style={{ width: `${percentage}%` }} /></span>}</span></div>; })}</section></div>;
+  if (!path.skill) return <div className="progress-page"><div className="progress-header"><h1>Your Learning Progress</h1><p>Track the learning items you have completed across each skill.</p></div><ProgressSummary progress={progress} /><section className="journey-list" aria-label="Skills">{skills.map((skill, index) => { const skillProgress = skillProgressOf(progress, skillIdOf(skill)); const percentage = percentageOf(skillProgress); return <button type="button" className="journey-row" key={skillIdOf(skill)} onClick={() => selectSkill(skill)}><span className="journey-number">{String(index + 1).padStart(2, "0")}</span><span className="journey-main"><strong>{skill.title || skill.name}</strong><span>{percentage === null ? "Progress unavailable" : `${percentage}% Complete · ${statusOf(skillProgress)}`}</span>{percentage !== null && <span className="journey-track"><span style={{ width: `${percentage}%` }} /></span>}</span></button>; })}</section></div>;
 
   if (!currentSkill) return null;
   const skillProgress = skillProgressOf(progress, path.skill);
@@ -98,14 +114,14 @@ function ProgressPage() {
 
   if (!currentObjective) return null;
   const objectiveProgress = objectiveProgressOf(detail, currentObjective.objective_id);
-  if (!path.item) return <DrilldownList backLabel={`Back to ${currentSkill.title || currentSkill.name}`} onBack={goBack} eyebrow="Objective" title={currentObjective.title} subtitle={`${percentageOf(objectiveProgress) ?? "-"}% · ${statusOf(objectiveProgress)}`} sectionLabel="Learning Items">{itemsOf(currentObjective).map((item) => { const completed = itemIsComplete(item, itemProgressOf(objectiveProgress, item.item_id), detail); return <button type="button" className={`activity-row ${completed ? "is-complete" : ""}`} key={item.item_id} onClick={() => setPath((previous) => ({ ...previous, item: item.item_id }))}><span className="activity-status">{completed ? <Check size={15} /> : <Circle size={15} />}</span><span className="activity-main"><strong>{item.title}</strong><span>{completed ? "Completed" : "Not Started"}</span></span><ChevronRight className="journey-arrow" size={18} aria-hidden="true" /></button>; })}</DrilldownList>;
+  if (!path.item) return <DrilldownList backLabel={`Back to ${currentSkill.title || currentSkill.name}`} onBack={goBack} eyebrow="Objective" title={currentObjective.title} subtitle={`${percentageOf(objectiveProgress) ?? "-"}% · ${statusOf(objectiveProgress)}`} sectionLabel="Learning Items" action={<button type="button" className="complete-button" onClick={markObjectiveComplete} disabled={objectiveProgress?.completed || completingObjective}>{objectiveProgress?.completed ? "Objective completed" : completingObjective ? "Saving..." : "Complete objective"}</button>}>{itemsOf(currentObjective).map((item) => { const completed = itemIsComplete(item, itemProgressOf(objectiveProgress, item.item_id), detail); return <button type="button" className={`activity-row ${completed ? "is-complete" : ""}`} key={item.item_id} onClick={() => setPath((previous) => ({ ...previous, item: item.item_id }))}><span className="activity-status">{completed ? <Check size={15} /> : <Circle size={15} />}</span><span className="activity-main"><strong>{item.title}</strong><span>{completed ? "Completed" : "Not Started"}</span></span><ChevronRight className="journey-arrow" size={18} aria-hidden="true" /></button>; })}</DrilldownList>;
 
   const completed = itemIsComplete(currentItem, itemProgressOf(objectiveProgress, currentItem.item_id), detail);
   return <div className="activity-detail"><button type="button" className="back-link" onClick={goBack}><ArrowLeft size={16} /> Back to {currentObjective.title}</button><p className="detail-eyebrow">Learning Item</p><h1>{currentItem.title}</h1><div className="activity-detail-card"><p>{currentItem.content || currentItem.description || "This learning item will appear here when you are ready to explore it."}</p><button type="button" className="complete-button" onClick={markComplete} disabled={completed || completing}>{completed ? "Completed" : completing ? "Saving..." : "Mark as complete"} {!completed && <ArrowRight size={16} />}</button></div></div>;
 }
 
-function DrilldownList({ backLabel, onBack, eyebrow, title, subtitle, sectionLabel, loading, children }) {
-  return <div className="drilldown-view"><button type="button" className="back-link" onClick={onBack}><ArrowLeft size={16} /> {backLabel}</button><div className="drilldown-heading"><p className="detail-eyebrow">{eyebrow}</p><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>{loading && <p className="progress-loading">Loading detailed progress...</p>}<section className="drilldown-section"><h2>{sectionLabel}</h2>{children}</section></div>;
+function DrilldownList({ backLabel, onBack, eyebrow, title, subtitle, sectionLabel, loading, action, children }) {
+  return <div className="drilldown-view"><button type="button" className="back-link" onClick={onBack}><ArrowLeft size={16} /> {backLabel}</button><div className="drilldown-heading"><p className="detail-eyebrow">{eyebrow}</p><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}{action}</div>{loading && <p className="progress-loading">Loading detailed progress...</p>}<section className="drilldown-section"><h2>{sectionLabel}</h2>{children}</section></div>;
 }
 
 export default ProgressPage;

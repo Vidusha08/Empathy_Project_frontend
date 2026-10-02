@@ -85,6 +85,15 @@ const completeItem = (skillId, itemId, itemType) => {
   });
 };
 
+const completeObjective = (skillId, objectiveId) => {
+  if (!skillId) throw new Error('skillId is required.');
+  if (!objectiveId) throw new Error('objectiveId is required.');
+  return apiRequest(`/objectives/${encodeURIComponent(objectiveId)}/complete`, {
+    method: 'POST',
+    body: JSON.stringify({ skill_id: skillId }),
+  });
+};
+
 const isObjectiveCompleted = (progress, objectiveId) =>
   Array.isArray(progress?.completed_objective_ids) && progress.completed_objective_ids.includes(objectiveId);
 
@@ -97,6 +106,7 @@ const calculateSkillPercentage = (progress, totalObjectives) => {
 const progressApi = {
   getProgress, getSkillProgress, getProgressStructure, getOverallProgress,
   getAllSkillProgress, completeItem,
+  completeObjective,
   isObjectiveCompleted, calculateSkillPercentage,
 };
 
@@ -104,5 +114,6 @@ export default progressApi;
 export {
   getProgress, getSkillProgress, getProgressStructure, getOverallProgress,
   getAllSkillProgress, completeItem,
+  completeObjective,
   isObjectiveCompleted, calculateSkillPercentage,
 };

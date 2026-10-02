@@ -1,13 +1,13 @@
 //pages/ContentPage.jsx
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, ChevronRight, Circle, ExternalLink, LoaderCircle, MessageCircle } from "lucide-react";
+import { ArrowLeft, ChevronRight, ExternalLink, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getSkill, getSkills } from "../api/contentApi";
 import progressApi from '../api/progressApi';
 import "./ContentPage.css";
 
 const listOf = (value) => Array.isArray(value) ? value : [];
-const idOf = (item) => typeof item === "string" ? item : item?.skill_id || item?.activity_id || item?.video_id || item?.quiz_id || item?.item_id || item?.objective_id || item?.id || item?.activityId || item?.videoId || item?.quizId || item?.objectiveId;
+const idOf = (item) => typeof item === "string" ? item : item?.skill_id || item?.chapter_id || item?.activity_id || item?.video_id || item?.quiz_id || item?.item_id || item?.objective_id || item?.id || item?.activityId || item?.videoId || item?.quizId || item?.objectiveId;
 const titleOf = (item) => typeof item === "string" ? item : item?.title || item?.name || item?.label || item?.objective || item?.text || item?.term || "Untitled learning item";
 const descriptionOf = (item) => typeof item === "string" ? "" : item?.description || item?.summary || item?.content || item?.details || item?.objective_description || item?.objectiveDescription || item?.definition || "";
 const typeOf = (item, fallback = "learning_item") => item?.item_type || item?.type || fallback;
@@ -62,12 +62,6 @@ function SkillList({ skills, progressBySkill, onSelect }) {
   </section>;
 }
 
-function CompletionButton({ completed, loading, available = true, onClick }) {
-  return <button type="button" className={`completion-button${completed ? " is-complete" : ""}`} onClick={onClick} disabled={!available || completed || loading}>{loading ? <LoaderCircle className="spin" size={16} /> : completed ? <Check size={16} /> : <Circle size={16} />}{completed ? "Completed" : loading ? "Saving..." : available ? "Mark complete" : "Unavailable"}</button>;
-}
-
-function ContentSection({ title, children }) { return <section className="content-section"><h2>{title}</h2>{children}</section>; }
-
 function ChatbotLink({ skillId }) {
   const chatPath = skillId ? `/chat?skill=${encodeURIComponent(skillId)}` : "/chat";
   return <Link to={chatPath} className="content-chatbot-link" aria-label="Open AI chatbot" title="Ask the AI chatbot">
@@ -76,21 +70,23 @@ function ChatbotLink({ skillId }) {
   </Link>;
 }
 
-function QuizItem({ quiz, completed, loading, onComplete }) {
-  const [selected, setSelected] = useState("");
-  const options = listOf(quiz.options || quiz.choices);
-  return <article className="quiz-item"><span className="resource-card__type">Question</span><h3>{quiz.question || titleOf(quiz)}</h3><div className="quiz-options">{options.map((option, index) => { const value = typeof option === "string" ? option : option.text || option.label; return <label key={`${idOf(quiz)}-${index}`}><input type="radio" name={idOf(quiz)} value={value} checked={selected === value} onChange={(event) => setSelected(event.target.value)} />{value}</label>; })}</div><CompletionButton available={Boolean(idOf(quiz))} completed={completed} loading={loading} onClick={onComplete} /></article>;
-}
-
-function SkillDetail({ detail, progress, completingId, onBack, onComplete }) {
+function SkillDetail({ detail, progress, completingId, completingObjectiveId, onBack, onComplete, onCompleteObjective }) {
   const skill = detail?.skill || detail;
   const objectives = detailList(detail, ["objectives", "learning_objectives", "learningObjectives", "goals", "learning_goals"]);
   const definitions = detailList(detail, ["definitions", "concept_definitions", "definitionList"]);
   const rawConcepts = detailList(detail, ["key_concepts", "keyConcepts", "concepts", "learning_concepts", "learningConcepts"]);
   const concepts = normalizeConcepts(rawConcepts, definitions);
-  const activities = detailList(detail, ["activities", "learning_activities", "learningActivities", "practice_activities", "practiceActivities"]);
-  const videos = detailList(detail, ["videos", "video_clips", "videoClips", "learning_videos", "learningVideos"]);
-  const quizzes = detailList(detail, ["quizzes", "quiz", "assessments", "assessment", "learning_quizzes"]);
+  const learningItems = objectives.flatMap((objective) => (
+    listOf(objective?.items || objective?.learning_items).map((item) => ({
+      ...item,
+      objective_id: objective.objective_id || objective.id,
+    }))
+  ));
+  const texts = learningItems.filter((item) => typeOf(item) === "text");
+  const activities = learningItems.filter((item) => ["activity", "practice", "reflection"].includes(typeOf(item)));
+  const videos = learningItems.filter((item) => typeOf(item) === "video");
+  const quizzes = learningItems.filter((item) => ["quiz", "assessment"].includes(typeOf(item)));
+  const learnItems = [...texts, ...videos];
   const resources = detailList(detail, ["resources", "reference_materials", "referenceMaterials", "support_materials"]);
   const reflection = skill?.reflection || detail?.reflection || "Take a moment to reflect on what you learned.";
   const completedIds = new Set(progress?.completed_item_ids || []);
@@ -135,6 +131,10 @@ function SkillDetail({ detail, progress, completingId, onBack, onComplete }) {
           <small>Objectives</small>
         </div>
         <div className="meta-panel__stat">
+          <span>{texts.length || 0}</span>
+          <small>Text lessons</small>
+        </div>
+        <div className="meta-panel__stat">
           <span>{activities.length || 0}</span>
           <small>Activities</small>
         </div>
@@ -164,6 +164,14 @@ function SkillDetail({ detail, progress, completingId, onBack, onComplete }) {
                 <span className={`objective-card__status ${isComplete ? "is-complete" : "is-pending"}`}>
                   {isComplete ? "✓ Completed" : "○ Not started"}
                 </span>
+                <button
+                  type="button"
+                  className="mini-button"
+                  onClick={() => onCompleteObjective(objectiveId)}
+                  disabled={isComplete || completingObjectiveId === objectiveId}
+                >
+                  {isComplete ? "Completed" : completingObjectiveId === objectiveId ? "Saving..." : "Complete objective"}
+                </button>
               </article>
             );
           }) : <p className="empty-state">No learning objectives are available for this skill yet.</p>}
@@ -200,14 +208,14 @@ function SkillDetail({ detail, progress, completingId, onBack, onComplete }) {
         <div className="path-grid">
           <article className="path-card path-card--learn">
             <span className="path-card__badge">Learn</span>
-            <h3>Videos and guidance</h3>
-            {videos.length ? videos.map((video, index) => {
+            <h3>Text and videos</h3>
+            {learnItems.length ? learnItems.map((video, index) => {
               const videoId = idOf(video);
               const completed = videoId ? completedIds.has(videoId) : false;
               return (
                 <div className="learning-item-card" key={keyOf(video, index, "video")}>
                   <div className="learning-item-card__top">
-                    <span className="learning-item-card__type">Video</span>
+                    <span className="learning-item-card__type">{typeOf(video) === "text" ? "Text" : "Video"}</span>
                     <span className="learning-item-card__duration">{formatDuration(video) || "Watch"}</span>
                   </div>
                   <h4>{titleOf(video)}</h4>
@@ -314,6 +322,7 @@ const ContentPage = () => {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [completingId, setCompletingId] = useState(null);
+  const [completingObjectiveId, setCompletingObjectiveId] = useState(null);
   const [error, setError] = useState('');
 
   const loadSkills = async () => {
@@ -353,7 +362,21 @@ const ContentPage = () => {
     }
   };
 
-  if (selectedSkillId) return <div className="content-page">{error && <p className="content-page__error">{error}</p>}{detailLoading ? <p className="content-page__loading">Loading skill details...</p> : detail && <SkillDetail detail={detail} progress={progressBySkill[selectedSkillId]} completingId={completingId} onBack={() => { setSelectedSkillId(null); setDetail(null); }} onComplete={markComplete} />}<ChatbotLink skillId={selectedSkillId} /></div>;
+  const markObjectiveComplete = async (objectiveId) => {
+    if (!objectiveId) return;
+    try {
+      setCompletingObjectiveId(objectiveId);
+      await progressApi.completeObjective(selectedSkillId, objectiveId);
+      const updated = await progressApi.getProgress(selectedSkillId);
+      setProgressBySkill((previous) => ({ ...previous, [selectedSkillId]: updated }));
+    } catch (completionError) {
+      setError(completionError.message || 'Unable to complete this objective.');
+    } finally {
+      setCompletingObjectiveId(null);
+    }
+  };
+
+  if (selectedSkillId) return <div className="content-page">{error && <p className="content-page__error">{error}</p>}{detailLoading ? <p className="content-page__loading">Loading skill details...</p> : detail && <SkillDetail detail={detail} progress={progressBySkill[selectedSkillId]} completingId={completingId} completingObjectiveId={completingObjectiveId} onBack={() => { setSelectedSkillId(null); setDetail(null); }} onComplete={markComplete} onCompleteObjective={markObjectiveComplete} />}<ChatbotLink skillId={selectedSkillId} /></div>;
 
   const completedCount = skills.filter((skill) => (progressBySkill[idOf(skill)]?.skill?.progress ?? progressBySkill[idOf(skill)]?.progress) === 100).length;
   const startedCount = skills.filter((skill) => (progressBySkill[idOf(skill)]?.completed_item_ids || []).length > 0).length;
