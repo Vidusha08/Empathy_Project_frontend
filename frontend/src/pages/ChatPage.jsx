@@ -14,11 +14,10 @@ function getFirstName(user) {
   if (user?.name) {
     const first = user.name.trim().split(/\s+/)[0];
     if (first) return first;
-  }
-  return user?.username ?? null;
+  } 
 }
 
-// Chat Input
+// Chat Input 
 
 function ChatInputArea({ onSend, isLoading }) {
   const [text, setText] = useState("");
@@ -257,7 +256,7 @@ export default function ChatPage() {
         <div className="px-6 pt-5 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">💬</span>
-            <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru: Your Empathy & Self Counselling Guide</h1>
+            <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru</h1>
           </div>
         </div>
 
