@@ -15,7 +15,6 @@ import {
   LayoutDashboardIcon,
 } from "lucide-react";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { useAuthStore } from "../../store/authStore";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, path: "/dashboard" },
@@ -44,7 +43,6 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-  const { clearAuth: logout } = useAuthStore();
   const navigate = useNavigate();
 
   const buttonRef = useRef(null);

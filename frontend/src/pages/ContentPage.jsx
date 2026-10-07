@@ -1,7 +1,7 @@
 //pages/ContentPage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronRight, ExternalLink, MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getSkill, getSkills } from "../api/contentApi";
 import progressApi from '../api/progressApi';
 import "./ContentPage.css";
@@ -11,6 +11,10 @@ const idOf = (item) => typeof item === "string" ? item : item?.skill_id || item?
 const titleOf = (item) => typeof item === "string" ? item : item?.title || item?.name || item?.label || item?.objective || item?.text || item?.term || "Untitled learning item";
 const descriptionOf = (item) => typeof item === "string" ? "" : item?.description || item?.summary || item?.content || item?.details || item?.objective_description || item?.objectiveDescription || item?.definition || "";
 const typeOf = (item, fallback = "learning_item") => item?.item_type || item?.type || fallback;
+const playableVideoUrlOf = (item) => {
+  const url = typeof item?.url === "string" ? item.url.trim() : "";
+  return url && (/^(https?:|blob:|data:)/i.test(url) || url.startsWith("/")) ? url : "";
+};
 const keyOf = (item, index, prefix) => `${prefix}-${idOf(item) || titleOf(item)}-${index}`;
 const detailList = (detail, keys) => {
   const candidates = Array.isArray(keys) ? keys : [keys];
@@ -70,7 +74,30 @@ function ChatbotLink({ skillId }) {
   </Link>;
 }
 
-function SkillDetail({ detail, progress, completingId, completingObjectiveId, onBack, onComplete, onCompleteObjective }) {
+function VideoPlayer({ video, completed, onComplete }) {
+  const completionAttempted = useRef(false);
+  const videoId = idOf(video);
+
+  const handleEnded = async () => {
+    if (!videoId || completed || completionAttempted.current) return;
+    completionAttempted.current = true;
+    const saved = await onComplete(videoId, "video");
+    if (!saved) completionAttempted.current = false;
+  };
+
+  return (
+    <video
+      className="learning-item-card__video"
+      controls
+      preload="metadata"
+      src={playableVideoUrlOf(video)}
+      onEnded={handleEnded}
+      aria-label={titleOf(video)}
+    />
+  );
+}
+
+function SkillDetail({ detail, progress, completingId, onBack, onComplete, onStartQuiz }) {
   const skill = detail?.skill || detail;
   const objectives = detailList(detail, ["objectives", "learning_objectives", "learningObjectives", "goals", "learning_goals"]);
   const definitions = detailList(detail, ["definitions", "concept_definitions", "definitionList"]);
@@ -164,14 +191,6 @@ function SkillDetail({ detail, progress, completingId, completingObjectiveId, on
                 <span className={`objective-card__status ${isComplete ? "is-complete" : "is-pending"}`}>
                   {isComplete ? "✓ Completed" : "○ Not started"}
                 </span>
-                <button
-                  type="button"
-                  className="mini-button"
-                  onClick={() => onCompleteObjective(objectiveId)}
-                  disabled={isComplete || completingObjectiveId === objectiveId}
-                >
-                  {isComplete ? "Completed" : completingObjectiveId === objectiveId ? "Saving..." : "Complete objective"}
-                </button>
               </article>
             );
           }) : <p className="empty-state">No learning objectives are available for this skill yet.</p>}
@@ -222,7 +241,11 @@ function SkillDetail({ detail, progress, completingId, completingObjectiveId, on
                   <p>{descriptionOf(video) || "Learn the key ideas behind this skill."}</p>
                   <div className="learning-item-card__footer">
                     <span className={`status ${completed ? "status--done" : "status--pending"}`}>{completed ? "Completed" : "Not started"}</span>
-                    {video.url ? <a href={video.url} target="_blank" rel="noreferrer" className="mini-link">Watch <ExternalLink size={12} /></a> : <button type="button" className="mini-button" onClick={() => markComplete({ ...video, progressType: "video" }, "video")} disabled={!videoId || completed || completingId === videoId}>{completed ? "Done" : "Mark complete"}</button>}
+                    {playableVideoUrlOf(video) ? (
+                      <VideoPlayer video={video} completed={completed} onComplete={onComplete} />
+                    ) : (
+                      <button type="button" className="mini-button" onClick={() => markComplete({ ...video, progressType: "video" }, "video")} disabled={!videoId || completed || completingId === videoId}>{completed ? "Done" : "Mark complete"}</button>
+                    )}
                   </div>
                 </div>
               );
@@ -268,7 +291,7 @@ function SkillDetail({ detail, progress, completingId, completingObjectiveId, on
                   <p>{descriptionOf(quiz) || "Check your understanding and reinforce key ideas."}</p>
                   <div className="learning-item-card__footer">
                     <span className={`status ${completed ? "status--done" : "status--pending"}`}>{completed ? "Completed" : "Not started"}</span>
-                    <button type="button" className="mini-button" onClick={() => markComplete({ ...quiz, progressType: "quiz" }, "quiz")} disabled={!quizId || completed || completingId === quizId}>{completed ? "Done" : "Start quiz"}</button>
+                    <button type="button" className="mini-button" onClick={() => onStartQuiz(quiz)} disabled={!quizId || completed}>{completed ? "Done" : "Start quiz"}</button>
                   </div>
                 </div>
               );
@@ -322,8 +345,8 @@ const ContentPage = () => {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [completingId, setCompletingId] = useState(null);
-  const [completingObjectiveId, setCompletingObjectiveId] = useState(null);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const loadSkills = async () => {
     try {
@@ -348,35 +371,34 @@ const ContentPage = () => {
   const markComplete = async (itemId, itemType) => {
     if (!itemId) {
       setError('This learning item is missing its stable ID and cannot be completed yet.');
-      return;
+      return false;
     }
     try {
       setCompletingId(itemId);
       await progressApi.completeItem(selectedSkillId, itemId, itemType);
       const updated = await progressApi.getProgress(selectedSkillId);
       setProgressBySkill((previous) => ({ ...previous, [selectedSkillId]: updated }));
+      return true;
     } catch (completionError) {
       setError(completionError.message || 'Unable to complete this item.');
+      return false;
     } finally {
       setCompletingId(null);
     }
   };
 
-  const markObjectiveComplete = async (objectiveId) => {
-    if (!objectiveId) return;
-    try {
-      setCompletingObjectiveId(objectiveId);
-      await progressApi.completeObjective(selectedSkillId, objectiveId);
-      const updated = await progressApi.getProgress(selectedSkillId);
-      setProgressBySkill((previous) => ({ ...previous, [selectedSkillId]: updated }));
-    } catch (completionError) {
-      setError(completionError.message || 'Unable to complete this objective.');
-    } finally {
-      setCompletingObjectiveId(null);
+  const startQuiz = (quiz) => {
+    const quizId = idOf(quiz);
+    if (!selectedSkillId || !quizId) {
+      setError('This quiz is missing a stable ID and cannot be opened yet.');
+      return;
     }
+    navigate(`/quiz?skill=${encodeURIComponent(selectedSkillId)}&item=${encodeURIComponent(quizId)}`, {
+      state: { quiz, skillTitle: titleOf(detail?.skill || detail) },
+    });
   };
 
-  if (selectedSkillId) return <div className="content-page">{error && <p className="content-page__error">{error}</p>}{detailLoading ? <p className="content-page__loading">Loading skill details...</p> : detail && <SkillDetail detail={detail} progress={progressBySkill[selectedSkillId]} completingId={completingId} completingObjectiveId={completingObjectiveId} onBack={() => { setSelectedSkillId(null); setDetail(null); }} onComplete={markComplete} onCompleteObjective={markObjectiveComplete} />}<ChatbotLink skillId={selectedSkillId} /></div>;
+  if (selectedSkillId) return <div className="content-page">{error && <p className="content-page__error">{error}</p>}{detailLoading ? <p className="content-page__loading">Loading skill details...</p> : detail && <SkillDetail detail={detail} progress={progressBySkill[selectedSkillId]} completingId={completingId} onBack={() => { setSelectedSkillId(null); setDetail(null); }} onComplete={markComplete} onStartQuiz={startQuiz} />}<ChatbotLink skillId={selectedSkillId} /></div>;
 
   const completedCount = skills.filter((skill) => (progressBySkill[idOf(skill)]?.skill?.progress ?? progressBySkill[idOf(skill)]?.progress) === 100).length;
   const startedCount = skills.filter((skill) => (progressBySkill[idOf(skill)]?.completed_item_ids || []).length > 0).length;

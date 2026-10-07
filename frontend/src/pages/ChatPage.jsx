@@ -97,22 +97,6 @@ export default function ChatPage() {
     addMessage({ id: createId(), role: "user", content, timestamp: ts() });
   };
 
-  const addFlowStep = (step, flowAction, flowSteps, flowIndex, skill, content, context = {}) => {
-    addMessage({
-      id: createId(),
-      role: "assistant",
-      content,
-      timestamp: ts(),
-      skill,
-      step,
-      flowAction,
-      flowIndex,
-      learningSteps: flowSteps,
-      recommendedActivity: context.recommendedActivity,
-      learningObjective: context.learningObjective,
-    });
-  };
-
   const handleSend = async (text) => {
     addUserMessage(text);
 
@@ -127,8 +111,8 @@ export default function ChatPage() {
       const progressRecommendation = learningContext.progress_recommendation || learningContext.progressRecommendation;
       const steps = Array.isArray(res.steps) ? res.steps : [];
 
-      const hasLearningFlow = steps.length > 0 && skill?.id;
       const firstStep = steps[0];
+      const hasLearningFlow = steps.length > 0 && skill?.id;
 
       addMessage({
         id:        createId(),
@@ -184,32 +168,77 @@ export default function ChatPage() {
     }
 
     const skillId = sourceMessage.skill?.id || sourceMessage.skill?.skill_id || sourceMessage.skill?.chapter_id;
-    const itemId = sourceMessage.recommendedActivity?.id
-      || sourceMessage.recommendedActivity?.item_id
-      || sourceMessage.recommendedActivity?.activity_id;
+    const recommendedActivity = sourceMessage.recommendedActivity
+      || sourceMessage.recommended_activity
+      || {};
+    const itemId = recommendedActivity.progress_item_id;
+    const itemType = recommendedActivity.progress_item_type;
 
-    if (action === "complete" && skillId && itemId) {
-      try {
-        await completeItem(skillId, itemId);
-      } catch (error) {
+    const flowSteps = sourceMessage.learningSteps || [];
+    const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
+    const nextStep = flowSteps[nextIndex];
+
+    if (action === "complete") {
+      if (!skillId || !itemId || !itemType) {
+        console.error("[chatbot-progress] missing completion metadata", {
+          action,
+          skillId,
+          recommendedActivity,
+          progress_item_id: itemId,
+          progress_item_type: itemType,
+          source: "chatbot",
+        });
         addMessage({
           id: createId(),
           role: "assistant",
-          content: error.message || "I could not save that completion yet.",
+          content: "I could not identify the recommended curriculum item to save your progress.",
+          timestamp: ts(),
+        });
+        return;
+      }
+      try {
+        const completionPayload = {
+          skill_id: String(skillId).trim(),
+          item_id: String(itemId).trim(),
+          item_type: itemType ? String(itemType).trim().toLowerCase() : undefined,
+          source: "chatbot",
+        };
+        console.info("[chatbot-progress] completing recommended item", {
+          action,
+          skillId,
+          recommendedActivity,
+          progress_item_id: itemId,
+          progress_item_type: itemType,
+          source: completionPayload.source,
+        });
+        const completionResponse = await completeItem(skillId, itemId, itemType, "chatbot");
+        console.info("[chatbot-progress] completion response", completionResponse);
+      } catch (error) {
+        console.error("[chatbot-progress] completion failed", {
+          action,
+          skillId,
+          recommendedActivity,
+          progress_item_id: itemId,
+          progress_item_type: itemType,
+          source: "chatbot",
+          status: error?.status,
+          response: error?.data,
+          message: error?.message,
+        });
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: error.message || "I could not save your learning progress yet.",
           timestamp: ts(),
         });
         return;
       }
     }
 
-    const flowSteps = sourceMessage.learningSteps || [];
-    const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
-    const nextStep = flowSteps[nextIndex];
-
     if (!nextStep) {
       const answerMatch = sourceMessage.step?.question?.match(/\bAnswer:\s*(true|false)\b/i);
       const correctAnswer = sourceMessage.step?.correct_answer ?? (answerMatch ? answerMatch[1].toLowerCase() === "true" : undefined);
-      const answer = text.toLowerCase() === "true";
+      const answer = ["true", "yes"].includes(text.toLowerCase());
       const result = correctAnswer === undefined || answer === correctAnswer;
 
       addMessage({
@@ -235,18 +264,22 @@ export default function ChatPage() {
       : nextAction === "complete"
         ? "Let's try a grounding activity."
         : nextAction === "practice"
-          ? "Great! Let's check your understanding."
+          ? "Did you understand the main idea? Let's check with a quick question."
           : "Let's continue.";
 
-    addFlowStep(
-      nextStep,
-      nextAction,
-      flowSteps,
-      nextIndex,
-      sourceMessage.skill,
-      nextContent,
-      sourceMessage,
-    );
+    addMessage({
+      id: createId(),
+      role: "assistant",
+      content: nextContent,
+      timestamp: ts(),
+      skill: sourceMessage.skill,
+      step: nextStep,
+      flowAction: nextAction,
+      flowIndex: nextIndex,
+      learningSteps: flowSteps,
+      recommendedActivity: sourceMessage.recommendedActivity,
+      learningObjective: sourceMessage.learningObjective,
+    });
   };
 
   return (
