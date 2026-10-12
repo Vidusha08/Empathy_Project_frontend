@@ -94,6 +94,7 @@ function ChatInputArea({ onSend, isLoading, answerStyle, onAnswerStyleChange }) 
 
 export default function ChatPage() {
   const [answerStyle, setAnswerStyle] = useState("short");
+  const [selectedAnswers, setSelectedAnswers] = useState({});
   const user = useAuthStore((state) => state.user);
   const {
     messages,
@@ -179,6 +180,7 @@ export default function ChatPage() {
     if (!sourceMessage || sourceMessage.flowHandled) return;
 
     markMessageHandled(sourceMessage.id);
+    setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
     addUserMessage(text);
 
     if (text === "No") {
@@ -324,6 +326,7 @@ export default function ChatPage() {
             messages={messages}
             isLoading={isLoading}
             onFlowMessage={handleFlowMessage}
+            selectedAnswers={selectedAnswers}
           />
         </div>
 

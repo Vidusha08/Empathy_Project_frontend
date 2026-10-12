@@ -8,15 +8,31 @@ import {
   X,
 } from "lucide-react";
 
-function ActionButton({ children, onClick, secondary = false, disabled = false }) {
+function ActionButton({
+  children,
+  onClick,
+  secondary = false,
+  disabled = false,
+  isChosen = false,
+  hasChosen = false,
+  isAnswer = false,
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={secondary
-        ? "inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
-        : "inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"}
+      className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition-colors ${
+        isChosen
+          ? "bg-indigo-600 text-white"
+          : hasChosen
+            ? "cursor-not-allowed bg-gray-100 text-gray-400"
+            : isAnswer
+              ? "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            : secondary
+              ? "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              : "bg-indigo-600 text-white hover:bg-indigo-700"
+      }`}
     >
       {children}
     </button>
@@ -85,9 +101,11 @@ function StepContent({ step, skill }) {
   ) : null;
 }
 
-export default function ChatMessage({ message, onFlowMessage }) {
+export default function ChatMessage({ message, onFlowMessage, selectedAnswers }) {
   const { role, content, timestamp, flowAction, step, skill, flowHandled } = message;
   const isUser = role === "user";
+  const selectedAnswer = selectedAnswers?.[message.id];
+  const hasChosen = Boolean(selectedAnswer);
   const emit = (text) => onFlowMessage?.(text, flowAction, message);
 
   if (isUser) {
@@ -111,16 +129,50 @@ export default function ChatMessage({ message, onFlowMessage }) {
           {flowAction === "learn" && <p className="mt-4 text-sm font-medium text-gray-800">Would you like to learn a skill that could help with this?</p>}
           {flowAction === "learn" && (
             <div className="mt-4 flex gap-2">
-              <ActionButton disabled={flowHandled} onClick={() => emit("Yes")}><Check size={14} />Yes</ActionButton>
-              <ActionButton disabled={flowHandled} secondary onClick={() => emit("No")}><X size={14} />Not now</ActionButton>
+              <ActionButton
+                disabled={flowHandled || hasChosen}
+                isChosen={selectedAnswer === "Yes"}
+                hasChosen={hasChosen}
+                isAnswer
+                onClick={() => emit("Yes")}
+              >
+                <Check size={14} />Yes
+              </ActionButton>
+              <ActionButton
+                disabled={flowHandled || hasChosen}
+                secondary
+                isChosen={selectedAnswer === "No"}
+                hasChosen={hasChosen}
+                isAnswer
+                onClick={() => emit("No")}
+              >
+                <X size={14} />No
+              </ActionButton>
             </div>
           )}
 
           {flowAction === "activity" && <p className="mt-4 text-sm font-medium text-gray-800">Would you like to try a short activity?</p>}
           {flowAction === "activity" && (
             <div className="mt-4 flex gap-2">
-              <ActionButton disabled={flowHandled} onClick={() => emit("Yes")}><Check size={14} />Yes</ActionButton>
-              <ActionButton disabled={flowHandled} secondary onClick={() => emit("No")}><X size={14} />Not now</ActionButton>
+              <ActionButton
+                disabled={flowHandled || hasChosen}
+                isChosen={selectedAnswer === "Yes"}
+                hasChosen={hasChosen}
+                isAnswer
+                onClick={() => emit("Yes")}
+              >
+                <Check size={14} />Yes
+              </ActionButton>
+              <ActionButton
+                disabled={flowHandled || hasChosen}
+                secondary
+                isChosen={selectedAnswer === "No"}
+                hasChosen={hasChosen}
+                isAnswer
+                onClick={() => emit("No")}
+              >
+                <X size={14} />No
+              </ActionButton>
             </div>
           )}
 
@@ -130,8 +182,25 @@ export default function ChatMessage({ message, onFlowMessage }) {
 
           {flowAction === "practice" && (
             <div className="mt-4 flex gap-2">
-              <ActionButton disabled={flowHandled} onClick={() => emit(step?.question_type === "yes_no" ? "Yes" : "True")}><Check size={14} />{step?.question_type === "yes_no" ? "Yes" : "True"}</ActionButton>
-              <ActionButton disabled={flowHandled} secondary onClick={() => emit(step?.question_type === "yes_no" ? "No" : "False")}><X size={14} />{step?.question_type === "yes_no" ? "No" : "False"}</ActionButton>
+              <ActionButton
+                disabled={flowHandled || hasChosen}
+                isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "Yes" : "True")}
+                hasChosen={hasChosen}
+                isAnswer
+                onClick={() => emit(step?.question_type === "yes_no" ? "Yes" : "True")}
+              >
+                <Check size={14} />{step?.question_type === "yes_no" ? "Yes" : "True"}
+              </ActionButton>
+              <ActionButton
+                disabled={flowHandled || hasChosen}
+                secondary
+                isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "No" : "False")}
+                hasChosen={hasChosen}
+                isAnswer
+                onClick={() => emit(step?.question_type === "yes_no" ? "No" : "False")}
+              >
+                <X size={14} />{step?.question_type === "yes_no" ? "No" : "False"}
+              </ActionButton>
             </div>
           )}
 
