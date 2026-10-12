@@ -20,18 +20,41 @@ function getFirstName(user) {
 
 // Chat Input
 
-function ChatInputArea({ onSend, isLoading }) {
+function ChatInputArea({ onSend, isLoading, answerStyle, onAnswerStyleChange }) {
   const [text, setText] = useState("");
   const ref = useRef(null);
 
   const submit = () => {
     if (!text.trim() || isLoading) return;
-    onSend(text.trim());
+    onSend(text.trim(), answerStyle);
     setText("");
   };
 
   return (
     <div className="px-5 pb-4 pt-1">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xs font-medium text-gray-500">Response style:</span>
+        <div className="flex rounded-lg bg-gray-100 p-0.5" role="group" aria-label="Response style">
+          {[
+            { value: "short", label: "Short" },
+            { value: "long", label: "Long" },
+          ].map((style) => (
+            <button
+              key={style.value}
+              type="button"
+              onClick={() => onAnswerStyleChange(style.value)}
+              aria-pressed={answerStyle === style.value}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                answerStyle === style.value
+                  ? "bg-white text-indigo-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {style.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="flex items-end gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-2.5 shadow-sm focus-within:border-indigo-300 transition-colors">
         <textarea
           ref={ref}
@@ -70,6 +93,7 @@ function ChatInputArea({ onSend, isLoading }) {
 // Main Page
 
 export default function ChatPage() {
+  const [answerStyle, setAnswerStyle] = useState("short");
   const user = useAuthStore((state) => state.user);
   const {
     messages,
@@ -97,13 +121,13 @@ export default function ChatPage() {
     addMessage({ id: createId(), role: "user", content, timestamp: ts() });
   };
 
-  const handleSend = async (text) => {
+  const handleSend = async (text, answerStyle) => {
     addUserMessage(text);
 
     setLoading(true);
 
     try {
-      const res = await sendMessage(text);
+      const res = await sendMessage(text, answerStyle);
       const learningContext = res.learning_context || res;
       const skill = learningContext.skill;
       const learningObjective = learningContext.learning_objective || learningContext.learningObjective;
@@ -305,7 +329,12 @@ export default function ChatPage() {
 
         {/* Input */}
         <div className="flex-shrink-0">
-          <ChatInputArea onSend={handleSend} isLoading={isLoading} />
+          <ChatInputArea
+            onSend={handleSend}
+            isLoading={isLoading}
+            answerStyle={answerStyle}
+            onAnswerStyleChange={setAnswerStyle}
+          />
         </div>
       </div>
     </div>
