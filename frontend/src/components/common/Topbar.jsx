@@ -135,7 +135,7 @@ function ProfileMenu({ displayName }) {
   const handleLogout = () => {
     setOpen(false);
     clearAuth();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
