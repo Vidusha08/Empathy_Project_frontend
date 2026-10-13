@@ -271,7 +271,7 @@ export default function ChatPage() {
         id: createId(),
         role: "assistant",
         content: result
-          ? "Correct! Great job. You've understood the main idea."
+          ? "Correct! Great job. Let's continue learning."
           : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
         timestamp: ts(),
       });
