@@ -4,7 +4,9 @@ import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
-import { completeItem } from "../api/progressApi";
+import { completeItem, getProgress } from "../api/progressApi";
+import { getSkill, getSkills } from "../api/contentApi";
+import { findNextObjective, idOf, objectiveItems, titleOf } from "../utils/nextObjective";
 import { Mic, Send } from "lucide-react";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
@@ -20,7 +22,7 @@ function getFirstName(user) {
 
 // Chat Input
 
-function ChatInputArea({ onSend, isLoading, answerStyle, onAnswerStyleChange }) {
+function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyleChange }) {
   const [text, setText] = useState("");
   const ref = useRef(null);
 
@@ -65,7 +67,7 @@ function ChatInputArea({ onSend, isLoading, answerStyle, onAnswerStyleChange }) 
           }}
           placeholder="Type a message…"
           rows={1}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
           className="flex-1 resize-none outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent leading-relaxed max-h-28 overflow-y-auto"
           style={{ minHeight: 24 }}
         />
@@ -75,7 +77,7 @@ function ChatInputArea({ onSend, isLoading, answerStyle, onAnswerStyleChange }) 
           </button>
           <button
             onClick={submit}
-            disabled={!text.trim() || isLoading}
+            disabled={!text.trim() || isLoading || disabled}
             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all
               ${text.trim() && !isLoading
                 ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow"
@@ -95,6 +97,7 @@ function ChatInputArea({ onSend, isLoading, answerStyle, onAnswerStyleChange }) 
 export default function ChatPage() {
   const [answerStyle, setAnswerStyle] = useState("short");
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const recommendationKeys = useRef(new Set());
   const user = useAuthStore((state) => state.user);
   const {
     messages,
@@ -120,6 +123,78 @@ export default function ChatPage() {
 
   const addUserMessage = (content) => {
     addMessage({ id: createId(), role: "user", content, timestamp: ts() });
+  };
+
+  const getNextObjective = async (sourceMessage) => {
+    const currentSkillId = sourceMessage.skill?.id
+      || sourceMessage.skill?.skill_id
+      || sourceMessage.skill?.chapter_id;
+    if (!currentSkillId) return null;
+
+    const currentSkill = await getSkill(currentSkillId);
+    const currentObjectiveId = idOf(sourceMessage.learningObjective);
+    const currentSkillWithContext = { ...currentSkill, currentObjective: { id: currentObjectiveId } };
+    let currentProgress = null;
+    try {
+      currentProgress = await getProgress(currentSkillId);
+    } catch (error) {
+      console.warn("[chatbot-next-objective] current skill progress unavailable", error);
+    }
+
+    const skills = (await getSkills())
+      .sort((first, second) => (first.order ?? 0) - (second.order ?? 0));
+    const currentIndex = skills.findIndex((skill) => idOf(skill) === currentSkillId);
+    const nextSkills = [];
+    for (const skill of skills.slice(currentIndex + 1)) {
+      const skillId = idOf(skill);
+      if (!skillId) continue;
+      try {
+        const [detail, progress] = await Promise.all([getSkill(skillId), getProgress(skillId)]);
+        nextSkills.push({ ...detail, progress });
+      } catch (error) {
+        console.warn(`[chatbot-next-objective] unable to load skill "${skillId}"`, error);
+      }
+    }
+
+    return findNextObjective(currentSkillWithContext, currentProgress, nextSkills);
+  };
+
+  const recommendNextObjective = async (sourceMessage) => {
+    const recommendationKey = `${sourceMessage.id}:${sourceMessage.learningObjective?.id || sourceMessage.learningObjective?.objective_id || "objective"}`;
+    if (recommendationKeys.current.has(recommendationKey)) return;
+    recommendationKeys.current.add(recommendationKey);
+
+    try {
+      const recommendation = await getNextObjective(sourceMessage);
+      if (!recommendation?.objective || !idOf(recommendation.objective) || !titleOf(recommendation.objective)) {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: "Great job! You've completed this learning objective. I couldn't find another objective to recommend right now.",
+          timestamp: ts(),
+        });
+        return;
+      }
+
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: `Great job! You've completed this learning objective. Would you like to explore the next objective: ${titleOf(recommendation.objective)}?`,
+        timestamp: ts(),
+        flowAction: "objective",
+        skill: recommendation.skill,
+        nextObjective: recommendation.objective,
+        nextObjectiveId: idOf(recommendation.objective),
+      });
+    } catch (error) {
+      console.error("[chatbot-next-objective] recommendation failed", error);
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: "Great job! You've completed this learning objective. I couldn't load the next objective right now, but you can keep chatting whenever you're ready.",
+        timestamp: ts(),
+      });
+    }
   };
 
   const handleSend = async (text, answerStyle) => {
@@ -197,8 +272,20 @@ export default function ChatPage() {
     const recommendedActivity = sourceMessage.recommendedActivity
       || sourceMessage.recommended_activity
       || {};
-    const itemId = recommendedActivity.progress_item_id;
-    const itemType = recommendedActivity.progress_item_type;
+    const itemId = recommendedActivity.progress_item_id
+      || recommendedActivity.item_id
+      || recommendedActivity.activity_id
+      || recommendedActivity.video_id
+      || recommendedActivity.quiz_id
+      || recommendedActivity.activityId
+      || recommendedActivity.videoId
+      || recommendedActivity.quizId
+      || recommendedActivity.id;
+    const rawItemType = recommendedActivity.progress_item_type
+      || recommendedActivity.item_type
+      || recommendedActivity.itemType
+      || recommendedActivity.type;
+    const itemType = { practice: "activity", assessment: "quiz" }[rawItemType] || rawItemType;
 
     const flowSteps = sourceMessage.learningSteps || [];
     const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
@@ -261,6 +348,30 @@ export default function ChatPage() {
       }
     }
 
+    if (action === "objective") {
+      const objective = sourceMessage.nextObjective;
+      const items = objectiveItems(objective);
+      const firstItem = items[0];
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: [
+          `Let's begin with "${titleOf(objective)}".`,
+          firstItem?.content || firstItem?.description,
+        ].filter(Boolean).join("\n\n"),
+        timestamp: ts(),
+        skill: sourceMessage.skill,
+        learningObjective: objective,
+        nextObjectiveId: sourceMessage.nextObjectiveId,
+        step: {
+          type: "objective",
+          content: objective.content || objective.description || titleOf(objective),
+        },
+        learningSteps: items,
+      });
+      return;
+    }
+
     if (!nextStep) {
       const answerMatch = sourceMessage.step?.question?.match(/\bAnswer:\s*(true|false)\b/i);
       const correctAnswer = sourceMessage.step?.correct_answer ?? (answerMatch ? answerMatch[1].toLowerCase() === "true" : undefined);
@@ -275,6 +386,7 @@ export default function ChatPage() {
           : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
         timestamp: ts(),
       });
+      if (result && action === "practice") await recommendNextObjective(sourceMessage);
       return;
     }
 

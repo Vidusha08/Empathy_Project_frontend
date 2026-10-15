@@ -180,6 +180,12 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
             <ActionButton disabled={flowHandled} onClick={() => emit("I've completed it.")}><CheckCircle2 size={14} />I&apos;ve completed it</ActionButton>
           )}
 
+          {flowAction === "objective" && (
+            <ActionButton disabled={flowHandled} onClick={() => emit("Explore next objective")}>
+              <Sparkles size={14} />Explore next objective
+            </ActionButton>
+          )}
+
           {flowAction === "practice" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
