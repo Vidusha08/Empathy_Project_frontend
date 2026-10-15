@@ -1,6 +1,4 @@
 //components/content/skillIcons.jsx
-import React from 'react';
- 
 // Shared defaults so every icon reads as one family: 1.5px stroke, round caps, no fill.
 const base = {
   width: 22,
@@ -80,13 +78,3 @@ export const IconCompassion = (props) => (
   </svg>
 );
  
-export const skillIconMap = {
-  calm: IconCalm,
-  ethics: IconEthics,
-  awareness: IconAwareness,
-  'self-compassion': IconSelfCompassion,
-  'common-humanity': IconCommonHumanity,
-  forgiveness: IconForgiveness,
-  'empathic-concern': IconEmpathicConcern,
-  compassion: IconCompassion,
-};

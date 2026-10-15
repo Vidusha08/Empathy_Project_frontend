@@ -76,12 +76,26 @@ const getAllSkillProgress = async (skillIds = []) => {
   }, {});
 };
 
-const completeItem = (skillId, itemId, itemType) => {
-  if (!skillId) throw new Error('skillId is required.');
-  if (!itemId) throw new Error('itemId is required.');
+const completeItem = (skillId, itemId, itemType, source = 'skills_page', quizScore) => {
+  const normalizedSkillId = typeof skillId === 'object'
+    ? skillId?.skill_id || skillId?.chapter_id || skillId?.id
+    : skillId;
+  const normalizedItemId = typeof itemId === 'object'
+    ? itemId?.item_id || itemId?.activity_id || itemId?.video_id || itemId?.quiz_id || itemId?.id
+    : itemId;
+  if (!normalizedSkillId) throw new Error('skillId is required.');
+  if (!normalizedItemId) throw new Error('itemId is required.');
+  const body = {
+    skill_id: String(normalizedSkillId).trim(),
+    item_id: String(normalizedItemId).trim(),
+    source,
+    ...(itemType ? { item_type: String(itemType).trim().toLowerCase() } : {}),
+    ...(quizScore !== undefined ? { quiz_score: quizScore } : {}),
+  };
+  console.info('[progressApi.completeItem] request', body);
   return apiRequest('/progress/item-complete', {
     method: 'POST',
-    body: JSON.stringify({ skill_id: skillId, item_id: itemId, ...(itemType ? { item_type: itemType } : {}) }),
+    body: JSON.stringify(body),
   });
 };
 

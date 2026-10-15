@@ -1,9 +1,10 @@
 // src/api/chatApi.js
 import api from "../utils/axiosInstance";
 
-export async function sendMessage(question) {
+export async function sendMessage(question, answerStyle = "short") {
   const { data } = await api.post("/api/learning-response", {
     question,
+    answer_style: answerStyle,
   });
 
   const context = data.learning_context ?? data;

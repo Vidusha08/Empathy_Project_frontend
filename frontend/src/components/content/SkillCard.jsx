@@ -1,7 +1,6 @@
 //components/content/SkillCard.jsx
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { skillIconMap } from './skillIcons';
+import { skillIconMap } from './skillIconMap';
 import progressApi from '../../api/progressApi';
 import './SkillCard.css';
  
