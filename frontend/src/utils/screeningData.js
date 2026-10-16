@@ -97,3 +97,15 @@ export const CRISIS_RESOURCES = [
   { name: "Emergency ambulance (Suwa Seriya)", contact: "1990" },
   { name: "Police emergency", contact: "119" },
 ];
+
+// ---- Screening risk rule (must match backend/registration_assessment.py) ----
+export const RED_PHQ9_MIN = 20;
+export const RED_GAD7_MIN = 15;
+
+const sum = (arr) => arr.reduce((a, v) => a + (v ?? 0), 0);
+
+// true => the student should be shown counseling support instead of continuing
+export const isNotSuitable = ({ phq9, gad7, asq }) =>
+  asq.some((v) => v === true) ||
+  sum(phq9) >= RED_PHQ9_MIN ||
+  sum(gad7) >= RED_GAD7_MIN;

@@ -30,6 +30,7 @@ const apiRequest = async (endpoint, options = {}) => {
       localStorage.removeItem('token');
       localStorage.removeItem('access_token');
       window.location.assign('/login');
+      //window.location.assign('/');
     }
     const error = new Error(data.error || data.message || `Request failed with status ${response.status}`);
     error.status = response.status;

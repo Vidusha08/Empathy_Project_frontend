@@ -106,19 +106,11 @@ export default function RegistrationPage() {
     setStage("preskill");
   };
 
-  // Immediate-risk path: save registration + screening only (no pre-skill test).
-  const handleAcute = async (answers) => {
-    await registerWithAssessments(buildPayload({ screening: answers, pre_skill: null }));
-  };
-
-  const handleAcuteDone = (saved) => {
-    if (saved) {
-      navigate("/login", {
-        state: { message: "Your account is on hold until you've spoken with a counselor." },
-      });
-    } else {
-      backToForm();
-    }
+  // Not suitable after test 1: counseling info was shown, nothing was saved.
+  const handleNotSuitable = () => {
+    setStage("form");
+    setScreeningAnswers(null);
+    navigate("/");
   };
 
   // ----- popup 2 callback: final save of everything -----
@@ -366,8 +358,7 @@ export default function RegistrationPage() {
       {stage === "screening" && (
         <RegistrationScreeningModal
           onComplete={handleScreeningComplete}
-          onAcute={handleAcute}
-          onAcuteDone={handleAcuteDone}
+          onNotSuitable={handleNotSuitable}
           onCancel={backToForm}
         />
       )}

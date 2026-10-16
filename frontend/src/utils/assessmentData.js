@@ -7,6 +7,117 @@ export const PRE_SKILL_NOTE =
 
 export const QUESTIONS_PER_PAGE = 5;
 
+// 9 questions: 1 self-rating (id "conf", not scored) + 8 knowledge questions
+// (one per SEEK skill). Question ids must match PRE_SKILL_KEY in the backend.
+export const PRE_SKILL_QUESTIONS = [
+  // Self-rated confidence (not marked right/wrong)
+  {
+    id: "conf",
+    text: "How confident and knowledgeable are you about empathy skills, such as understanding your own feelings, caring for yourself, and showing care for others?",
+    options: [
+      { id: "1", label: "1 – Not at all confident or knowledgeable" },
+      { id: "2", label: "2 – Slightly confident and knowledgeable" },
+      { id: "3", label: "3 – Moderately confident and knowledgeable" },
+      { id: "4", label: "4 – Very confident and knowledgeable" },
+      { id: "5", label: "5 – Extremely confident and knowledgeable" },
+    ],
+  },
+
+  // Skill 1: Calming the Body and Mind
+  {
+    id: "q03",
+    text: "Which of these is an example of a grounding practice?",
+    options: [
+      { id: "a", label: "Replaying the argument over and over in your mind" },
+      { id: "b", label: "Pushing unpleasant thoughts away by force" },
+      { id: "c", label: "Planning what you will say to win the next argument" },
+      { id: "d", label: "Noticing five things you can see, hear or feel right now" },
+    ],
+  },
+  // Skill 2: Ethical Mindfulness
+  {
+    id: "q04",
+    text: "What does ethical mindfulness involve?",
+    options: [
+      { id: "a", label: "Focusing only on reaching your own goals" },
+      { id: "b", label: "Noticing your thoughts and actions with awareness of how they affect yourself and others" },
+      { id: "c", label: "Avoiding all difficult emotions" },
+      { id: "d", label: "Following rules without thinking about them" },
+    ],
+  },
+  // Skill 3: Emotional Awareness
+  {
+    id: "q09",
+    text: "Which is an example of recognising a body signal of emotion?",
+    options: [
+      { id: "a", label: "Noticing a tight chest and realising you may be feeling anxious" },
+      { id: "b", label: "Deciding that you never feel anything in your body" },
+      { id: "c", label: "Believing emotions only happen in the mind" },
+      { id: "d", label: "Ignoring a headache because you are busy" },
+    ],
+  },
+  // Skill 4: Self-Compassion
+  {
+    id: "q10",
+    text: "You failed a test you studied hard for. Which inner response is most self-compassionate?",
+    options: [
+      { id: "a", label: "\"I'm stupid and I'll never get this.\"" },
+      { id: "b", label: "\"I shouldn't care about this at all.\"" },
+      { id: "c", label: "\"This is painful, and many people struggle sometimes. What can I learn, and what do I need right now?\"" },
+      { id: "d", label: "\"I'll pretend it never happened.\"" },
+    ],
+  },
+  // Skill 5: Impartiality and Common Humanity
+  {
+    id: "q14",
+    text: "A new student from a different background is sitting alone. What is the most impartial response?",
+    options: [
+      { id: "a", label: "Ignore them and assume they will adjust" },
+      { id: "b", label: "Include them only if other popular students do" },
+      { id: "c", label: "Judge them by your first impression" },
+      { id: "d", label: "Include them as you would anyone, regardless of background" },
+    ],
+  },
+  // Skill 6: Forgiveness and Gratitude
+  {
+    id: "q16",
+    text: "How can practising gratitude help us?",
+    options: [
+      { id: "a", label: "By helping us compare ourselves with others" },
+      { id: "b", label: "By helping us ignore our problems" },
+      { id: "c", label: "By creating a duty to repay everyone who helps us" },
+      { id: "d", label: "By turning our attention to what is good and supportive, which can improve wellbeing and relationships" },
+    ],
+  },
+  // Skill 7: Empathic Concern
+  {
+    id: "q17",
+    text: "A friend tells you their pet has died. Which response best shows empathic concern?",
+    options: [
+      { id: "a", label: "\"It's just a pet.\"" },
+      { id: "b", label: "\"At least you can get a new one.\"" },
+      { id: "c", label: "\"I'm so sorry. That sounds really painful. I'm here if you want to talk.\"" },
+      { id: "d", label: "Quickly change the subject to something cheerful" },
+    ],
+  },
+  // Skill 8: Compassion
+  {
+    id: "q19",
+    text: "Which best describes compassion?",
+    options: [
+      { id: "a", label: "Noticing suffering, wishing to relieve it, and taking helpful action where possible" },
+      { id: "b", label: "Feeling sorry for someone from a distance" },
+      { id: "c", label: "Solving other people's problems for them without asking" },
+      { id: "d", label: "Avoiding people who are in pain" },
+    ],
+  },
+];
+
+/*export const PRE_SKILL_NOTE =
+  "This assessment is only for our research purposes. Please answer on your own, using your own knowledge. There are no marks shown and no one is judging your answers.";
+
+export const QUESTIONS_PER_PAGE = 5;
+
 export const PRE_SKILL_QUESTIONS = [
   // Calming the Body and Mind
   {
@@ -216,4 +327,4 @@ export const PRE_SKILL_QUESTIONS = [
       { id: "d", label: "Reach out to them privately, support them, and speak up or tell a trusted adult" },
     ],
   },
-];
+];*/

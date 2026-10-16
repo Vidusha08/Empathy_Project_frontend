@@ -1,7 +1,7 @@
 // src/components/assessment/RegistrationResultModal.jsx
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { CrisisPanel, ModalShell, primaryBtn } from "./TestParts";
+import { ModalShell, primaryBtn } from "./TestParts";
 
 const COPY = {
   green: {
@@ -12,29 +12,21 @@ const COPY = {
     title: "Thanks for being honest with us",
     body: "Your registration is complete. You can use this program, but we recommend talking to a counselor as well. The chatbot teaches skills and is not a replacement for professional support.",
   },
-  red: {
-    title: "Let's connect you with a counselor first",
-    body: "Your registration is saved. Based on your answers, we'd like you to speak with a counselor before using the learning program, so your account is on hold until then. This is not a judgement; it's about making sure you get the right kind of support.",
-  },
 };
 
 export default function RegistrationResultModal({ result }) {
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
 
-  const tier = result?.tier;
-  const copy = COPY[tier] || COPY.green;
-  const canEnter = tier !== "red" && !!result?.access_token;
+  const copy = COPY[result?.tier] || COPY.green;
 
   const handleContinue = () => {
-    if (canEnter) {
+    if (result?.access_token) {
       localStorage.setItem("token", result.access_token);
       setAuth(result.student, result.access_token);
       navigate("/dashboard", { replace: true });
     } else {
-      navigate("/login", {
-        state: { message: "Your account is on hold until you've spoken with a counselor." },
-      });
+      navigate("/login", { replace: true });
     }
   };
 
@@ -44,11 +36,10 @@ export default function RegistrationResultModal({ result }) {
       scrollKey="result"
       footer={
         <button type="button" className={`${primaryBtn} w-full`} onClick={handleContinue}>
-          {canEnter ? "Go to dashboard" : "Back to sign in"}
+          Go to dashboard
         </button>
       }
     >
-      {tier === "red" && <CrisisPanel />}
       <p className="text-sm text-gray-600 leading-relaxed">{copy.body}</p>
     </ModalShell>
   );

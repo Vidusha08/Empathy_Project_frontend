@@ -66,7 +66,7 @@ export default function RegistrationPreSkillModal({ onSubmit, submitting, error,
             <p className="text-sm text-gray-700 leading-relaxed">{PRE_SKILL_NOTE}</p>
           </div>
           <p className="text-sm text-gray-600 leading-relaxed">
-            There are {PRE_SKILL_QUESTIONS.length} multiple-choice questions about empathy skills. Choose the one answer you think is best for each question. It takes about 5 minutes.
+            There are {PRE_SKILL_QUESTIONS.length} multiple-choice questions about empathy skills. Choose the one answer you think is best for each question. It takes about 2 minutes.
           </p>
         </div>
       ) : (

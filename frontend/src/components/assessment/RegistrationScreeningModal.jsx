@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   FREQUENCY_OPTIONS, FUNCTION_OPTIONS, PHQ9_ITEMS, PHQ9_FUNCTION_TEXT,
   GAD7_ITEMS, ASQ_ITEMS, ASQ_NOW_TEXT, YES_NO, CONTEXT_ITEMS,
+  isNotSuitable,
 } from "../../utils/screeningData";
 import { Question, CrisisPanel, ModalShell, primaryBtn, ghostBtn, plainBtn } from "./TestParts";
 
@@ -17,18 +18,16 @@ const STEP_INFO = {
 
 /**
  * Props
- *  onComplete(answers)  – non-acute path: go on to the pre-skill popup
- *  onAcute(answers)     – async; saves registration + screening in the background (throws on failure)
- *  onAcuteDone(saved)   – user pressed the button on the crisis view
- *  onCancel()           – back to the registration form
+ *  onComplete(answers) – suitable: go on to the pre-skill popup
+ *  onNotSuitable()     – not suitable: counseling info was shown, user pressed the button.
+ *                        NOTHING is saved to the backend in this case.
+ *  onCancel()          – back to the registration form
  */
-export default function RegistrationScreeningModal({ onComplete, onAcute, onAcuteDone, onCancel }) {
+export default function RegistrationScreeningModal({ onComplete, onNotSuitable, onCancel }) {
   const [step, setStep] = useState(0);
   const [consent, setConsent] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
-  const [acuteView, setAcuteView] = useState(false);
-  const [acuteSaving, setAcuteSaving] = useState(false);
-  const [saveFailed, setSaveFailed] = useState(false);
+  const [supportView, setSupportView] = useState(false);
   const [answers, setAnswers] = useState({
     phq9: Array(9).fill(null),
     functional: null,
@@ -46,7 +45,6 @@ export default function RegistrationScreeningModal({ onComplete, onAcute, onAcut
 
   const phqTotal = answers.phq9.reduce((a, v) => a + (v ?? 0), 0);
   const anyAsqYes = answers.asq.some((v) => v === true);
-  const acute = anyAsqYes && answers.asqNow === true;
 
   const complete = {
     phq9: answers.phq9.every((v) => v !== null) && (phqTotal === 0 || answers.functional !== null),
@@ -57,7 +55,7 @@ export default function RegistrationScreeningModal({ onComplete, onAcute, onAcut
 
   const key = STEPS[step];
 
-  const next = async () => {
+  const next = () => {
     if (key === "intro") {
       if (!consent) { setShowErrors(true); return; }
     } else if (!complete[key]) {
@@ -66,17 +64,10 @@ export default function RegistrationScreeningModal({ onComplete, onAcute, onAcut
     }
     setShowErrors(false);
 
-    // Immediate risk: show crisis help at once, save in the background.
-    if (key === "asq" && acute) {
-      setAcuteView(true);
-      setAcuteSaving(true);
-      try {
-        await onAcute(answers);
-      } catch {
-        setSaveFailed(true);
-      } finally {
-        setAcuteSaving(false);
-      }
+    // All scored questions are done after the Safety step.
+    // Not suitable -> show counseling support. No API call, no 2nd test.
+    if (key === "asq" && isNotSuitable(answers)) {
+      setSupportView(true);
       return;
     }
 
@@ -86,29 +77,28 @@ export default function RegistrationScreeningModal({ onComplete, onAcute, onAcut
 
   const back = () => { setShowErrors(false); setStep((s) => Math.max(0, s - 1)); };
 
-  // ---------- Crisis view ----------
-  if (acuteView) {
+  // ---------- Counseling support view ----------
+  if (supportView) {
     return (
-      <ModalShell title="Your safety matters most right now" scrollKey="acute"
+      <ModalShell
+        title="Support is available for you"
+        scrollKey="support"
         footer={
-          <button type="button" onClick={() => onAcuteDone(!saveFailed)} disabled={acuteSaving}
-            className={`${primaryBtn} w-full`}>
-            {acuteSaving ? "Saving..." : saveFailed ? "Back to registration" : "Back to sign in"}
+          <button type="button" onClick={onNotSuitable} className={`${primaryBtn} w-full`}>
+            Close
           </button>
-        }>
-        <p className="text-sm text-gray-600">
-          Thank you for telling us. You don't have to handle this alone. Please contact one of these services now.
+        }
+      >
+        <p className="text-sm text-gray-600 leading-relaxed">
+          Thank you for answering honestly. Based on your answers, we recommend that you speak with a
+          counselor before using this learning program. You don't have to handle this alone.
+          Please contact one of these services.
         </p>
         <CrisisPanel />
-        {!saveFailed ? (
-          <p className="text-sm text-gray-600 leading-relaxed">
-            Your account is on hold until you've spoken with a counselor. This is not a judgement; it's about making sure you get the right kind of support.
-          </p>
-        ) : (
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
-            We couldn't save your registration just now. Your safety information above still applies.
-          </p>
-        )}
+        <p className="text-sm text-gray-600 leading-relaxed">
+          This is not a diagnosis or a judgement. It's about making sure you get the right kind of support.
+          Your answers have not been saved and no account has been created.
+        </p>
       </ModalShell>
     );
   }

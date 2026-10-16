@@ -83,10 +83,13 @@ export function useAuth() {
   };
 
   const logout = async () => {
-    await logoutUser();
+     await logoutUser();
+    //const logoutRequest = logoutUser();
     localStorage.removeItem("token");
     clearAuth();
-    navigate("/login");
+    navigate("/");
+    //navigate("/", { replace: true });
+    //await logoutRequest;
   };
 
   return {
