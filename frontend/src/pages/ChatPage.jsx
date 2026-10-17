@@ -207,7 +207,10 @@ export default function ChatPage() {
       const learningContext = res.learning_context || res;
       const skill = learningContext.skill;
       const learningObjective = learningContext.learning_objective || learningContext.learningObjective;
-      const recommendedActivity = learningContext.recommended_activity || learningContext.recommendedActivity;
+      const recommendedActivity = learningContext.recommended_activity
+        || learningContext.recommendedActivity
+        || res.recommendedActivity
+        || null;
       const progressRecommendation = learningContext.progress_recommendation || learningContext.progressRecommendation;
       const steps = Array.isArray(res.steps) ? res.steps : [];
 
@@ -229,6 +232,9 @@ export default function ChatPage() {
         nextIncompleteObjective: learningContext.next_incomplete_objective || learningContext.nextIncompleteObjective,
         progressRecommendation,
         recommendedActivity,
+        progressItemId: recommendedActivity?.progress_item_id ?? res.progressItemId ?? null,
+        progressObjectiveId: recommendedActivity?.progress_objective_id ?? res.progressObjectiveId ?? null,
+        progressItemType: recommendedActivity?.progress_item_type ?? res.progressItemType ?? null,
         sourcePage: learningContext.source_page || learningContext.sourcePage,
         interactionId: res.interactionId,
         flowAction: hasLearningFlow ? "learn" : undefined,
@@ -272,19 +278,10 @@ export default function ChatPage() {
     const recommendedActivity = sourceMessage.recommendedActivity
       || sourceMessage.recommended_activity
       || {};
-    const itemId = recommendedActivity.progress_item_id
-      || recommendedActivity.item_id
-      || recommendedActivity.activity_id
-      || recommendedActivity.video_id
-      || recommendedActivity.quiz_id
-      || recommendedActivity.activityId
-      || recommendedActivity.videoId
-      || recommendedActivity.quizId
-      || recommendedActivity.id;
-    const rawItemType = recommendedActivity.progress_item_type
-      || recommendedActivity.item_type
-      || recommendedActivity.itemType
-      || recommendedActivity.type;
+    const itemId = sourceMessage.progressItemId
+      || recommendedActivity.progress_item_id;
+    const rawItemType = sourceMessage.progressItemType
+      || recommendedActivity.progress_item_type;
     const itemType = { practice: "activity", assessment: "quiz" }[rawItemType] || rawItemType;
 
     const flowSteps = sourceMessage.learningSteps || [];
@@ -417,6 +414,9 @@ export default function ChatPage() {
       learningSteps: flowSteps,
       recommendedActivity: sourceMessage.recommendedActivity,
       learningObjective: sourceMessage.learningObjective,
+      progressItemId: sourceMessage.progressItemId,
+      progressObjectiveId: sourceMessage.progressObjectiveId,
+      progressItemType: sourceMessage.progressItemType,
     });
   };
 
