@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import RabbitThinking from "./RabbitThinking";
 
-export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
+export default function ChatWindow({ messages, isLoading, onFlowMessage, selectedAnswers }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -17,6 +17,7 @@ export default function ChatWindow({ messages, isLoading, onFlowMessage }) {
           key={msg.id}
           message={msg}
           onFlowMessage={onFlowMessage}
+          selectedAnswers={selectedAnswers}
         />
       ))}
 

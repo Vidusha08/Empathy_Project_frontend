@@ -4,7 +4,6 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { login, loading, error, setError } = useAuth();
 
@@ -13,14 +12,7 @@ export default function LoginPage() {
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-
-  // Show success message if redirected from registration
-  useEffect(() => {
-    if (location.state?.message) {
-      setSuccessMessage(location.state.message);
-    }
-  }, [location.state]);
+  const successMessage = location.state?.message;
 
   const validate = () => {
     const e = {};

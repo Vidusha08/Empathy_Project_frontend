@@ -4,7 +4,9 @@ import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
-import { completeItem } from "../api/progressApi";
+import { completeItem, getProgress } from "../api/progressApi";
+import { getSkill, getSkills } from "../api/contentApi";
+import { findNextObjective, idOf, objectiveItems, titleOf } from "../utils/nextObjective";
 import { Mic, Send } from "lucide-react";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
@@ -19,18 +21,41 @@ function getFirstName(user) {
 
 // Chat Input 
 
-function ChatInputArea({ onSend, isLoading }) {
+function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyleChange }) {
   const [text, setText] = useState("");
   const ref = useRef(null);
 
   const submit = () => {
     if (!text.trim() || isLoading) return;
-    onSend(text.trim());
+    onSend(text.trim(), answerStyle);
     setText("");
   };
 
   return (
     <div className="px-5 pb-4 pt-1">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xs font-medium text-gray-500">Response style:</span>
+        <div className="flex rounded-lg bg-gray-100 p-0.5" role="group" aria-label="Response style">
+          {[
+            { value: "short", label: "Short" },
+            { value: "long", label: "Long" },
+          ].map((style) => (
+            <button
+              key={style.value}
+              type="button"
+              onClick={() => onAnswerStyleChange(style.value)}
+              aria-pressed={answerStyle === style.value}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                answerStyle === style.value
+                  ? "bg-white text-indigo-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {style.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="flex items-end gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-2.5 shadow-sm focus-within:border-indigo-300 transition-colors">
         <textarea
           ref={ref}
@@ -41,7 +66,7 @@ function ChatInputArea({ onSend, isLoading }) {
           }}
           placeholder="Type a message…"
           rows={1}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
           className="flex-1 resize-none outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent leading-relaxed max-h-28 overflow-y-auto"
           style={{ minHeight: 24 }}
         />
@@ -51,7 +76,7 @@ function ChatInputArea({ onSend, isLoading }) {
           </button>
           <button
             onClick={submit}
-            disabled={!text.trim() || isLoading}
+            disabled={!text.trim() || isLoading || disabled}
             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all
               ${text.trim() && !isLoading
                 ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow"
@@ -69,6 +94,9 @@ function ChatInputArea({ onSend, isLoading }) {
 // Main Page
 
 export default function ChatPage() {
+  const [answerStyle, setAnswerStyle] = useState("short");
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const recommendationKeys = useRef(new Set());
   const user = useAuthStore((state) => state.user);
   const {
     messages,
@@ -96,29 +124,85 @@ export default function ChatPage() {
     addMessage({ id: createId(), role: "user", content, timestamp: ts() });
   };
 
-  const addFlowStep = (step, flowAction, flowSteps, flowIndex, skill, content, context = {}) => {
-    addMessage({
-      id: createId(),
-      role: "assistant",
-      content,
-      timestamp: ts(),
-      skill,
-      step,
-      flowAction,
-      flowIndex,
-      learningSteps: flowSteps,
-      recommendedActivity: context.recommendedActivity,
-      learningObjective: context.learningObjective,
-    });
+  const getNextObjective = async (sourceMessage) => {
+    const currentSkillId = sourceMessage.skill?.id
+      || sourceMessage.skill?.skill_id
+      || sourceMessage.skill?.chapter_id;
+    if (!currentSkillId) return null;
+
+    const currentSkill = await getSkill(currentSkillId);
+    const currentObjectiveId = idOf(sourceMessage.learningObjective);
+    const currentSkillWithContext = { ...currentSkill, currentObjective: { id: currentObjectiveId } };
+    let currentProgress = null;
+    try {
+      currentProgress = await getProgress(currentSkillId);
+    } catch (error) {
+      console.warn("[chatbot-next-objective] current skill progress unavailable", error);
+    }
+
+    const skills = (await getSkills())
+      .sort((first, second) => (first.order ?? 0) - (second.order ?? 0));
+    const currentIndex = skills.findIndex((skill) => idOf(skill) === currentSkillId);
+    const nextSkills = [];
+    for (const skill of skills.slice(currentIndex + 1)) {
+      const skillId = idOf(skill);
+      if (!skillId) continue;
+      try {
+        const [detail, progress] = await Promise.all([getSkill(skillId), getProgress(skillId)]);
+        nextSkills.push({ ...detail, progress });
+      } catch (error) {
+        console.warn(`[chatbot-next-objective] unable to load skill "${skillId}"`, error);
+      }
+    }
+
+    return findNextObjective(currentSkillWithContext, currentProgress, nextSkills);
   };
 
-  const handleSend = async (text) => {
+  const recommendNextObjective = async (sourceMessage) => {
+    const recommendationKey = `${sourceMessage.id}:${sourceMessage.learningObjective?.id || sourceMessage.learningObjective?.objective_id || "objective"}`;
+    if (recommendationKeys.current.has(recommendationKey)) return;
+    recommendationKeys.current.add(recommendationKey);
+
+    try {
+      const recommendation = await getNextObjective(sourceMessage);
+      if (!recommendation?.objective || !idOf(recommendation.objective) || !titleOf(recommendation.objective)) {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: "Great job! You've completed this learning objective. I couldn't find another objective to recommend right now.",
+          timestamp: ts(),
+        });
+        return;
+      }
+
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: `Great job! You've completed this learning objective. Would you like to explore the next objective: ${titleOf(recommendation.objective)}?`,
+        timestamp: ts(),
+        flowAction: "objective",
+        skill: recommendation.skill,
+        nextObjective: recommendation.objective,
+        nextObjectiveId: idOf(recommendation.objective),
+      });
+    } catch (error) {
+      console.error("[chatbot-next-objective] recommendation failed", error);
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: "Great job! You've completed this learning objective. I couldn't load the next objective right now, but you can keep chatting whenever you're ready.",
+        timestamp: ts(),
+      });
+    }
+  };
+
+  const handleSend = async (text, answerStyle) => {
     addUserMessage(text);
 
     setLoading(true);
 
     try {
-      const res = await sendMessage(text);
+      const res = await sendMessage(text, answerStyle);
       const learningContext = res.learning_context || res;
       const skill = learningContext.skill;
       const learningObjective = learningContext.learning_objective || learningContext.learningObjective;
@@ -126,8 +210,8 @@ export default function ChatPage() {
       const progressRecommendation = learningContext.progress_recommendation || learningContext.progressRecommendation;
       const steps = Array.isArray(res.steps) ? res.steps : [];
 
-      const hasLearningFlow = steps.length > 0 && skill?.id;
       const firstStep = steps[0];
+      const hasLearningFlow = steps.length > 0 && skill?.id;
 
       addMessage({
         id:        createId(),
@@ -170,6 +254,7 @@ export default function ChatPage() {
     if (!sourceMessage || sourceMessage.flowHandled) return;
 
     markMessageHandled(sourceMessage.id);
+    setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
     addUserMessage(text);
 
     if (text === "No") {
@@ -183,42 +268,124 @@ export default function ChatPage() {
     }
 
     const skillId = sourceMessage.skill?.id || sourceMessage.skill?.skill_id || sourceMessage.skill?.chapter_id;
-    const itemId = sourceMessage.recommendedActivity?.id
-      || sourceMessage.recommendedActivity?.item_id
-      || sourceMessage.recommendedActivity?.activity_id;
+    const recommendedActivity = sourceMessage.recommendedActivity
+      || sourceMessage.recommended_activity
+      || {};
+    const itemId = recommendedActivity.progress_item_id
+      || recommendedActivity.item_id
+      || recommendedActivity.activity_id
+      || recommendedActivity.video_id
+      || recommendedActivity.quiz_id
+      || recommendedActivity.activityId
+      || recommendedActivity.videoId
+      || recommendedActivity.quizId
+      || recommendedActivity.id;
+    const rawItemType = recommendedActivity.progress_item_type
+      || recommendedActivity.item_type
+      || recommendedActivity.itemType
+      || recommendedActivity.type;
+    const itemType = { practice: "activity", assessment: "quiz" }[rawItemType] || rawItemType;
 
-    if (action === "complete" && skillId && itemId) {
-      try {
-        await completeItem(skillId, itemId);
-      } catch (error) {
+    const flowSteps = sourceMessage.learningSteps || [];
+    const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
+    const nextStep = flowSteps[nextIndex];
+
+    if (action === "complete") {
+      if (!skillId || !itemId || !itemType) {
+        console.error("[chatbot-progress] missing completion metadata", {
+          action,
+          skillId,
+          recommendedActivity,
+          progress_item_id: itemId,
+          progress_item_type: itemType,
+          source: "chatbot",
+        });
         addMessage({
           id: createId(),
           role: "assistant",
-          content: error.message || "I could not save that completion yet.",
+          content: "I could not identify the recommended curriculum item to save your progress.",
+          timestamp: ts(),
+        });
+        return;
+      }
+      try {
+        const completionPayload = {
+          skill_id: String(skillId).trim(),
+          item_id: String(itemId).trim(),
+          item_type: itemType ? String(itemType).trim().toLowerCase() : undefined,
+          source: "chatbot",
+        };
+        console.info("[chatbot-progress] completing recommended item", {
+          action,
+          skillId,
+          recommendedActivity,
+          progress_item_id: itemId,
+          progress_item_type: itemType,
+          source: completionPayload.source,
+        });
+        const completionResponse = await completeItem(skillId, itemId, itemType, "chatbot");
+        console.info("[chatbot-progress] completion response", completionResponse);
+      } catch (error) {
+        console.error("[chatbot-progress] completion failed", {
+          action,
+          skillId,
+          recommendedActivity,
+          progress_item_id: itemId,
+          progress_item_type: itemType,
+          source: "chatbot",
+          status: error?.status,
+          response: error?.data,
+          message: error?.message,
+        });
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: error.message || "I could not save your learning progress yet.",
           timestamp: ts(),
         });
         return;
       }
     }
 
-    const flowSteps = sourceMessage.learningSteps || [];
-    const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
-    const nextStep = flowSteps[nextIndex];
+    if (action === "objective") {
+      const objective = sourceMessage.nextObjective;
+      const items = objectiveItems(objective);
+      const firstItem = items[0];
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: [
+          `Let's begin with "${titleOf(objective)}".`,
+          firstItem?.content || firstItem?.description,
+        ].filter(Boolean).join("\n\n"),
+        timestamp: ts(),
+        skill: sourceMessage.skill,
+        learningObjective: objective,
+        nextObjectiveId: sourceMessage.nextObjectiveId,
+        step: {
+          type: "objective",
+          content: objective.content || objective.description || titleOf(objective),
+        },
+        learningSteps: items,
+      });
+      return;
+    }
 
     if (!nextStep) {
       const answerMatch = sourceMessage.step?.question?.match(/\bAnswer:\s*(true|false)\b/i);
       const correctAnswer = sourceMessage.step?.correct_answer ?? (answerMatch ? answerMatch[1].toLowerCase() === "true" : undefined);
-      const answer = text.toLowerCase() === "true";
+      const answer = ["true", "yes"].includes(text.toLowerCase());
       const result = correctAnswer === undefined || answer === correctAnswer;
 
       addMessage({
         id: createId(),
         role: "assistant",
         content: result
-          ? "Correct! Great job. You've understood the main idea."
+          ? "Correct! Great job. Let's continue learning."
           : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
         timestamp: ts(),
       });
+      if (result && action === "practice") await recommendNextObjective(sourceMessage);
       return;
     }
 
@@ -234,18 +401,22 @@ export default function ChatPage() {
       : nextAction === "complete"
         ? "Let's try a grounding activity."
         : nextAction === "practice"
-          ? "Great! Let's check your understanding."
+          ? "Did you understand the main idea? Let's check with a quick question."
           : "Let's continue.";
 
-    addFlowStep(
-      nextStep,
-      nextAction,
-      flowSteps,
-      nextIndex,
-      sourceMessage.skill,
-      nextContent,
-      sourceMessage,
-    );
+    addMessage({
+      id: createId(),
+      role: "assistant",
+      content: nextContent,
+      timestamp: ts(),
+      skill: sourceMessage.skill,
+      step: nextStep,
+      flowAction: nextAction,
+      flowIndex: nextIndex,
+      learningSteps: flowSteps,
+      recommendedActivity: sourceMessage.recommendedActivity,
+      learningObjective: sourceMessage.learningObjective,
+    });
   };
 
   return (
@@ -266,12 +437,18 @@ export default function ChatPage() {
             messages={messages}
             isLoading={isLoading}
             onFlowMessage={handleFlowMessage}
+            selectedAnswers={selectedAnswers}
           />
         </div>
 
         {/* Input */}
         <div className="flex-shrink-0">
-          <ChatInputArea onSend={handleSend} isLoading={isLoading} />
+          <ChatInputArea
+            onSend={handleSend}
+            isLoading={isLoading}
+            answerStyle={answerStyle}
+            onAnswerStyleChange={setAnswerStyle}
+          />
         </div>
       </div>
     </div>

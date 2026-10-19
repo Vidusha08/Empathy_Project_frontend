@@ -597,6 +597,238 @@
   line-height: 1.6;
 }
 
+.learning-item-card__video {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  aspect-ratio: 16 / 9;
+  background: #0f172a;
+  border-radius: 10px;
+}
+
+.sensation-activity {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.sensation-activity__instructions,
+.sensation-activity__completion {
+  margin: 0;
+  color: var(--progress-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sensation-activity__items,
+.sensation-activity__categories {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sensation-activity__items {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sensation-card {
+  padding: 12px;
+  color: var(--progress-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  cursor: grab;
+}
+
+.sensation-card:hover,
+.sensation-card.is-dragging {
+  border-color: var(--progress-accent);
+  background: #eef2ff;
+}
+
+.sensation-card:active {
+  cursor: grabbing;
+}
+
+.sensation-drop-zone {
+  min-height: 100px;
+  padding: 12px;
+  background: #f8faff;
+  border: 1px dashed #a5b4fc;
+  border-radius: 12px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.sensation-drop-zone.is-ready {
+  background: #eef2ff;
+  border-color: var(--progress-accent);
+}
+
+.sensation-drop-zone h5,
+.sensation-activity__reflection h5 {
+  margin: 0 0 9px;
+  font-size: 14px;
+}
+
+.sensation-drop-zone__items {
+  display: grid;
+  gap: 8px;
+}
+
+.sensation-drop-zone__hint {
+  color: var(--progress-muted);
+  font-size: 12px;
+}
+
+.sensation-card--placed {
+  width: 100%;
+}
+
+.sensation-activity__completion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+  font-weight: 700;
+}
+
+.sensation-activity__reflection {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  background: #fbfdfb;
+  border: 1px solid var(--progress-line);
+  border-radius: 10px;
+}
+
+.sensation-activity__reflection label {
+  color: var(--progress-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sensation-activity__reflection textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px;
+  font: inherit;
+  border: 1px solid var(--progress-line);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.scenario-choice-activity {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.scenario-choice-activity__instructions,
+.scenario-choice-activity__completion {
+  margin: 0;
+  color: var(--progress-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.scenario-choice-activity__scenario {
+  padding: 14px;
+  background: #f8faff;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+}
+
+.scenario-choice-activity__scenario p {
+  margin: 6px 0 0;
+  color: var(--progress-ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.scenario-choice-activity__label {
+  color: var(--progress-accent-dark);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scenario-choice-activity__options {
+  display: grid;
+  gap: 10px;
+}
+
+.scenario-choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  color: var(--progress-ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.scenario-choice-card:hover:not(:disabled),
+.scenario-choice-card.is-selected {
+  border-color: var(--progress-accent);
+  background: #eef2ff;
+}
+
+.scenario-choice-card:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.scenario-choice-card__key {
+  flex: 0 0 auto;
+  color: var(--progress-accent-dark);
+  font-weight: 800;
+}
+
+.scenario-choice-feedback {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.scenario-choice-feedback p {
+  margin: 5px 0 0;
+}
+
+.scenario-choice-feedback.is-correct {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.scenario-choice-feedback.is-incorrect {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+
+.scenario-choice-activity__completion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+  font-weight: 700;
+}
+
 .status {
   display: inline-flex;
   align-items: center;
@@ -764,5 +996,15 @@
 
   .skill-card__number {
     font-size: 20px;
+  }
+
+  .sensation-activity__items,
+  .sensation-activity__categories {
+    grid-template-columns: 1fr;
+  }
+
+  .sensation-activity__completion {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

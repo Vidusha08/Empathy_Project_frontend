@@ -16,20 +16,21 @@ const normalizeSkill = (skill) => ({
   ...skill,
   title: skill?.title || skill?.skill_title || '',
   objectives: listOf(skill?.objectives).map((objective) => {
-    const items = [
+    const authoredItems = listOf(objective.items || objective.learning_items);
+    const items = authoredItems.length ? authoredItems : [
       ...listOf(objective.learning_content).map((item) => normalizeItem(item, 'text')),
       ...listOf(objective.activities).map((item) => normalizeItem(item, 'activity')),
       ...listOf(objective.videos).map((item) => normalizeItem(item, 'video')),
       ...(objective.quiz ? [normalizeItem(objective.quiz, 'quiz')] : []),
       ...(objective.reflection ? [normalizeItem(objective.reflection, 'reflection')] : []),
-    ];
+    ].map((item) => normalizeItem(item, item?.type || item?.item_type || 'learning_item'));
 
     return {
       ...objective,
       objective_id: objective.objective_id || objective.id,
       title: objective.objective_title || objective.title || '',
       content: objective.objective_title || objective.content || '',
-      items,
+      items: items.map((item) => normalizeItem(item, item?.type || item?.item_type || 'learning_item')),
     };
   }),
 });
