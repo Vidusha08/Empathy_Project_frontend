@@ -187,7 +187,7 @@ function ProfileMenu({ displayName, user }) {
       {editOpen && (
         <EditProfileModal
           user={user}
-          onClose={() => setOpen(false)}
+          onClose={() => setEditOpen(false)}
         />
       )}
     </>
@@ -203,7 +203,7 @@ export default function Topbar() {
   const isDashboardPage = location.pathname === "/dashboard" || location.pathname.startsWith("/dashboard/");
 
   return (
-    <div className="bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
+    <div className="app-topbar bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
       {!isDashboardPage && (
         <div>
           <p className="text-xs text-gray-500 mb-0.5">Welcome,</p>

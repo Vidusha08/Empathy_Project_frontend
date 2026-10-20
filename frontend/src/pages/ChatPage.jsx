@@ -420,7 +420,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+    <div className="chat-page flex flex-col h-full overflow-hidden">
 
       {/* Chat area */}
       <div className="flex-1 flex flex-col overflow-hidden">

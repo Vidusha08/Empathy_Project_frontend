@@ -10,6 +10,7 @@ import AssessmentPage from "./pages/AssessmentPage";
 import QuizPage from "./pages/QuizPage";
 import ProgressPage from "./pages/ProgressPage";
 import ChatHistoryPage from "./pages/ChatHistoryPage";
+import SettingsPage from "./pages/SettingsPage";
 import Layout from "./components/common/Layout";
 import PrivateRoute from "./components/common/PrivateRoute";
  
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/history" element={<ChatHistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Route>
  

@@ -1,0 +1,149 @@
+.app-main {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.app-shell [class~="bg-indigo-600"] {
+  background-color: var(--app-accent);
+}
+
+.app-shell [class~="text-indigo-600"],
+.app-shell [class~="text-indigo-700"] {
+  color: var(--app-accent);
+}
+
+.app-shell [class~="border-indigo-300"],
+.app-shell [class~="border-indigo-500"] {
+  border-color: var(--app-accent);
+}
+
+.app-shell[data-color-mode="dark"] {
+  color-scheme: dark;
+}
+
+.app-shell[data-color-mode="dark"] .app-topbar {
+  color: #f3f4f6;
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-800"],
+.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-700"],
+.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-600"],
+.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-500"] {
+  color: #e5e7eb;
+}
+
+.app-shell[data-color-mode="dark"] main [class~="bg-white"] {
+  color: #e5e7eb;
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] main [class~="bg-gray-50"],
+.app-shell[data-color-mode="dark"] main [class~="bg-gray-100"] {
+  background-color: #111827;
+}
+
+.app-shell[data-color-mode="dark"] main [class~="text-gray-900"],
+.app-shell[data-color-mode="dark"] main [class~="text-gray-800"],
+.app-shell[data-color-mode="dark"] main [class~="text-gray-700"],
+.app-shell[data-color-mode="dark"] main [class~="text-gray-600"],
+.app-shell[data-color-mode="dark"] main [class~="text-gray-500"] {
+  color: #e5e7eb;
+}
+
+.app-shell[data-color-mode="dark"] main [class~="border-gray-100"],
+.app-shell[data-color-mode="dark"] main [class~="border-gray-200"],
+.app-shell[data-color-mode="dark"] main [class~="border-gray-300"] {
+  border-color: #4b5563;
+}
+
+.app-shell[data-color-mode="dark"] .student-dashboard {
+  color: #e5e7eb;
+  background: transparent;
+}
+
+.app-shell[data-color-mode="dark"] .student-dashboard [class*="text-[#3A342B]"],
+.app-shell[data-color-mode="dark"] .student-dashboard [class*="text-[#6B6255]"],
+.app-shell[data-color-mode="dark"] .student-dashboard [class*="text-[#9B8E7E]"] {
+  color: #e5e7eb;
+}
+
+.app-shell[data-color-mode="dark"] .student-dashboard [class~="bg-white"] {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] .chat-page,
+.app-shell[data-color-mode="dark"] .content-page,
+.app-shell[data-color-mode="dark"] .progress-page,
+.app-shell[data-color-mode="dark"] .history-page {
+  color: #e5e7eb;
+  background: transparent;
+}
+
+.app-shell[data-color-mode="dark"] .content-page,
+.app-shell[data-color-mode="dark"] .progress-page {
+  --progress-ink: #f3f4f6;
+  --progress-muted: #cbd5e1;
+  --progress-line: #4b5563;
+  --progress-panel: #1f2937;
+  --progress-soft: #273449;
+}
+
+.app-shell .content-page,
+.app-shell .progress-page {
+  --progress-accent: var(--app-accent);
+  --progress-accent-dark: var(--app-accent);
+}
+
+.app-shell[data-color-mode="dark"] .content-page__title,
+.app-shell[data-color-mode="dark"] .progress-header h1 {
+  color: #f3f4f6;
+}
+
+.app-shell[data-color-mode="dark"] .content-page__card,
+.app-shell[data-color-mode="dark"] .progress-page .overall-progress-card,
+.app-shell[data-color-mode="dark"] .progress-page .skill-card {
+  color: #e5e7eb;
+  background-color: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] .history-list,
+.app-shell[data-color-mode="dark"] .history-count,
+.app-shell[data-color-mode="dark"] .history-state {
+  color: #e5e7eb;
+  border-color: #4b5563;
+  background-color: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] .history-entry + .history-entry {
+  border-color: #374151;
+}
+
+.app-shell[data-color-mode="dark"] .history-question:hover,
+.app-shell[data-color-mode="dark"] .history-entry[open] .history-question,
+.app-shell[data-color-mode="dark"] .history-response {
+  background-color: #273449;
+}
+
+.app-shell[data-color-mode="dark"] .history-question__content strong,
+.app-shell[data-color-mode="dark"] .history-response p {
+  color: #e5e7eb;
+}
+
+.app-shell[data-background="beach"] .student-dashboard,
+.app-shell[data-background="forest"] .student-dashboard,
+.app-shell[data-background="beach"] .chat-page,
+.app-shell[data-background="forest"] .chat-page,
+.app-shell[data-background="beach"] .content-page,
+.app-shell[data-background="forest"] .content-page,
+.app-shell[data-background="beach"] .progress-page,
+.app-shell[data-background="forest"] .progress-page,
+.app-shell[data-background="beach"] .history-page,
+.app-shell[data-background="forest"] .history-page {
+  background: transparent;
+}

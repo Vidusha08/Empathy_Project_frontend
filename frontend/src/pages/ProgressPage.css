@@ -10,9 +10,7 @@
   box-sizing: border-box;
   padding: clamp(24px, 4vw, 48px);
   color: var(--progress-ink);
-  background:
-    radial-gradient(circle at 92% 0%, rgba(206, 235, 220, 0.55), transparent 34%),
-    #f7f9f8;
+  background: transparent;
   font-family: "Nunito Sans", "Segoe UI", sans-serif;
 }
 

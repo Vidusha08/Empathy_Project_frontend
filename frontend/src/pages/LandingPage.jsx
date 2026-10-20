@@ -281,7 +281,7 @@ export default function LandingPage() {
                   className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
                   Next skill
                 </button>
-                <Link to="/register" className="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl transition-colors">
+                <Link to="/login" className="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl transition-colors">
                   Learn this skill
                 </Link>
               </div>
