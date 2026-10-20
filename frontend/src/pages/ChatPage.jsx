@@ -1,12 +1,14 @@
 //src/pages/ChatPage.jsx
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ChatWindow from "../components/chat/ChatWindow";
+import SuggestedQuestions from "../components/chat/SuggestedQuestions";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
 import { completeItem, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
-import { findNextObjective, idOf, objectiveItems, titleOf } from "../utils/nextObjective";
+import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
 import { Mic, Send } from "lucide-react";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
@@ -18,6 +20,26 @@ function getFirstName(user) {
     if (first) return first;
   }
   return user?.username ?? null;
+}
+
+function fallbackObjectiveQuestions(objective) {
+  const items = Array.isArray(objective?.items) ? objective.items : [];
+  const source = items.find((item) => typeof item?.content === "string" && item.content.trim());
+  const title = titleOf(objective);
+  const topic = (source?.title || source?.content || objective?.content || title || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/(?<=[.!?])\s+/)[0]
+    .slice(0, 72)
+    .replace(/[.,;:]$/, "");
+  if (!topic) return [];
+
+  const objectiveTitle = title || topic;
+  return [
+    `What does the approved SEEK content say about ${topic}?`,
+    `How does ${topic} relate to ${objectiveTitle}?`,
+    `Which part of ${objectiveTitle} would you like to understand better?`,
+  ];
 }
 
 // Chat Input
@@ -95,9 +117,12 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
 // Main Page
 
 export default function ChatPage() {
+  const navigate = useNavigate();
   const [answerStyle, setAnswerStyle] = useState("short");
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [suggestedQuestions, setSuggestedQuestions] = useState([]);
   const recommendationKeys = useRef(new Set());
+  const requestInFlight = useRef(false);
   const user = useAuthStore((state) => state.user);
   const {
     messages,
@@ -125,6 +150,57 @@ export default function ChatPage() {
     addMessage({ id: createId(), role: "user", content, timestamp: ts() });
   };
 
+  const addLearningResponse = (res, introduction = "") => {
+    const learningContext = res.learning_context || res;
+    const skill = learningContext.skill;
+    const learningObjective = learningContext.learning_objective
+      || learningContext.learningObjective;
+    const recommendedActivity = learningContext.recommended_activity
+      || learningContext.recommendedActivity
+      || res.recommendedActivity
+      || null;
+    const progressRecommendation = learningContext.progress_recommendation
+      || learningContext.progressRecommendation;
+    const steps = Array.isArray(res.steps) ? res.steps : [];
+    const hasLearningFlow = steps.length > 0 && skill?.id;
+
+    addMessage({
+      id: createId(),
+      role: "assistant",
+      content: [
+        introduction,
+        res.message || learningContext.message || steps[0]?.content,
+        progressRecommendation,
+      ].filter(Boolean).join("\n\n"),
+      timestamp: ts(),
+      emotion: res.emotion ?? "calm",
+      status: res.status,
+      skill,
+      topic: learningContext.topic,
+      learningObjective,
+      nextIncompleteObjective: learningContext.next_incomplete_objective
+        || learningContext.nextIncompleteObjective,
+      progressRecommendation,
+      recommendedActivity,
+      progressItemId: recommendedActivity?.progress_item_id
+        ?? res.progressItemId
+        ?? null,
+      progressObjectiveId: recommendedActivity?.progress_objective_id
+        ?? res.progressObjectiveId
+        ?? null,
+      progressItemType: recommendedActivity?.progress_item_type
+        ?? res.progressItemType
+        ?? null,
+      sourcePage: learningContext.source_page || learningContext.sourcePage,
+      interactionId: res.interactionId,
+      flowAction: hasLearningFlow ? "learn" : undefined,
+      flowIndex: hasLearningFlow ? 0 : undefined,
+      learningSteps: hasLearningFlow ? steps : undefined,
+    });
+
+    return learningObjective;
+  };
+
   const getNextObjective = async (sourceMessage) => {
     const currentSkillId = sourceMessage.skill?.id
       || sourceMessage.skill?.skill_id
@@ -134,11 +210,50 @@ export default function ChatPage() {
     const currentSkill = await getSkill(currentSkillId);
     const currentObjectiveId = idOf(sourceMessage.learningObjective);
     const currentSkillWithContext = { ...currentSkill, currentObjective: { id: currentObjectiveId } };
-    let currentProgress = null;
-    try {
-      currentProgress = await getProgress(currentSkillId);
-    } catch (error) {
-      console.warn("[chatbot-next-objective] current skill progress unavailable", error);
+    const currentProgress = await getProgress(currentSkillId);
+    const objectiveProgress = currentProgress?.skill?.objectives?.find(
+      (objective) => idOf(objective) === currentObjectiveId,
+    );
+    const missingRequiredItemIds = objectiveProgress?.missing_required_item_ids;
+    if (!currentObjectiveId || objectiveProgress?.completed !== true) {
+      const objective = currentSkill.objectives?.find(
+        (item) => idOf(item) === currentObjectiveId,
+      );
+      const incompleteItems = Array.isArray(missingRequiredItemIds)
+        ? missingRequiredItemIds.map((itemId) => {
+          const item = objective?.items?.find(
+            (candidate) => candidate.item_id === itemId,
+          );
+          const type = item?.type || "learning item";
+          const actionByType = {
+            text: "open and complete the lesson",
+            activity: "complete the activity",
+            practice: "complete the activity",
+            video: "watch the video",
+            quiz: "pass the quiz",
+            reflection: "complete the reflection",
+          };
+          return {
+            id: itemId,
+            title: item?.title || item?.question || itemId,
+            instruction: actionByType[type] || "complete this learning item",
+            type,
+          };
+        })
+        : [];
+      const quizItem = incompleteItems
+        .filter((item) => ["quiz", "assessment"].includes(item.type))
+        .map((incompleteItem) => objective?.items?.find(
+          (item) => item.item_id === incompleteItem.id,
+        ))
+        .find(Boolean);
+      return {
+        objectiveCompleted: false,
+        incompleteItems,
+        objective,
+        quizItem,
+        objectiveProgress,
+      };
     }
 
     const skills = (await getSkills())
@@ -156,92 +271,173 @@ export default function ChatPage() {
       }
     }
 
-    return findNextObjective(currentSkillWithContext, currentProgress, nextSkills);
+    return {
+      objectiveCompleted: true,
+      ...findNextObjective(currentSkillWithContext, currentProgress, nextSkills),
+    };
   };
 
-  const recommendNextObjective = async (sourceMessage) => {
+  const recommendNextObjective = async (sourceMessage, answerWasCorrect) => {
     const recommendationKey = `${sourceMessage.id}:${sourceMessage.learningObjective?.id || sourceMessage.learningObjective?.objective_id || "objective"}`;
     if (recommendationKeys.current.has(recommendationKey)) return;
     recommendationKeys.current.add(recommendationKey);
 
+    const feedback = answerWasCorrect === null
+      ? "Your saved progress has been updated."
+      : answerWasCorrect
+        ? "Correct! Good work checking your understanding."
+        : "Not quite. Review the learning guidance below and keep practising.";
+
+    requestInFlight.current = true;
+    setLoading(true);
+
     try {
       const recommendation = await getNextObjective(sourceMessage);
+      if (!recommendation?.objectiveCompleted) {
+        const objective = recommendation?.objective
+          || sourceMessage.learningObjective;
+        const objectiveTitle = titleOf(objective)
+          || titleOf(sourceMessage.learningObjective)
+          || "This learning objective";
+        const objectiveItems = Array.isArray(objective?.items) ? objective.items : [];
+        const activityMissing = recommendation?.objectiveProgress?.activity_completed !== true;
+        const quizMissing = recommendation?.objectiveProgress?.quiz_passed !== true;
+        const activity = activityMissing && objectiveItems.find(
+          (item) => ["activity", "practice"].includes(item.type),
+        );
+        const quiz = quizMissing && objectiveItems.find(
+          (item) => ["quiz", "assessment"].includes(item.type),
+        );
+        const nextRequiredItem = activity || quiz;
+        const isQuiz = Boolean(quiz && !activity);
+        const itemTitle = nextRequiredItem?.title
+          || nextRequiredItem?.item_id
+          || "the remaining required learning item";
+        const nextStepText = activity
+          ? `Next, complete the approved activity "${itemTitle}".`
+          : quiz
+            ? `Next, pass the required quiz "${itemTitle}".`
+            : "Saved progress still shows this objective as incomplete. Continue with its remaining required learning items.";
+        const requiredActivity = activity
+          ? {
+            ...activity,
+            progress_item_id: activity.item_id,
+            progress_item_type: activity.type,
+            progress_objective_id: idOf(objective),
+          }
+          : null;
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: `${feedback} "${objectiveTitle}" is not complete yet. ${nextStepText}${nextRequiredItem?.content ? `\n\n${nextRequiredItem.content}` : ""}`,
+          timestamp: ts(),
+          skill: recommendation.skill || sourceMessage.skill,
+          learningObjective: objective,
+          objectiveProgress: recommendation.objectiveProgress,
+          ...(isQuiz
+            ? {
+              quizItem: quiz,
+              flowAction: "quiz",
+            }
+            : activity
+              ? {
+                requiredObjectiveItem: true,
+                recommendedActivity: requiredActivity,
+                progressItemId: activity.item_id,
+                progressObjectiveId: idOf(objective),
+                progressItemType: activity.type,
+                flowAction: "complete",
+              }
+              : {}),
+        });
+        return;
+      }
       if (!recommendation?.objective || !idOf(recommendation.objective) || !titleOf(recommendation.objective)) {
         addMessage({
           id: createId(),
           role: "assistant",
-          content: "Great job! You've completed this learning objective. I couldn't find another objective to recommend right now.",
+          content: `${feedback} Your saved progress confirms this objective is complete. I couldn't find another incomplete objective to recommend right now.`,
           timestamp: ts(),
         });
         return;
       }
 
-      addMessage({
-        id: createId(),
-        role: "assistant",
-        content: `Great job! You've completed this learning objective. Would you like to explore the next objective: ${titleOf(recommendation.objective)}?`,
-        timestamp: ts(),
-        flowAction: "objective",
-        skill: recommendation.skill,
-        nextObjective: recommendation.objective,
-        nextObjectiveId: idOf(recommendation.objective),
-      });
+      const targetObjective = recommendation.objective;
+      const fallbackQuestions = fallbackObjectiveQuestions(targetObjective);
+      const targetTitle = titleOf(targetObjective);
+      const targetObjectiveId = idOf(targetObjective);
+
+      try {
+        const response = await sendMessage(
+          `I'd like to learn about ${targetTitle}.`,
+          answerStyle,
+        );
+        const responseContext = response.learning_context || response;
+        const responseObjective = responseContext.learning_objective
+          || responseContext.learningObjective;
+        if (idOf(responseObjective) !== targetObjectiveId) {
+          throw new Error("The learning response did not match the next incomplete objective.");
+        }
+
+        const responseQuestions = Array.isArray(response.suggested_questions)
+          ? response.suggested_questions
+          : [];
+        setSuggestedQuestions(
+          responseQuestions.length ? responseQuestions : fallbackQuestions,
+        );
+        addLearningResponse(response, feedback);
+      } catch (error) {
+        console.error("[chatbot-next-objective] guidance generation failed", error);
+        setSuggestedQuestions(fallbackQuestions);
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: `${feedback} Your next incomplete objective is "${targetTitle}". ${targetObjective.content || "Start with the approved SEEK content for this objective."}`,
+          timestamp: ts(),
+          skill: recommendation.skill,
+          learningObjective: targetObjective,
+          step: {
+            type: "objective",
+            content: targetObjective.content || `Approved learning objective: ${targetTitle}.`,
+          },
+        });
+      }
     } catch (error) {
       console.error("[chatbot-next-objective] recommendation failed", error);
       addMessage({
         id: createId(),
         role: "assistant",
-        content: "Great job! You've completed this learning objective. I couldn't load the next objective right now, but you can keep chatting whenever you're ready.",
+        content: `${feedback} I couldn't verify your saved progress or load the next objective right now. You can keep chatting whenever you're ready.`,
         timestamp: ts(),
       });
+    } finally {
+      requestInFlight.current = false;
+      setLoading(false);
     }
   };
 
-  const handleSend = async (text, answerStyle) => {
-    addUserMessage(text);
+  const handleSend = async (text, style = answerStyle) => {
+    const question = text?.trim();
+    if (!question || requestInFlight.current || isLoading) return;
 
+    requestInFlight.current = true;
+    setSuggestedQuestions([]);
+    addUserMessage(question);
     setLoading(true);
 
     try {
-      const res = await sendMessage(text, answerStyle);
-      const learningContext = res.learning_context || res;
-      const skill = learningContext.skill;
-      const learningObjective = learningContext.learning_objective || learningContext.learningObjective;
-      const recommendedActivity = learningContext.recommended_activity
-        || learningContext.recommendedActivity
-        || res.recommendedActivity
-        || null;
-      const progressRecommendation = learningContext.progress_recommendation || learningContext.progressRecommendation;
-      const steps = Array.isArray(res.steps) ? res.steps : [];
-
-      const firstStep = steps[0];
-      const hasLearningFlow = steps.length > 0 && skill?.id;
-
-      addMessage({
-        id:        createId(),
-        role:      "assistant",
-        content:   [res.message || learningContext.message || firstStep?.content, progressRecommendation]
-          .filter(Boolean)
-          .join("\n\n"),
-        timestamp: ts(),
-        emotion:   res.emotion ?? "calm",
-        status:    res.status,
-        skill,
-        topic:     learningContext.topic,
-        learningObjective,
-        nextIncompleteObjective: learningContext.next_incomplete_objective || learningContext.nextIncompleteObjective,
-        progressRecommendation,
-        recommendedActivity,
-        progressItemId: recommendedActivity?.progress_item_id ?? res.progressItemId ?? null,
-        progressObjectiveId: recommendedActivity?.progress_objective_id ?? res.progressObjectiveId ?? null,
-        progressItemType: recommendedActivity?.progress_item_type ?? res.progressItemType ?? null,
-        sourcePage: learningContext.source_page || learningContext.sourcePage,
-        interactionId: res.interactionId,
-        flowAction: hasLearningFlow ? "learn" : undefined,
-        flowIndex: hasLearningFlow ? 0 : undefined,
-        learningSteps: hasLearningFlow ? steps : undefined,
-      });
+      const res = await sendMessage(question, style);
+      const questions = Array.isArray(res.suggested_questions)
+        ? res.suggested_questions
+        : [];
+      setSuggestedQuestions([...new Set(
+        questions
+          .filter((question) => typeof question === "string" && question.trim())
+          .map((question) => question.trim()),
+      )].slice(0, 4));
+      addLearningResponse(res);
     } catch (err) {
+      setSuggestedQuestions([]);
       const isUnauth = err?.response?.status === 401;
       addMessage({
         id:        createId(),
@@ -253,16 +449,53 @@ export default function ChatPage() {
         emotion:   "calm",
       });
     } finally {
+      requestInFlight.current = false;
       setLoading(false);
     }
   };
 
   const handleFlowMessage = async (text, action, sourceMessage) => {
-    if (!sourceMessage || sourceMessage.flowHandled) return;
+    if (
+      !sourceMessage
+      || sourceMessage.flowHandled
+      || requestInFlight.current
+      || isLoading
+    ) return;
 
     markMessageHandled(sourceMessage.id);
     setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
+    if (action === "objective") {
+      const objectiveTitle = titleOf(sourceMessage.nextObjective);
+      await handleSend(
+        objectiveTitle
+          ? `I'd like to learn about ${objectiveTitle}.`
+          : "I'd like to explore the next learning objective.",
+        answerStyle,
+      );
+      return;
+    }
     addUserMessage(text);
+
+    if (action === "quiz") {
+      const skillId = sourceMessage.skill?.id
+        || sourceMessage.skill?.skill_id
+        || sourceMessage.skill?.chapter_id;
+      const quizItem = sourceMessage.quizItem;
+      if (!skillId || !quizItem?.item_id) {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: "I could not find this objective's authored quiz. Its completion requirements have not been changed.",
+          timestamp: ts(),
+        });
+        return;
+      }
+      navigate(
+        `/quiz?skill=${encodeURIComponent(skillId)}&item=${encodeURIComponent(quizItem.item_id)}`,
+        { state: { quiz: quizItem, skillId } },
+      );
+      return;
+    }
 
     if (text === "No") {
       addMessage({
@@ -287,7 +520,6 @@ export default function ChatPage() {
     const flowSteps = sourceMessage.learningSteps || [];
     const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
     const nextStep = flowSteps[nextIndex];
-
     if (action === "complete") {
       if (!skillId || !itemId || !itemType) {
         console.error("[chatbot-progress] missing completion metadata", {
@@ -323,6 +555,36 @@ export default function ChatPage() {
         });
         const completionResponse = await completeItem(skillId, itemId, itemType, "chatbot");
         console.info("[chatbot-progress] completion response", completionResponse);
+        if (!completionResponse.objective_completed && !sourceMessage.requiredObjectiveItem) {
+          const missingItems = completionResponse.missing_completion_items || [];
+          const missingQuiz = missingItems.find(
+            (item) => ["quiz", "assessment"].includes(item.type),
+          );
+          const missingActivity = missingItems.find(
+            (item) => ["activity", "practice"].includes(item.type),
+          );
+          const missingConditions = completionResponse.missing_completion_conditions || [];
+          const objectiveTitle = titleOf(sourceMessage.learningObjective)
+            || "This learning objective";
+          const remaining = missingConditions.includes("quiz")
+            ? ` The activity is saved; you still need to pass the quiz${missingQuiz?.title ? ` "${missingQuiz.title}"` : ""}.`
+            : missingConditions.includes("activity")
+              ? ` The quiz is saved; you still need to complete the activity${missingActivity?.title ? ` "${missingActivity.title}"` : ""}.`
+              : " Saved progress does not yet confirm both required conditions.";
+          addMessage({
+            id: createId(),
+            role: "assistant",
+            content: `"${objectiveTitle}" is not complete yet.${remaining}`,
+            timestamp: ts(),
+            ...(missingQuiz
+              ? {
+                flowAction: "quiz",
+                skill: sourceMessage.skill,
+                quizItem: missingQuiz,
+              }
+              : {}),
+          });
+        }
       } catch (error) {
         console.error("[chatbot-progress] completion failed", {
           action,
@@ -345,27 +607,8 @@ export default function ChatPage() {
       }
     }
 
-    if (action === "objective") {
-      const objective = sourceMessage.nextObjective;
-      const items = objectiveItems(objective);
-      const firstItem = items[0];
-      addMessage({
-        id: createId(),
-        role: "assistant",
-        content: [
-          `Let's begin with "${titleOf(objective)}".`,
-          firstItem?.content || firstItem?.description,
-        ].filter(Boolean).join("\n\n"),
-        timestamp: ts(),
-        skill: sourceMessage.skill,
-        learningObjective: objective,
-        nextObjectiveId: sourceMessage.nextObjectiveId,
-        step: {
-          type: "objective",
-          content: objective.content || objective.description || titleOf(objective),
-        },
-        learningSteps: items,
-      });
+    if (sourceMessage.requiredObjectiveItem) {
+      await recommendNextObjective(sourceMessage, null);
       return;
     }
 
@@ -375,15 +618,18 @@ export default function ChatPage() {
       const answer = ["true", "yes"].includes(text.toLowerCase());
       const result = correctAnswer === undefined || answer === correctAnswer;
 
-      addMessage({
-        id: createId(),
-        role: "assistant",
-        content: result
-          ? "Correct! Great job. Let's continue learning."
-          : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
-        timestamp: ts(),
-      });
-      if (result && action === "practice") await recommendNextObjective(sourceMessage);
+      if (action === "practice") {
+        await recommendNextObjective(sourceMessage, result);
+      } else {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: result
+            ? "Correct! Great job. Let's continue learning."
+            : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
+          timestamp: ts(),
+        });
+      }
       return;
     }
 
@@ -439,6 +685,11 @@ export default function ChatPage() {
             isLoading={isLoading}
             onFlowMessage={handleFlowMessage}
             selectedAnswers={selectedAnswers}
+          />
+          <SuggestedQuestions
+            questions={suggestedQuestions}
+            isLoading={isLoading}
+            onSelect={(question) => handleSend(question)}
           />
         </div>
 

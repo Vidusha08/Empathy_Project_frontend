@@ -101,7 +101,12 @@ function StepContent({ step, skill }) {
   ) : null;
 }
 
-export default function ChatMessage({ message, onFlowMessage, selectedAnswers }) {
+export default function ChatMessage({
+  message,
+  isLoading,
+  onFlowMessage,
+  selectedAnswers,
+}) {
   const { role, content, timestamp, flowAction, step, skill, flowHandled } = message;
   const isUser = role === "user";
   const selectedAnswer = selectedAnswers?.[message.id];
@@ -130,7 +135,7 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
           {flowAction === "learn" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 isChosen={selectedAnswer === "Yes"}
                 hasChosen={hasChosen}
                 isAnswer
@@ -139,7 +144,7 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
                 <Check size={14} />Yes
               </ActionButton>
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 secondary
                 isChosen={selectedAnswer === "No"}
                 hasChosen={hasChosen}
@@ -155,7 +160,7 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
           {flowAction === "activity" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 isChosen={selectedAnswer === "Yes"}
                 hasChosen={hasChosen}
                 isAnswer
@@ -164,7 +169,7 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
                 <Check size={14} />Yes
               </ActionButton>
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 secondary
                 isChosen={selectedAnswer === "No"}
                 hasChosen={hasChosen}
@@ -177,19 +182,25 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
           )}
 
           {flowAction === "complete" && (
-            <ActionButton disabled={flowHandled} onClick={() => emit("I've completed it.")}><CheckCircle2 size={14} />I&apos;ve completed it</ActionButton>
+            <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("I've completed it.")}><CheckCircle2 size={14} />I&apos;ve completed it</ActionButton>
           )}
 
           {flowAction === "objective" && (
-            <ActionButton disabled={flowHandled} onClick={() => emit("Explore next objective")}>
+            <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("Explore next objective")}>
               <Sparkles size={14} />Explore next objective
+            </ActionButton>
+          )}
+
+          {flowAction === "quiz" && (
+            <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("Open the objective quiz")}>
+              <CheckCircle2 size={14} />Open {message.quizItem?.title || "objective quiz"}
             </ActionButton>
           )}
 
           {flowAction === "practice" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "Yes" : "True")}
                 hasChosen={hasChosen}
                 isAnswer
@@ -198,7 +209,7 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
                 <Check size={14} />{step?.question_type === "yes_no" ? "Yes" : "True"}
               </ActionButton>
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 secondary
                 isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "No" : "False")}
                 hasChosen={hasChosen}

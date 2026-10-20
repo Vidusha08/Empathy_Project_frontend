@@ -27,6 +27,11 @@ export async function sendMessage(question, answerStyle = "short") {
     progressItemType: context.recommended_activity?.progress_item_type ?? null,
     sourcePage: context.source_page ?? null,
     steps: Array.isArray(data.steps) ? data.steps : [],
+    suggested_questions: Array.isArray(data.suggested_questions)
+      ? data.suggested_questions
+        .filter((question) => typeof question === "string" && question.trim())
+        .map((question) => question.trim())
+      : [],
     interactionId: data.interaction_id ?? null,
   };
 }
