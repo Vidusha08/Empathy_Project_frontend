@@ -1,8 +1,11 @@
 // src/components/common/Topbar.jsx
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
+import { useSettingsStore } from "../../store/settingsStore";
+import beachSound from "../../assets/audio/beach_sound.mp3";
+import forestSound from "../../assets/audio/forest_sound.mp3";
 //import { useAuth } from "../../hooks/useAuth";
 import { getSkills } from "../../api/contentApi";
 import EditProfileModal from "./EditProfileModal";
@@ -100,15 +103,82 @@ function ContentMenu() {
   );
 }
 
-// Sound toggle — icon-only (mute / unmute — background music hook-up comes later)
+// Sound toggle — loops the ambient audio for the selected background scene.
 
 function SoundToggle() {
   const [muted, setMuted] = useState(true);
+  const [playbackError, setPlaybackError] = useState("");
+  const backgroundScene = useSettingsStore((state) => state.backgroundScene);
+  const audioRef = useRef(null);
+  const mutedRef = useRef(muted);
+  const playbackAttemptRef = useRef(0);
+
+  const playScene = useCallback((scene) => {
+    const audio = audioRef.current ?? new Audio();
+    audioRef.current = audio;
+    audio.loop = true;
+    audio.volume = 0.4;
+
+    const sound = {
+      beach: beachSound,
+      forest: forestSound,
+    }[scene];
+
+    if (!sound) {
+      playbackAttemptRef.current += 1;
+      audio.pause();
+      audio.removeAttribute("src");
+      delete audio.dataset.scene;
+      audio.load();
+      setPlaybackError("");
+      return;
+    }
+
+    if (audio.dataset.scene !== scene) {
+      audio.pause();
+      audio.src = sound;
+      audio.dataset.scene = scene;
+      audio.currentTime = 0;
+    }
+
+    const attempt = ++playbackAttemptRef.current;
+    setPlaybackError("");
+    audio.play().catch(() => {
+      if (attempt === playbackAttemptRef.current) {
+        setPlaybackError("Audio could not be played. Select the speaker to try again.");
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!mutedRef.current) playScene(backgroundScene);
+  }, [backgroundScene, playScene]);
+
+  useEffect(() => () => {
+    playbackAttemptRef.current += 1;
+    audioRef.current?.pause();
+  }, []);
+
+  const toggleSound = () => {
+    const nextMuted = !mutedRef.current;
+    mutedRef.current = nextMuted;
+    setMuted(nextMuted);
+
+    if (nextMuted) {
+      playbackAttemptRef.current += 1;
+      audioRef.current?.pause();
+      setPlaybackError("");
+    } else {
+      playScene(backgroundScene);
+    }
+  };
 
   return (
     <button
-      onClick={() => setMuted((m) => !m)}
-      title={muted ? "Unmute background music" : "Mute background music"}
+      onClick={toggleSound}
+      aria-label={playbackError || (muted ? "Unmute ambient sounds" : "Mute ambient sounds")}
+      aria-pressed={!muted}
+      title={playbackError || (muted ? "Unmute ambient sounds" : "Mute ambient sounds")}
       className="flex items-center justify-center w-9 h-9 rounded-xl text-gray-600 hover:bg-gray-100 transition-all"
     >
       {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}

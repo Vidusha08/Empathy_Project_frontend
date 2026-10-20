@@ -424,7 +424,7 @@ export default function ChatPage() {
 
       {/* Chat area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="px-6 pt-5 pb-2 flex-shrink-0">
+        <div className="chat-page__header px-6 pt-5 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">💬</span>
             <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru</h1>
