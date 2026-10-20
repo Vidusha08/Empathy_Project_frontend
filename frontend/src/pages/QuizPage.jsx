@@ -54,6 +54,12 @@ function QuizPage() {
 
   const questions = useMemo(() => listOf(quiz?.questions), [quiz]);
   const quizId = itemIdOf(quiz) || itemId;
+  const passingScore = Number.isFinite(quiz?.passing_score)
+    ? quiz.passing_score
+    : 80;
+  const missingActivity = result?.missingCompletionItems?.find(
+    (item) => ["activity", "practice"].includes(item.type),
+  );
 
   const selectAnswer = (questionIndex, answer) => {
     setAnswers((current) => ({ ...current, [questionIndex]: answer }));
@@ -66,10 +72,7 @@ function QuizPage() {
     const correct = questions.reduce((count, question, index) =>
       count + (answers[index] === answerOf(question) ? 1 : 0), 0);
     const score = Math.round((correct / questions.length) * 100);
-    setResult({ correct, total: questions.length, score, completed: false });
     setError("");
-
-    if (score < 80) return;
 
     if (!skillId || !quizId) {
       setError("This quiz is missing a stable skill or item ID.");
@@ -78,8 +81,24 @@ function QuizPage() {
 
     try {
       setSubmitting(true);
-      await progressApi.completeItem(skillId, quizId, "quiz", "skills_page", score);
-      setResult((current) => ({ ...current, completed: true }));
+      const saved = await progressApi.completeItem(
+        skillId,
+        quizId,
+        "quiz",
+        "skills_page",
+        score,
+      );
+      setResult({
+        correct,
+        total: questions.length,
+        score,
+        completed: saved.quiz_passed === true,
+        objectiveCompleted: saved.objective_completed === true,
+        completedObjective: saved.completed_objective,
+        nextObjective: saved.next_incomplete_objective,
+        missingConditions: saved.missing_completion_conditions || [],
+        missingCompletionItems: saved.missing_completion_items || [],
+      });
     } catch (submitError) {
       setError(submitError?.data?.error || submitError.message || "Unable to save quiz progress.");
     } finally {
@@ -111,14 +130,30 @@ function QuizPage() {
         <div className="mt-6 rounded-xl border p-4" role="status">
           <strong>Score: {result.score}% ({result.correct}/{result.total})</strong>
           {result.completed
-            ? <p className="text-green-700 mt-1">Quiz completed and progress saved.</p>
-            : result.score < 80
-              ? <p className="text-amber-700 mt-1">You need at least 80% to complete this quiz.</p>
+            ? result.objectiveCompleted
+              ? (
+                <div className="mt-1 text-green-700">
+                  <p>{result.completedObjective?.title || "Learning objective"} completed. Both its activity and quiz are saved.</p>
+                  {result.nextObjective?.title
+                    ? <p className="mt-1">Next objective: {result.nextObjective.title}.</p>
+                    : <p className="mt-1">There are no remaining objectives in this skill.</p>}
+                </div>
+              )
+              : (
+                  <p className="mt-1 text-amber-700">
+                    Quiz passed and saved.{" "}
+                    {missingActivity?.title
+                      ? `Complete the activity "${missingActivity.title}" to finish this objective.`
+                      : "Complete the objective's approved activity to finish this objective."}
+                  </p>
+                )
+            : result.score < passingScore
+              ? <p className="text-amber-700 mt-1">Your attempt was saved. You need at least {passingScore}% to pass this quiz.</p>
               : null}
         </div>
       )}
 
-      {!result?.completed && (
+      {!result?.completed && questions.length > 0 && (
         <form onSubmit={submitQuiz} className="mt-6 space-y-6">
           {questions.map((question, index) => (
             <fieldset key={question.question_id || index} className="rounded-xl border p-4">
@@ -145,7 +180,13 @@ function QuizPage() {
         </form>
       )}
 
-      {result && !result.completed && result.score < 80 && (
+      {questions.length === 0 && (
+        <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800" role="status">
+          This curriculum quiz does not yet contain any questions, so it cannot be completed.
+        </p>
+      )}
+
+      {result && !result.completed && result.score < passingScore && (
         <button type="button" onClick={retry} className="mt-4 px-4 py-2 rounded-lg border">
           Retry quiz
         </button>

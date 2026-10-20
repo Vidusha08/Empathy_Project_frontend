@@ -3,11 +3,12 @@ const listOf = (value) => (Array.isArray(value) ? value : []);
 export const idOf = (item) =>
   typeof item === "string"
     ? item
-    : item?.skill_id
+    : item?.objective_id
+      || item?.objectiveId
+      || item?.skill_id
       || item?.chapter_id
-      || item?.objective_id
       || item?.id
-      || item?.objectiveId;
+      || item?.skillId;
 
 export const titleOf = (item) =>
   typeof item === "string"
@@ -21,13 +22,20 @@ export const titleOf = (item) =>
 const objectivesOf = (skill) =>
   listOf(skill?.objectives || skill?.learning_objectives || skill?.learningObjectives);
 
-const completedObjectiveIdsOf = (progress) => new Set(
-  listOf(
+const completedObjectiveIdsOf = (progress) => {
+  const completedIds = listOf(
     progress?.completed_objective_ids
       || progress?.completed_objectives
       || progress?.completedObjectives,
-  ).map((item) => (typeof item === "object" ? idOf(item) : item)).filter(Boolean),
-);
+  ).map((item) => (typeof item === "object" ? idOf(item) : item));
+  const completedFromSummary = listOf(
+    progress?.skill?.objectives || progress?.objectives,
+  )
+    .filter((objective) => objective?.completed === true)
+    .map(idOf);
+
+  return new Set([...completedIds, ...completedFromSummary].filter(Boolean));
+};
 
 const isCompleted = (objective, progress) => {
   const objectiveId = idOf(objective);
