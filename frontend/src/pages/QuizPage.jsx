@@ -118,9 +118,11 @@ function QuizPage() {
 
   return (
     <main className="p-6 max-w-3xl mx-auto">
-      <Link to="/content" className="text-indigo-600">← Back to content</Link>
-      <h1 className="text-2xl font-bold mt-4">{quiz.title || "Quiz"}</h1>
-      {quiz.description || quiz.content ? <p className="mt-2 text-gray-600">{quiz.description || quiz.content}</p> : null}
+      <header className="quiz-page__header mb-6">
+        <Link to="/content" className="text-indigo-600">← Back to content</Link>
+        <h1 className="text-2xl font-bold mt-4">{quiz.title || "Quiz"}</h1>
+        {quiz.description || quiz.content ? <p className="mt-2 text-gray-600">{quiz.description || quiz.content}</p> : null}
+      </header>
 
       {error && <p className="mt-4 text-red-600" role="alert">{error}</p>}
 

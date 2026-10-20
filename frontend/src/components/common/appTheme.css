@@ -19,6 +19,30 @@
   border-color: var(--app-accent);
 }
 
+.app-shell main .student-dashboard__header,
+.app-shell main .admin-dashboard__header,
+.app-shell main .quiz-page__header,
+.app-shell main .chat-page__header,
+.app-shell main .settings-page__header,
+.app-shell main .content-page__header,
+.app-shell main .skill-detail__hero,
+.app-shell main .progress-header,
+.app-shell main .history-header {
+  box-sizing: border-box;
+  padding: 18px 20px;
+  border: 1px solid #e8e1d7;
+  border-radius: 16px;
+  background: #f6f2ec;
+}
+
+.app-shell main .student-dashboard__quick-action {
+  color: #3a342b;
+}
+
+.app-shell main .quiz-page__header {
+  color: #202938;
+}
+
 .app-shell[data-color-mode="dark"] {
   color-scheme: dark;
 }
@@ -75,6 +99,63 @@
 .app-shell[data-color-mode="dark"] .student-dashboard [class~="bg-white"] {
   border-color: #374151;
   background-color: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] main .student-dashboard__header,
+.app-shell[data-color-mode="dark"] main .admin-dashboard__header,
+.app-shell[data-color-mode="dark"] main .quiz-page__header,
+.app-shell[data-color-mode="dark"] main .chat-page__header,
+.app-shell[data-color-mode="dark"] main .settings-page__header,
+.app-shell[data-color-mode="dark"] main .content-page__header,
+.app-shell[data-color-mode="dark"] main .skill-detail__hero,
+.app-shell[data-color-mode="dark"] main .progress-header,
+.app-shell[data-color-mode="dark"] main .history-header {
+  border-color: #374151;
+  background: #1f2937;
+}
+
+.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action {
+  border-color: #374151;
+  background: #1f2937;
+  color: #f3f4f6;
+}
+
+.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action h3,
+.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action p {
+  color: #e5e7eb;
+}
+
+.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action > div > span {
+  color: #ddd6fe;
+  background: #374151;
+}
+
+.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action--chat button {
+  border: 1px solid #6d5bd0;
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action--content button {
+  border-color: #6b7280;
+  background: #374151;
+  color: #f3f4f6;
+}
+
+.app-shell[data-color-mode="dark"] main .history-heading h1 {
+  color: #f3f4f6;
+}
+
+.app-shell[data-color-mode="dark"] main .history-heading p {
+  color: #cbd5e1;
+}
+
+.app-shell[data-color-mode="dark"] main .quiz-page__header {
+  color: #f3f4f6;
+}
+
+.app-shell[data-color-mode="dark"] main .quiz-page__header p {
+  color: #cbd5e1;
 }
 
 .app-shell[data-color-mode="dark"] .chat-page,

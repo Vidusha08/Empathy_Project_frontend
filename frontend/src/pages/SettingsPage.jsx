@@ -105,7 +105,7 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
-        <label className="settings-color-picker">
+        {/*<label className="settings-color-picker">
           <span>
             <strong>Background color</strong>
             <small>Used when the Default background is selected.</small>
@@ -119,7 +119,7 @@ export default function SettingsPage() {
               onChange={(event) => setBackgroundColor(event.target.value)}
             />
           </span>
-        </label>
+        </label>*/}
       </section>
 
       <section className="settings-card settings-card--future" aria-label="More settings coming soon">
@@ -127,12 +127,12 @@ export default function SettingsPage() {
           <span className="settings-card__icon"><UserRound size={19} /></span>
           <div>
             <h2>More ways to personalize</h2>
-            <p>Character and sound options are planned for a future update.</p>
+            <p>Character and more other options are planned for a future update.</p>
           </div>
         </div>
         <div className="settings-future-options">
           <span><UserRound size={17} /> Character <small>Coming soon</small></span>
-          <span><Headphones size={17} /> Sound <small>Coming soon</small></span>
+          {/* <span><Headphones size={17} /> Sound <small>Coming soon</small></span> */}
         </div>
       </section>
     </div>
