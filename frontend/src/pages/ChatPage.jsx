@@ -277,7 +277,11 @@ export default function ChatPage() {
 
     requestInFlight.current = true;
     setLoading(true);
-    setSuggestedQuestions([]);
+    setSuggestedQuestions((current) => answerWasCorrect === null
+      ? []
+      : current.length
+        ? current
+        : fallbackObjectiveQuestions(sourceMessage.learningObjective));
 
     try {
       const recommendation = await getNextObjective(sourceMessage);
@@ -450,7 +454,13 @@ export default function ChatPage() {
 
     markMessageHandled(sourceMessage.id);
     setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
-    setSuggestedQuestions([]);
+    if (action === "practice") {
+      setSuggestedQuestions((current) => current.length
+        ? current
+        : fallbackObjectiveQuestions(sourceMessage.learningObjective));
+    } else {
+      setSuggestedQuestions([]);
+    }
     if (action === "objective") {
       const objectiveTitle = titleOf(sourceMessage.nextObjective);
       await handleSend(
