@@ -112,6 +112,12 @@ export default function ChatMessage({
   const selectedAnswer = selectedAnswers?.[message.id];
   const hasChosen = Boolean(selectedAnswer);
   const emit = (text) => onFlowMessage?.(text, flowAction, message);
+  const normalizedQuestionType = String(step?.question_type ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/([a-z])([A-Z])/g, "$1_$2");
+  const isYesNoQuestion = normalizedQuestionType === "yes_no" || normalizedQuestionType === "yesno";
 
   if (isUser) {
     return (
@@ -201,22 +207,22 @@ export default function ChatMessage({
             <div className="mt-4 flex gap-2">
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
-                isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "Yes" : "True")}
+                isChosen={selectedAnswer === (isYesNoQuestion ? "Yes" : "True")}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit(step?.question_type === "yes_no" ? "Yes" : "True")}
+                onClick={() => emit(isYesNoQuestion ? "Yes" : "True")}
               >
-                <Check size={14} />{step?.question_type === "yes_no" ? "Yes" : "True"}
+                <Check size={14} />{isYesNoQuestion ? "Yes" : "True"}
               </ActionButton>
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
                 secondary
-                isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "No" : "False")}
+                isChosen={selectedAnswer === (isYesNoQuestion ? "No" : "False")}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit(step?.question_type === "yes_no" ? "No" : "False")}
+                onClick={() => emit(isYesNoQuestion ? "No" : "False")}
               >
-                <X size={14} />{step?.question_type === "yes_no" ? "No" : "False"}
+                <X size={14} />{isYesNoQuestion ? "No" : "False"}
               </ActionButton>
             </div>
           )}
