@@ -11,42 +11,30 @@ export default function SuggestedQuestions({
       .map((question) => question.trim())
   )].slice(0, 4);
 
-  if (uniqueQuestions.length === 0 && !isLoading) return null;
+  if (isLoading || uniqueQuestions.length === 0) return null;
 
   return (
     <section
       aria-label="Suggested questions"
-      className="flex flex-shrink-0 justify-end border-t border-gray-100 px-3 py-2 sm:px-5"
+      className="flex justify-start px-4 py-3"
     >
-      <div className="w-full sm:max-w-[85%]">
-        <p className="mb-2 flex items-center justify-end gap-1.5 text-xs font-semibold text-indigo-700">
+      <div className="w-full sm:max-w-[72%]">
+        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-indigo-700">
           <Sparkles size={14} aria-hidden="true" />
           Suggested questions
         </p>
-        {uniqueQuestions.length === 0 ? (
-          <p className="text-right text-xs text-gray-500" role="status">
-            Updating suggestions…
-          </p>
-        ) : (
-          <div className="flex flex-wrap justify-end gap-2">
-            {uniqueQuestions.map((question) => (
-              <button
-                key={question}
-                type="button"
-                disabled={isLoading}
-                onClick={() => onSelect?.(question)}
-                className="max-w-full rounded-full border border-indigo-100 bg-indigo-50 px-3 py-2 text-left text-xs text-indigo-800 transition-colors hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-[75%]"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        )}
-        {isLoading && uniqueQuestions.length > 0 && (
-          <p className="mt-2 text-right text-xs text-gray-500" role="status">
-            Updating suggestions…
-          </p>
-        )}
+        <div className="flex flex-col gap-2">
+          {uniqueQuestions.map((question) => (
+            <button
+              key={question}
+              type="button"
+              onClick={() => onSelect?.(question)}
+              className="w-full max-w-full whitespace-normal break-words rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-left text-sm leading-5 text-indigo-800 transition-colors hover:bg-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600"
+            >
+              {question}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );

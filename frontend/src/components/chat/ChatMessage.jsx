@@ -16,12 +16,14 @@ function ActionButton({
   isChosen = false,
   hasChosen = false,
   isAnswer = false,
+  ariaLabel,
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition-colors ${
         isChosen
           ? "bg-indigo-600 text-white"
@@ -197,19 +199,14 @@ export default function ChatMessage({
             </ActionButton>
           )}
 
-          {flowAction === "quiz" && (
-            <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("Open the objective quiz")}>
-              <CheckCircle2 size={14} />Open {message.quizItem?.title || "objective quiz"}
-            </ActionButton>
-          )}
-
           {flowAction === "practice" && (
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-3" role="group" aria-label={isYesNoQuestion ? "Yes or no answer" : "True or false answer"}>
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
                 isChosen={selectedAnswer === (isYesNoQuestion ? "Yes" : "True")}
                 hasChosen={hasChosen}
                 isAnswer
+                ariaLabel={isYesNoQuestion ? "Answer Yes" : "Answer True"}
                 onClick={() => emit(isYesNoQuestion ? "Yes" : "True")}
               >
                 <Check size={14} />{isYesNoQuestion ? "Yes" : "True"}
@@ -220,6 +217,7 @@ export default function ChatMessage({
                 isChosen={selectedAnswer === (isYesNoQuestion ? "No" : "False")}
                 hasChosen={hasChosen}
                 isAnswer
+                ariaLabel={isYesNoQuestion ? "Answer No" : "Answer False"}
                 onClick={() => emit(isYesNoQuestion ? "No" : "False")}
               >
                 <X size={14} />{isYesNoQuestion ? "No" : "False"}

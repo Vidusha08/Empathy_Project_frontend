@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ChatWindow from "../components/chat/ChatWindow";
-import SuggestedQuestions from "../components/chat/SuggestedQuestions";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
@@ -290,6 +289,7 @@ export default function ChatPage() {
 
     requestInFlight.current = true;
     setLoading(true);
+    setSuggestedQuestions([]);
 
     try {
       const recommendation = await getNextObjective(sourceMessage);
@@ -350,6 +350,7 @@ export default function ChatPage() {
               }
               : {}),
         });
+        setSuggestedQuestions(fallbackObjectiveQuestions(objective));
         return;
       }
       if (!recommendation?.objective || !idOf(recommendation.objective) || !titleOf(recommendation.objective)) {
@@ -464,6 +465,7 @@ export default function ChatPage() {
 
     markMessageHandled(sourceMessage.id);
     setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
+    setSuggestedQuestions([]);
     if (action === "objective") {
       const objectiveTitle = titleOf(sourceMessage.nextObjective);
       await handleSend(
@@ -685,11 +687,8 @@ export default function ChatPage() {
             isLoading={isLoading}
             onFlowMessage={handleFlowMessage}
             selectedAnswers={selectedAnswers}
-          />
-          <SuggestedQuestions
-            questions={suggestedQuestions}
-            isLoading={isLoading}
-            onSelect={(question) => handleSend(question)}
+            suggestedQuestions={suggestedQuestions}
+            onSuggestedQuestionSelect={(question) => handleSend(question)}
           />
         </div>
 
