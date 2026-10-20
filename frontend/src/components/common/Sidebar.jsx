@@ -1,6 +1,5 @@
 //src/components/common/Sidebar.jsx
-import { NavLink, useNavigate } from "react-router-dom";
-import { createPortal } from "react-dom";
+import { NavLink } from "react-router-dom";
 import {
   MessageSquare,
   BookOpen,
@@ -9,12 +8,11 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  UserCog,
   BarChart2,
   LayoutDashboardIcon,
 } from "lucide-react";
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useState } from "react";
+import { themeOptions, useSettingsStore } from "../../store/settingsStore";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, path: "/dashboard" },
@@ -22,50 +20,20 @@ const navItems = [
   { label: "Content", icon: BookOpen, path: "/content" },
   { label: "Progress", icon: BarChart2, path: "/progress" },
   { label: "Chat History", icon: History, path: "/history" },
+  { label: "Settings", icon: Settings, path: "/settings" },
 ];
-
-// Hook: close a popover when clicking outside it
-function useOnClickOutside(refs, handler) {
-  useEffect(() => {
-    const listener = (e) => {
-      const clickedInside = refs.some(
-        (ref) => ref.current && ref.current.contains(e.target)
-      );
-      if (clickedInside) return;
-      handler();
-    };
-    document.addEventListener("mousedown", listener);
-    return () => document.removeEventListener("mousedown", listener);
-  }, [refs, handler]);
-}
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-  const navigate = useNavigate();
-
-  const buttonRef = useRef(null);
-  const menuRef = useRef(null);
-  useOnClickOutside([buttonRef, menuRef], () => setSettingsOpen(false));
-
-  // Recalculate popover position whenever it opens (escapes overflow-hidden via portal)
-  useLayoutEffect(() => {
-    if (settingsOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setMenuPos({
-        top: rect.bottom + 8,
-        left: rect.left,
-      });
-    }
-  }, [settingsOpen]);
+  const theme = useSettingsStore((state) => state.theme);
+  const activeTheme = themeOptions.find((option) => option.id === theme) ?? themeOptions[0];
 
   return (
     <aside
-      className={`relative flex flex-col h-screen bg-[#1a237e] text-white transition-all duration-300 ${
+      className={`relative flex flex-col h-screen text-white transition-all duration-300 ${
         collapsed ? "w-16" : "w-56"
       }`}
-      style={{ minWidth: collapsed ? "4rem" : "14rem" }}
+      style={{ minWidth: collapsed ? "4rem" : "14rem", backgroundColor: activeTheme.sidebar }}
     >
       {/* Logo Empathy Buddy */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
@@ -104,57 +72,11 @@ export default function Sidebar() {
       {/* Spacer pushes the Settings section down without growing the nav itself */}
       <div className="flex-1" />
 
-      {/* Bottom: Settings trigger — increased vertical padding for more room */}
-      <div className="px-2 pb-16 pt-8 border-t border-white/10">
-        <button
-          ref={buttonRef}
-          onClick={() => setSettingsOpen((o) => !o)}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-            settingsOpen
-              ? "bg-white/15 text-white font-semibold"
-              : "text-white/70 hover:bg-white/10 hover:text-white"
-          }`}
-        >
-          <Settings size={15} className="flex-shrink-0" />
-          {!collapsed && (
-            <>
-              <span className="text-sm font-medium flex-1 text-left">Settings</span>
-              <ChevronDown
-                size={16}
-                className={`flex-shrink-0 transition-transform duration-200 ${
-                  settingsOpen ? "rotate-180" : ""
-                }`}
-              />
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* Settings popover */}
-      {settingsOpen &&
-        createPortal(
-          <div
-            ref={menuRef}
-            style={{ position: "fixed", top: menuPos.top, left: menuPos.left }}
-            className="w-52 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden z-[100]"
-          >
-            <button
-              onClick={() => {
-                setSettingsOpen(false);
-                navigate("/profile/edit");
-              }}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <UserCog size={15} /> Edit Profile
-            </button>
-          </div>,
-          document.body
-        )}
-
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#1a237e] border border-white/20 flex items-center justify-center text-white/70 hover:text-white shadow-md z-10"
+        style={{ backgroundColor: activeTheme.sidebar }}
+        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white/70 hover:text-white shadow-md z-10"
       >
         {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
