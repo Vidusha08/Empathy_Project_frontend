@@ -118,7 +118,7 @@ export default function StudentDashboard() {
       <div className="p-4 md:p-5" >
 
         {/* Header style={{ fontFamily: "'Work Sans', sans-serif" }}*/}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div className="student-dashboard__header flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <div>
             <p className="text-xs text-[#9B8E7E] font-medium mb-0.5">Welcome back</p>
             <h1 className="text-2xl md:text-3xl font-bold text-[#3A342B]" style={{ fontFamily: "'Newsreader', serif" }}>
@@ -137,7 +137,7 @@ export default function StudentDashboard() {
 
         {/* Quick actions */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div className="bg-gradient-to-br from-[#EFE6F5] to-[#F6F2EC] rounded-2xl p-4 border border-[#E7DEEF] flex items-center justify-between gap-3">
+          <div className="student-dashboard__quick-action student-dashboard__quick-action--chat bg-gradient-to-br from-[#EFE6F5] to-[#F6F2EC] rounded-2xl p-4 border border-[#E7DEEF] flex items-center justify-between gap-3">
             <div className="min-w-0">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#8B6FA8] bg-white/70 px-2.5 py-0.5 rounded-full mb-2">
                 <MessageSquare size={12} /> Chatbot
@@ -158,7 +158,7 @@ export default function StudentDashboard() {
             <RabbitIdle onClick={() => navigate("/chat")} size={90} />
           </div>
 
-          <div className="bg-gradient-to-br from-[#E8F0E9] to-[#F6F2EC] rounded-2xl p-4 border border-[#DCEADD] flex flex-col justify-between">
+          <div className="student-dashboard__quick-action student-dashboard__quick-action--content bg-gradient-to-br from-[#E8F0E9] to-[#F6F2EC] rounded-2xl p-4 border border-[#DCEADD] flex flex-col justify-between">
             <div>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#5C8A6B] bg-white/70 px-2.5 py-0.5 rounded-full mb-2">
                 <BookOpen size={12} /> Learn
