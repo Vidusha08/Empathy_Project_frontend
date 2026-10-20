@@ -114,7 +114,7 @@ export default function StudentDashboard() {
   return (
     // flex-1 + min-h-0 lets this size to whatever Layout.jsx gives it;
     // overflow-y-auto on THIS element (not a wrapper) is what scrolls.
-    <div className="flex-1 min-h-0 overflow-y-auto bg-[#F6F2EC]">
+    <div className="student-dashboard flex-1 min-h-0 overflow-y-auto">
       <div className="p-4 md:p-5" >
 
         {/* Header style={{ fontFamily: "'Work Sans', sans-serif" }}*/}

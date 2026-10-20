@@ -1,3 +1,4 @@
+// src/utils/axiosInstance.js
 import axios from "axios";
 
 const api = axios.create({
@@ -42,6 +43,7 @@ api.interceptors.request.use((config) => {
 // "your session expired" — these should NOT trigger the global redirect,
 // or the login/register page never gets a chance to show its own error.
 const AUTH_ENTRY_ROUTES = ["/auth/login", "/auth/register"];
+//const AUTH_ENTRY_ROUTES = ["/auth/login", "/auth/register", "/auth/logout"];
 
 // Response interceptor: handle 401
 api.interceptors.response.use(
@@ -56,11 +58,11 @@ api.interceptors.response.use(
       // Clear both possible storage locations
       localStorage.removeItem("auth-storage");
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      //window.location.href = "/login";
+      window.location.href = "/";
     }
     return Promise.reject(error);
   }
 );
 
 export default api;
-

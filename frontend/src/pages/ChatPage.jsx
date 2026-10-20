@@ -17,8 +17,7 @@ function getFirstName(user) {
   if (user?.name) {
     const first = user.name.trim().split(/\s+/)[0];
     if (first) return first;
-  }
-  return user?.username ?? null;
+  } 
 }
 
 function fallbackObjectiveQuestions(objective) {
@@ -41,7 +40,27 @@ function fallbackObjectiveQuestions(objective) {
   ];
 }
 
-// Chat Input
+function fallbackObjectiveQuestions(objective) {
+  const items = Array.isArray(objective?.items) ? objective.items : [];
+  const source = items.find((item) => typeof item?.content === "string" && item.content.trim());
+  const title = titleOf(objective);
+  const topic = (source?.title || source?.content || objective?.content || title || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/(?<=[.!?])\s+/)[0]
+    .slice(0, 72)
+    .replace(/[.,;:]$/, "");
+  if (!topic) return [];
+
+  const objectiveTitle = title || topic;
+  return [
+    `What does the approved SEEK content say about ${topic}?`,
+    `How does ${topic} relate to ${objectiveTitle}?`,
+    `Which part of ${objectiveTitle} would you like to understand better?`,
+  ];
+}
+
+// Chat Input 
 
 function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyleChange }) {
   const [text, setText] = useState("");
@@ -669,14 +688,14 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+    <div className="chat-page flex flex-col h-full overflow-hidden">
 
       {/* Chat area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="px-6 pt-5 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">💬</span>
-            <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru: Your Empathy & Self Counselling Guide</h1>
+            <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru</h1>
           </div>
         </div>
 

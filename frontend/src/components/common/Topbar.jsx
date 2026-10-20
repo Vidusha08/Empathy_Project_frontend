@@ -3,9 +3,11 @@ import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
+//import { useAuth } from "../../hooks/useAuth";
 import { getSkills } from "../../api/contentApi";
+import EditProfileModal from "./EditProfileModal";
 import {
-  BookOpen, Volume2, VolumeX, User, LogOut, ArrowRight,
+  BookOpen, Volume2, VolumeX, User, LogOut, ArrowRight, Settings,
 } from "lucide-react";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
@@ -116,14 +118,16 @@ function SoundToggle() {
 
 // Profile — icon-only avatar trigger, dropdown shows name + logout
 
-function ProfileMenu({ displayName }) {
+function ProfileMenu({ displayName, user }) {
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
   useOnClickOutside([buttonRef, menuRef], () => setOpen(false));
   const navigate = useNavigate();
   const { clearAuth } = useAuthStore();
+  //const { logout } = useAuth();
 
   useLayoutEffect(() => {
     if (open && buttonRef.current) {
@@ -132,10 +136,12 @@ function ProfileMenu({ displayName }) {
     }
   }, [open]);
 
-  const handleLogout = () => {
+    const handleLogout = () => {
+  //const handleLogout = async () => {
     setOpen(false);
     clearAuth();
-    navigate("/login");
+    navigate("/");
+    //await logout();
   };
 
   return (
@@ -147,9 +153,11 @@ function ProfileMenu({ displayName }) {
         className={`flex items-center justify-center w-9 h-9 rounded-full transition-all
           ${open ? "ring-2 ring-indigo-200" : ""}`}
       >
-        <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center flex-shrink-0">
-          <User size={15} className="text-white" />
-        </div>
+        {user?.profileImage
+          ? <img src={user.profileImage} alt="" className="h-8 w-8 rounded-full object-cover" />
+          : <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center flex-shrink-0">
+              <User size={15} className="text-white" />
+            </div>}
       </button>
 
       {open && createPortal(
@@ -162,6 +170,12 @@ function ProfileMenu({ displayName }) {
             <p className="text-sm font-medium text-gray-700 truncate">{displayName}</p>
           </div>
           <button
+            onClick={() => { setOpen(false); setEditOpen(true); }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Settings size={15} /> Edit profile
+          </button>
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
           >
@@ -169,6 +183,12 @@ function ProfileMenu({ displayName }) {
           </button>
         </div>,
         document.body
+      )}
+      {editOpen && (
+        <EditProfileModal
+          user={user}
+          onClose={() => setEditOpen(false)}
+        />
       )}
     </>
   );
@@ -183,7 +203,7 @@ export default function Topbar() {
   const isDashboardPage = location.pathname === "/dashboard" || location.pathname.startsWith("/dashboard/");
 
   return (
-    <div className="bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
+    <div className="app-topbar bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
       {!isDashboardPage && (
         <div>
           <p className="text-xs text-gray-500 mb-0.5">Welcome,</p>
@@ -197,7 +217,7 @@ export default function Topbar() {
       <div className="ml-auto flex items-center gap-1">
         <ContentMenu />
         <SoundToggle />
-        <ProfileMenu displayName={username ?? "Guest"} />
+        <ProfileMenu displayName={username ?? "Guest"} user={user} />
       </div>
     </div>
   );
