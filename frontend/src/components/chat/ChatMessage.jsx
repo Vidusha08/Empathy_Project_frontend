@@ -75,7 +75,7 @@ function StepContent({ step, skill }) {
           </div>
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">Try this</p>
-            <h3 className="mt-1 text-sm font-semibold text-gray-900">{step.activity?.title || "Grounding Activity"}</h3>
+            <h3 className="mt-1 text-sm font-semibold text-gray-900">{step.activity?.title || "No activity selected"}</h3>
           </div>
         </div>
         <p className="mt-4 whitespace-pre-line text-sm leading-6 text-gray-700">{step.content}</p>
@@ -120,6 +120,7 @@ export default function ChatMessage({
     .replace(/\s+/g, "_")
     .replace(/([a-z])([A-Z])/g, "$1_$2");
   const isYesNoQuestion = normalizedQuestionType === "yes_no" || normalizedQuestionType === "yesno";
+  const hasApprovedActivity = Boolean(step?.activity?.id);
 
   if (isUser) {
     return (
@@ -139,8 +140,9 @@ export default function ChatMessage({
         <div className="px-4 pb-4">
           <StepContent step={step} skill={skill} />
 
-          {flowAction === "learn" && <p className="mt-4 text-sm font-medium text-gray-800">Would you like to learn a skill that could help with this?</p>}
-          {flowAction === "learn" && (
+          {flowAction === "learn" && <p className="mt-4 text-sm font-medium text-gray-800">Does this answer your question so far? Choose Yes to explore the learning objective, or No to ask for clarification.</p>}
+          {flowAction === "understanding" && <p className="mt-4 text-sm font-medium text-gray-800">Does this explanation make sense so far? Choose Yes to continue, or No to ask for clarification.</p>}
+          {(flowAction === "learn" || flowAction === "understanding") && (
             <div className="mt-4 flex gap-2">
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
@@ -164,27 +166,23 @@ export default function ChatMessage({
             </div>
           )}
 
-          {flowAction === "activity" && <p className="mt-4 text-sm font-medium text-gray-800">Would you like to try a short activity?</p>}
+          {flowAction === "activity" && (
+            <p className="mt-4 text-sm font-medium text-gray-800">
+              {hasApprovedActivity
+                ? "Try just this first step now. You can describe what you notice in the chat, or confirm when you've tried it."
+                : "No approved activity was selected. Continue when you're ready for a quick understanding check."}
+            </p>
+          )}
           {flowAction === "activity" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
-                isChosen={selectedAnswer === "Yes"}
+                isChosen={hasChosen}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit("Yes")}
+                onClick={() => emit(hasApprovedActivity ? "I've tried this step" : "Continue")}
               >
-                <Check size={14} />Yes
-              </ActionButton>
-              <ActionButton
-                disabled={flowHandled || hasChosen || isLoading}
-                secondary
-                isChosen={selectedAnswer === "No"}
-                hasChosen={hasChosen}
-                isAnswer
-                onClick={() => emit("No")}
-              >
-                <X size={14} />No
+                <Check size={14} />{hasApprovedActivity ? "I've tried this step" : "Continue"}
               </ActionButton>
             </div>
           )}

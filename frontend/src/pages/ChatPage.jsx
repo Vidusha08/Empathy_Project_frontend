@@ -1,11 +1,10 @@
 //src/pages/ChatPage.jsx
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { sendMessage } from "../api/chatApi";
-import { completeItem, getProgress } from "../api/progressApi";
+import { completeItem, completeObjective, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
 import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
 import { Mic, Send } from "lucide-react";
@@ -18,26 +17,6 @@ function getFirstName(user) {
     const first = user.name.trim().split(/\s+/)[0];
     if (first) return first;
   } 
-}
-
-function fallbackObjectiveQuestions(objective) {
-  const items = Array.isArray(objective?.items) ? objective.items : [];
-  const source = items.find((item) => typeof item?.content === "string" && item.content.trim());
-  const title = titleOf(objective);
-  const topic = (source?.title || source?.content || objective?.content || title || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(/(?<=[.!?])\s+/)[0]
-    .slice(0, 72)
-    .replace(/[.,;:]$/, "");
-  if (!topic) return [];
-
-  const objectiveTitle = title || topic;
-  return [
-    `What does the approved SEEK content say about ${topic}?`,
-    `How does ${topic} relate to ${objectiveTitle}?`,
-    `Which part of ${objectiveTitle} would you like to understand better?`,
-  ];
 }
 
 function fallbackObjectiveQuestions(objective) {
@@ -135,7 +114,6 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
 // Main Page
 
 export default function ChatPage() {
-  const navigate = useNavigate();
   const [answerStyle, setAnswerStyle] = useState("short");
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [suggestedQuestions, setSuggestedQuestions] = useState([]);
@@ -187,8 +165,7 @@ export default function ChatPage() {
       role: "assistant",
       content: [
         introduction,
-        res.message || learningContext.message || steps[0]?.content,
-        progressRecommendation,
+        res.message || steps[0]?.content || learningContext.message,
       ].filter(Boolean).join("\n\n"),
       timestamp: ts(),
       emotion: res.emotion ?? "calm",
@@ -248,7 +225,6 @@ export default function ChatPage() {
             activity: "complete the activity",
             practice: "complete the activity",
             video: "watch the video",
-            quiz: "pass the quiz",
             reflection: "complete the reflection",
           };
           return {
@@ -259,17 +235,10 @@ export default function ChatPage() {
           };
         })
         : [];
-      const quizItem = incompleteItems
-        .filter((item) => ["quiz", "assessment"].includes(item.type))
-        .map((incompleteItem) => objective?.items?.find(
-          (item) => item.item_id === incompleteItem.id,
-        ))
-        .find(Boolean);
       return {
         objectiveCompleted: false,
         incompleteItems,
         objective,
-        quizItem,
         objectiveProgress,
       };
     }
@@ -320,23 +289,15 @@ export default function ChatPage() {
           || "This learning objective";
         const objectiveItems = Array.isArray(objective?.items) ? objective.items : [];
         const activityMissing = recommendation?.objectiveProgress?.activity_completed !== true;
-        const quizMissing = recommendation?.objectiveProgress?.quiz_passed !== true;
         const activity = activityMissing && objectiveItems.find(
           (item) => ["activity", "practice"].includes(item.type),
         );
-        const quiz = quizMissing && objectiveItems.find(
-          (item) => ["quiz", "assessment"].includes(item.type),
-        );
-        const nextRequiredItem = activity || quiz;
-        const isQuiz = Boolean(quiz && !activity);
-        const itemTitle = nextRequiredItem?.title
-          || nextRequiredItem?.item_id
+        const itemTitle = activity?.title
+          || activity?.item_id
           || "the remaining required learning item";
         const nextStepText = activity
           ? `Next, complete the approved activity "${itemTitle}".`
-          : quiz
-            ? `Next, pass the required quiz "${itemTitle}".`
-            : "Saved progress still shows this objective as incomplete. Continue with its remaining required learning items.";
+          : "Saved progress still shows this objective as incomplete. Continue with its remaining learning items.";
         const requiredActivity = activity
           ? {
             ...activity,
@@ -348,26 +309,21 @@ export default function ChatPage() {
         addMessage({
           id: createId(),
           role: "assistant",
-          content: `${feedback} "${objectiveTitle}" is not complete yet. ${nextStepText}${nextRequiredItem?.content ? `\n\n${nextRequiredItem.content}` : ""}`,
+          content: `${feedback} "${objectiveTitle}" is not complete yet. ${nextStepText}${activity?.content ? `\n\n${activity.content}` : ""}`,
           timestamp: ts(),
           skill: recommendation.skill || sourceMessage.skill,
           learningObjective: objective,
           objectiveProgress: recommendation.objectiveProgress,
-          ...(isQuiz
+          ...(activity
             ? {
-              quizItem: quiz,
-              flowAction: "quiz",
+              requiredObjectiveItem: true,
+              recommendedActivity: requiredActivity,
+              progressItemId: activity.item_id,
+              progressObjectiveId: idOf(objective),
+              progressItemType: activity.type,
+              flowAction: "complete",
             }
-            : activity
-              ? {
-                requiredObjectiveItem: true,
-                recommendedActivity: requiredActivity,
-                progressItemId: activity.item_id,
-                progressObjectiveId: idOf(objective),
-                progressItemType: activity.type,
-                flowAction: "complete",
-              }
-              : {}),
+            : {}),
         });
         setSuggestedQuestions(fallbackObjectiveQuestions(objective));
         return;
@@ -440,6 +396,16 @@ export default function ChatPage() {
     const question = text?.trim();
     if (!question || requestInFlight.current || isLoading) return;
 
+    const pendingActivityMessage = [...messages].reverse().find(
+      (message) => message.role === "assistant"
+        && message.flowAction === "activity"
+        && !message.flowHandled,
+    );
+    if (pendingActivityMessage) {
+      await handleFlowMessage(question, "activity", pendingActivityMessage);
+      return;
+    }
+
     requestInFlight.current = true;
     setSuggestedQuestions([]);
     addUserMessage(question);
@@ -497,24 +463,18 @@ export default function ChatPage() {
     }
     addUserMessage(text);
 
-    if (action === "quiz") {
-      const skillId = sourceMessage.skill?.id
-        || sourceMessage.skill?.skill_id
-        || sourceMessage.skill?.chapter_id;
-      const quizItem = sourceMessage.quizItem;
-      if (!skillId || !quizItem?.item_id) {
-        addMessage({
-          id: createId(),
-          role: "assistant",
-          content: "I could not find this objective's authored quiz. Its completion requirements have not been changed.",
-          timestamp: ts(),
-        });
-        return;
-      }
-      navigate(
-        `/quiz?skill=${encodeURIComponent(skillId)}&item=${encodeURIComponent(quizItem.item_id)}`,
-        { state: { quiz: quizItem, skillId } },
-      );
+    if (text === "No" && ["learn", "understanding"].includes(action)) {
+      addMessage({
+        id: createId(),
+        role: "assistant",
+        content: "That's okay. What part would you like me to explain differently? We'll stay here until it makes sense.",
+        timestamp: ts(),
+        skill: sourceMessage.skill,
+        flowAction: action,
+        flowIndex: sourceMessage.flowIndex,
+        learningSteps: sourceMessage.learningSteps,
+        learningObjective: sourceMessage.learningObjective,
+      });
       return;
     }
 
@@ -541,7 +501,10 @@ export default function ChatPage() {
     const flowSteps = sourceMessage.learningSteps || [];
     const nextIndex = (sourceMessage.flowIndex ?? -1) + 1;
     const nextStep = flowSteps[nextIndex];
-    if (action === "complete") {
+    if (
+      action === "complete"
+      || (action === "activity" && sourceMessage.recommendedActivity)
+    ) {
       if (!skillId || !itemId || !itemType) {
         console.error("[chatbot-progress] missing completion metadata", {
           action,
@@ -578,32 +541,20 @@ export default function ChatPage() {
         console.info("[chatbot-progress] completion response", completionResponse);
         if (!completionResponse.objective_completed && !sourceMessage.requiredObjectiveItem) {
           const missingItems = completionResponse.missing_completion_items || [];
-          const missingQuiz = missingItems.find(
-            (item) => ["quiz", "assessment"].includes(item.type),
-          );
           const missingActivity = missingItems.find(
             (item) => ["activity", "practice"].includes(item.type),
           );
           const missingConditions = completionResponse.missing_completion_conditions || [];
           const objectiveTitle = titleOf(sourceMessage.learningObjective)
             || "This learning objective";
-          const remaining = missingConditions.includes("quiz")
-            ? ` The activity is saved; you still need to pass the quiz${missingQuiz?.title ? ` "${missingQuiz.title}"` : ""}.`
-            : missingConditions.includes("activity")
-              ? ` The quiz is saved; you still need to complete the activity${missingActivity?.title ? ` "${missingActivity.title}"` : ""}.`
-              : " Saved progress does not yet confirm both required conditions.";
+          const remaining = missingConditions.includes("activity")
+            ? ` Please complete the activity${missingActivity?.title ? ` "${missingActivity.title}"` : ""}.`
+            : " Saved progress still shows this objective as incomplete. Continue with its remaining learning items.";
           addMessage({
             id: createId(),
             role: "assistant",
             content: `"${objectiveTitle}" is not complete yet.${remaining}`,
             timestamp: ts(),
-            ...(missingQuiz
-              ? {
-                flowAction: "quiz",
-                skill: sourceMessage.skill,
-                quizItem: missingQuiz,
-              }
-              : {}),
           });
         }
       } catch (error) {
@@ -640,6 +591,24 @@ export default function ChatPage() {
       const result = correctAnswer === undefined || answer === correctAnswer;
 
       if (action === "practice") {
+        if (result) {
+          try {
+            await completeObjective(
+              skillId,
+              idOf(sourceMessage.learningObjective),
+              { source: "chatbot", quick_check_passed: true },
+            );
+          } catch (error) {
+            console.error("[chatbot-progress] objective completion failed", error);
+            addMessage({
+              id: createId(),
+              role: "assistant",
+              content: error.message || "I could not save your learning objective progress yet.",
+              timestamp: ts(),
+            });
+            return;
+          }
+        }
         await recommendNextObjective(sourceMessage, result);
       } else {
         addMessage({
@@ -655,18 +624,22 @@ export default function ChatPage() {
     }
 
     const nextAction = action === "learn"
-      ? "activity"
-      : action === "activity"
-        ? "complete"
+      ? "understanding"
+      : action === "understanding"
+        ? "activity"
+        : action === "activity"
+          ? "practice"
         : action === "complete"
           ? "practice"
           : undefined;
-    const nextContent = nextAction === "activity"
-      ? "Great. Let's explore something that may help."
+    const nextContent = nextAction === "understanding"
+      ? "Before we continue, let's check that the explanation is clear."
+      : nextAction === "activity"
+        ? "Great. Let's continue with the approved activity."
       : nextAction === "complete"
-        ? "Let's try a grounding activity."
+          ? "Let's try the activity step."
         : nextAction === "practice"
-          ? "Did you understand the main idea? Let's check with a quick question."
+            ? "Thanks for trying the first step. Let's check one idea from what we explored."
           : "Let's continue.";
 
     addMessage({

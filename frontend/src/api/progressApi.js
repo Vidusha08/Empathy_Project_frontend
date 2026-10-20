@@ -100,12 +100,12 @@ const completeItem = (skillId, itemId, itemType, source = 'skills_page', quizSco
   });
 };
 
-const completeObjective = (skillId, objectiveId) => {
+const completeObjective = (skillId, objectiveId, completionContext = {}) => {
   if (!skillId) throw new Error('skillId is required.');
   if (!objectiveId) throw new Error('objectiveId is required.');
   return apiRequest(`/objectives/${encodeURIComponent(objectiveId)}/complete`, {
     method: 'POST',
-    body: JSON.stringify({ skill_id: skillId }),
+    body: JSON.stringify({ skill_id: skillId, ...completionContext }),
   });
 };
 

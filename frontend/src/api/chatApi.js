@@ -13,7 +13,7 @@ export async function sendMessage(question, answerStyle = "short") {
     // Keep the controller response available to consumers that need metadata
     // beyond the presentation fields below.
     learning_context: context,
-    message: data.educational_response ?? context.message,
+    message: data.educational_response ?? data.answer ?? context.message,
     status: context.status,
     emotion: context.detected_emotion ?? "calm",
     skill: context.skill ?? null,
