@@ -16,12 +16,14 @@ function ActionButton({
   isChosen = false,
   hasChosen = false,
   isAnswer = false,
+  ariaLabel,
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition-colors ${
         isChosen
           ? "bg-indigo-600 text-white"
@@ -73,7 +75,7 @@ function StepContent({ step, skill }) {
           </div>
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">Try this</p>
-            <h3 className="mt-1 text-sm font-semibold text-gray-900">{step.activity?.title || "Grounding Activity"}</h3>
+            <h3 className="mt-1 text-sm font-semibold text-gray-900">{step.activity?.title || "No activity selected"}</h3>
           </div>
         </div>
         <p className="mt-4 whitespace-pre-line text-sm leading-6 text-gray-700">{step.content}</p>
@@ -101,12 +103,24 @@ function StepContent({ step, skill }) {
   ) : null;
 }
 
-export default function ChatMessage({ message, onFlowMessage, selectedAnswers }) {
+export default function ChatMessage({
+  message,
+  isLoading,
+  onFlowMessage,
+  selectedAnswers,
+}) {
   const { role, content, timestamp, flowAction, step, skill, flowHandled } = message;
   const isUser = role === "user";
   const selectedAnswer = selectedAnswers?.[message.id];
   const hasChosen = Boolean(selectedAnswer);
   const emit = (text) => onFlowMessage?.(text, flowAction, message);
+  const normalizedQuestionType = String(step?.question_type ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/([a-z])([A-Z])/g, "$1_$2");
+  const isYesNoQuestion = normalizedQuestionType === "yes_no" || normalizedQuestionType === "yesno";
+  const hasApprovedActivity = Boolean(step?.activity?.id);
 
   if (isUser) {
     return (
@@ -126,11 +140,12 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
         <div className="px-4 pb-4">
           <StepContent step={step} skill={skill} />
 
-          {flowAction === "learn" && <p className="mt-4 text-sm font-medium text-gray-800">Would you like to learn a skill that could help with this?</p>}
-          {flowAction === "learn" && (
+          {flowAction === "learn" && <p className="mt-4 text-sm font-medium text-gray-800">Does this answer your question so far? Choose Yes to explore the learning objective, or No to ask for clarification.</p>}
+          {flowAction === "understanding" && <p className="mt-4 text-sm font-medium text-gray-800">Does this explanation make sense so far? Choose Yes to continue, or No to ask for clarification.</p>}
+          {(flowAction === "learn" || flowAction === "understanding") && (
             <div className="mt-4 flex gap-2">
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 isChosen={selectedAnswer === "Yes"}
                 hasChosen={hasChosen}
                 isAnswer
@@ -139,7 +154,7 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
                 <Check size={14} />Yes
               </ActionButton>
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 secondary
                 isChosen={selectedAnswer === "No"}
                 hasChosen={hasChosen}
@@ -151,61 +166,59 @@ export default function ChatMessage({ message, onFlowMessage, selectedAnswers })
             </div>
           )}
 
-          {flowAction === "activity" && <p className="mt-4 text-sm font-medium text-gray-800">Would you like to try a short activity?</p>}
+          {flowAction === "activity" && (
+            <p className="mt-4 text-sm font-medium text-gray-800">
+              {hasApprovedActivity
+                ? "Try just this first step now. You can describe what you notice in the chat, or confirm when you've tried it."
+                : "No approved activity was selected. Continue when you're ready for a quick understanding check."}
+            </p>
+          )}
           {flowAction === "activity" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
-                disabled={flowHandled || hasChosen}
-                isChosen={selectedAnswer === "Yes"}
+                disabled={flowHandled || hasChosen || isLoading}
+                isChosen={hasChosen}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit("Yes")}
+                onClick={() => emit(hasApprovedActivity ? "I've tried this step" : "Continue")}
               >
-                <Check size={14} />Yes
-              </ActionButton>
-              <ActionButton
-                disabled={flowHandled || hasChosen}
-                secondary
-                isChosen={selectedAnswer === "No"}
-                hasChosen={hasChosen}
-                isAnswer
-                onClick={() => emit("No")}
-              >
-                <X size={14} />No
+                <Check size={14} />{hasApprovedActivity ? "I've tried this step" : "Continue"}
               </ActionButton>
             </div>
           )}
 
           {flowAction === "complete" && (
-            <ActionButton disabled={flowHandled} onClick={() => emit("I've completed it.")}><CheckCircle2 size={14} />I&apos;ve completed it</ActionButton>
+            <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("I've completed it.")}><CheckCircle2 size={14} />I&apos;ve completed it</ActionButton>
           )}
 
           {flowAction === "objective" && (
-            <ActionButton disabled={flowHandled} onClick={() => emit("Explore next objective")}>
+            <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("Explore next objective")}>
               <Sparkles size={14} />Explore next objective
             </ActionButton>
           )}
 
           {flowAction === "practice" && (
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-3" role="group" aria-label={isYesNoQuestion ? "Yes or no answer" : "True or false answer"}>
               <ActionButton
-                disabled={flowHandled || hasChosen}
-                isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "Yes" : "True")}
+                disabled={flowHandled || hasChosen || isLoading}
+                isChosen={selectedAnswer === (isYesNoQuestion ? "Yes" : "True")}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit(step?.question_type === "yes_no" ? "Yes" : "True")}
+                ariaLabel={isYesNoQuestion ? "Answer Yes" : "Answer True"}
+                onClick={() => emit(isYesNoQuestion ? "Yes" : "True")}
               >
-                <Check size={14} />{step?.question_type === "yes_no" ? "Yes" : "True"}
+                <Check size={14} />{isYesNoQuestion ? "Yes" : "True"}
               </ActionButton>
               <ActionButton
-                disabled={flowHandled || hasChosen}
+                disabled={flowHandled || hasChosen || isLoading}
                 secondary
-                isChosen={selectedAnswer === (step?.question_type === "yes_no" ? "No" : "False")}
+                isChosen={selectedAnswer === (isYesNoQuestion ? "No" : "False")}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit(step?.question_type === "yes_no" ? "No" : "False")}
+                ariaLabel={isYesNoQuestion ? "Answer No" : "Answer False"}
+                onClick={() => emit(isYesNoQuestion ? "No" : "False")}
               >
-                <X size={14} />{step?.question_type === "yes_no" ? "No" : "False"}
+                <X size={14} />{isYesNoQuestion ? "No" : "False"}
               </ActionButton>
             </div>
           )}
