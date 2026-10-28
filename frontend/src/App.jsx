@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
+import GeneralEmpathyChatPage from "./pages/GeneralEmpathyChatPage";
 import ContentPage from "./pages/ContentPage";
 import AssessmentPage from "./pages/AssessmentPage";
 import QuizPage from "./pages/QuizPage";
@@ -27,6 +28,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/general-empathy-chat" element={<GeneralEmpathyChatPage />} />
             <Route path="/content" element={<ContentPage />} />
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/progress" element={<ProgressPage />} />

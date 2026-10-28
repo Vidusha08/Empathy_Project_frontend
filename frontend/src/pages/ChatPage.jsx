@@ -7,6 +7,7 @@ import { sendMessage } from "../api/chatApi";
 import { completeItem, completeObjective, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
 import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
+import { verifyQuickCheckAnswer } from "../utils/quickCheck";
 import { Mic, Send } from "lucide-react";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
@@ -118,6 +119,7 @@ export default function ChatPage() {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [suggestedQuestions, setSuggestedQuestions] = useState([]);
   const recommendationKeys = useRef(new Set());
+  const activityCompletionInFlight = useRef(new Set());
   const requestInFlight = useRef(false);
   const user = useAuthStore((state) => state.user);
   const {
@@ -400,16 +402,6 @@ export default function ChatPage() {
     const question = text?.trim();
     if (!question || requestInFlight.current || isLoading) return;
 
-    const pendingActivityMessage = [...messages].reverse().find(
-      (message) => message.role === "assistant"
-        && message.flowAction === "activity"
-        && !message.flowHandled,
-    );
-    if (pendingActivityMessage) {
-      await handleFlowMessage(question, "activity", pendingActivityMessage);
-      return;
-    }
-
     requestInFlight.current = true;
     setSuggestedQuestions([]);
     addUserMessage(question);
@@ -444,7 +436,7 @@ export default function ChatPage() {
     }
   };
 
-  const handleFlowMessage = async (text, action, sourceMessage) => {
+  const handleFlowMessage = async (text, action, sourceMessage, options = {}) => {
     if (
       !sourceMessage
       || sourceMessage.flowHandled
@@ -452,8 +444,17 @@ export default function ChatPage() {
       || isLoading
     ) return;
 
-    markMessageHandled(sourceMessage.id);
-    setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
+    const isActivityConfirmation = action === "activity"
+      && options.activityConfirmation === true
+      && Boolean(sourceMessage.recommendedActivity);
+    if (isActivityConfirmation) {
+      if (activityCompletionInFlight.current.has(sourceMessage.id)) return;
+      activityCompletionInFlight.current.add(sourceMessage.id);
+      setLoading(true);
+    } else {
+      markMessageHandled(sourceMessage.id);
+      setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
+    }
     if (action === "practice") {
       setSuggestedQuestions((current) => current.length
         ? current
@@ -471,7 +472,7 @@ export default function ChatPage() {
       );
       return;
     }
-    addUserMessage(text);
+    if (!isActivityConfirmation) addUserMessage(text);
 
     if (text === "No" && ["learn", "understanding"].includes(action)) {
       addMessage({
@@ -513,7 +514,7 @@ export default function ChatPage() {
     const nextStep = flowSteps[nextIndex];
     if (
       action === "complete"
-      || (action === "activity" && sourceMessage.recommendedActivity)
+      || isActivityConfirmation
     ) {
       if (!skillId || !itemId || !itemType) {
         console.error("[chatbot-progress] missing completion metadata", {
@@ -530,6 +531,10 @@ export default function ChatPage() {
           content: "I could not identify the recommended curriculum item to save your progress.",
           timestamp: ts(),
         });
+        if (isActivityConfirmation) {
+          activityCompletionInFlight.current.delete(sourceMessage.id);
+          setLoading(false);
+        }
         return;
       }
       try {
@@ -549,6 +554,13 @@ export default function ChatPage() {
         });
         const completionResponse = await completeItem(skillId, itemId, itemType, "chatbot");
         console.info("[chatbot-progress] completion response", completionResponse);
+        if (isActivityConfirmation) {
+          markMessageHandled(sourceMessage.id);
+          setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
+          addUserMessage(text);
+          activityCompletionInFlight.current.delete(sourceMessage.id);
+          setLoading(false);
+        }
         if (!completionResponse.objective_completed && !sourceMessage.requiredObjectiveItem) {
           const missingItems = completionResponse.missing_completion_items || [];
           const missingActivity = missingItems.find(
@@ -568,6 +580,10 @@ export default function ChatPage() {
           });
         }
       } catch (error) {
+        if (isActivityConfirmation) {
+          activityCompletionInFlight.current.delete(sourceMessage.id);
+          setLoading(false);
+        }
         console.error("[chatbot-progress] completion failed", {
           action,
           skillId,
@@ -595,18 +611,28 @@ export default function ChatPage() {
     }
 
     if (!nextStep) {
-      const answerMatch = sourceMessage.step?.question?.match(/\bAnswer:\s*(true|false)\b/i);
-      const correctAnswer = sourceMessage.step?.correct_answer ?? (answerMatch ? answerMatch[1].toLowerCase() === "true" : undefined);
-      const answer = ["true", "yes"].includes(text.toLowerCase());
-      const result = correctAnswer === undefined || answer === correctAnswer;
+      const result = verifyQuickCheckAnswer(sourceMessage.step, text);
 
       if (action === "practice") {
-        if (result) {
+        if (result === null) {
+          addMessage({
+            id: createId(),
+            role: "assistant",
+            content: "I couldn't verify that answer, so I won't mark the objective complete. Let's keep practising.",
+            timestamp: ts(),
+          });
+          return;
+        }
+        if (result === true) {
           try {
             await completeObjective(
               skillId,
               idOf(sourceMessage.learningObjective),
-              { source: "chatbot", quick_check_passed: true },
+              {
+                source: "chatbot",
+                interaction_id: sourceMessage.interactionId,
+                quick_check_answer: ["true", "yes"].includes(text.trim().toLowerCase()),
+              },
             );
           } catch (error) {
             console.error("[chatbot-progress] objective completion failed", error);
@@ -624,9 +650,11 @@ export default function ChatPage() {
         addMessage({
           id: createId(),
           role: "assistant",
-          content: result
-            ? "Correct! Great job. Let's continue learning."
-            : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
+          content: result === null
+            ? "I couldn't verify that answer yet. Let's keep practising together."
+            : result
+              ? "Correct! Great job. Let's continue learning."
+              : "Not quite. The correct answer is worth remembering, and we can keep practicing together.",
           timestamp: ts(),
         });
       }
@@ -664,6 +692,7 @@ export default function ChatPage() {
       learningSteps: flowSteps,
       recommendedActivity: sourceMessage.recommendedActivity,
       learningObjective: sourceMessage.learningObjective,
+      interactionId: sourceMessage.interactionId,
       progressItemId: sourceMessage.progressItemId,
       progressObjectiveId: sourceMessage.progressObjectiveId,
       progressItemType: sourceMessage.progressItemType,
