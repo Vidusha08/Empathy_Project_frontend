@@ -113,7 +113,7 @@ export default function ChatMessage({
   const isUser = role === "user";
   const selectedAnswer = selectedAnswers?.[message.id];
   const hasChosen = Boolean(selectedAnswer);
-  const emit = (text) => onFlowMessage?.(text, flowAction, message);
+  const emit = (text, options) => onFlowMessage?.(text, flowAction, message, options);
   const normalizedQuestionType = String(step?.question_type ?? "")
     .trim()
     .toLowerCase()
@@ -180,7 +180,10 @@ export default function ChatMessage({
                 isChosen={hasChosen}
                 hasChosen={hasChosen}
                 isAnswer
-                onClick={() => emit(hasApprovedActivity ? "I've tried this step" : "Continue")}
+                onClick={() => emit(
+                  hasApprovedActivity ? "I've tried this step" : "Continue",
+                  { activityConfirmation: hasApprovedActivity },
+                )}
               >
                 <Check size={14} />{hasApprovedActivity ? "I've tried this step" : "Continue"}
               </ActionButton>

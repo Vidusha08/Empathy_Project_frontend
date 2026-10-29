@@ -54,7 +54,11 @@ api.interceptors.response.use(
       requestUrl.includes(path)
     );
 
-    if (error.response?.status === 401 && !isAuthEntryRequest) {
+    if (
+      error.response?.status === 401 &&
+      !isAuthEntryRequest &&
+      !error.config?.skipAuthRedirect
+    ) {
       // Clear both possible storage locations
       localStorage.removeItem("auth-storage");
       localStorage.removeItem("token");
