@@ -21,18 +21,11 @@ function getFirstName(user) {
 }
 
 function fallbackObjectiveQuestions(objective) {
-  const items = Array.isArray(objective?.items) ? objective.items : [];
-  const source = items.find((item) => typeof item?.content === "string" && item.content.trim());
   const title = titleOf(objective);
-  const topic = (source?.title || source?.content || objective?.content || title || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(/(?<=[.!?])\s+/)[0]
-    .slice(0, 72)
-    .replace(/[.,;:]$/, "");
+  const topic = title || "";
   if (!topic) return [];
 
-  const objectiveTitle = title || topic;
+  const objectiveTitle = topic;
   return [
     `What does the approved SEEK content say about ${topic}?`,
     `How does ${topic} relate to ${objectiveTitle}?`,
@@ -409,6 +402,11 @@ export default function ChatPage() {
 
     try {
       const res = await sendMessage(question, style);
+      const context = res.learning_context || res;
+
+console.log("Selected objective title:", context.learning_objective?.title);
+console.log("Selected objective ID:", context.learning_objective?.objective_id);
+console.log("Question-relevant content:", context.question_relevant_content);
       const questions = Array.isArray(res.suggested_questions)
         ? res.suggested_questions
         : [];
@@ -444,14 +442,32 @@ export default function ChatPage() {
       || isLoading
     ) return;
 
-    const isActivityConfirmation = action === "activity"
-      && options.activityConfirmation === true
-      && Boolean(sourceMessage.recommendedActivity);
-    if (isActivityConfirmation) {
+    const activityMode = sourceMessage.step?.activity?.interaction_type
+      || (sourceMessage.step?.activity?.type === "reflection" ? "reflective" : "practical");
+    const hasActivityResponse = typeof options.activityResponse === "string"
+      && Boolean(options.activityResponse.trim());
+    const isActivitySubmission = action === "activity"
+      && options.activitySubmission === true
+      && Boolean(sourceMessage.recommendedActivity?.id)
+      && (
+        (activityMode === "practical" && options.activityConfirmation === true)
+        || (activityMode === "reflective" && hasActivityResponse)
+        || (activityMode === "combined" && hasActivityResponse && options.activityConfirmation === true)
+      );
+    if (isActivitySubmission) {
       if (activityCompletionInFlight.current.has(sourceMessage.id)) return;
       activityCompletionInFlight.current.add(sourceMessage.id);
       setLoading(true);
     } else {
+      if (action === "activity") {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: "Please complete the activity response before continuing.",
+          timestamp: ts(),
+        });
+        return;
+      }
       markMessageHandled(sourceMessage.id);
       setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
     }
@@ -472,7 +488,7 @@ export default function ChatPage() {
       );
       return;
     }
-    if (!isActivityConfirmation) addUserMessage(text);
+    if (!isActivitySubmission) addUserMessage(text);
 
     if (text === "No" && ["learn", "understanding"].includes(action)) {
       addMessage({
@@ -514,7 +530,7 @@ export default function ChatPage() {
     const nextStep = flowSteps[nextIndex];
     if (
       action === "complete"
-      || isActivityConfirmation
+      || isActivitySubmission
     ) {
       if (!skillId || !itemId || !itemType) {
         console.error("[chatbot-progress] missing completion metadata", {
@@ -531,7 +547,7 @@ export default function ChatPage() {
           content: "I could not identify the recommended curriculum item to save your progress.",
           timestamp: ts(),
         });
-        if (isActivityConfirmation) {
+        if (isActivitySubmission) {
           activityCompletionInFlight.current.delete(sourceMessage.id);
           setLoading(false);
         }
@@ -554,14 +570,20 @@ export default function ChatPage() {
         });
         const completionResponse = await completeItem(skillId, itemId, itemType, "chatbot");
         console.info("[chatbot-progress] completion response", completionResponse);
-        if (isActivityConfirmation) {
+        if (isActivitySubmission) {
           markMessageHandled(sourceMessage.id);
           setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
-          addUserMessage(text);
+          addUserMessage(hasActivityResponse
+            ? `Reflection: ${options.activityResponse.trim()}`
+            : text);
           activityCompletionInFlight.current.delete(sourceMessage.id);
           setLoading(false);
         }
-        if (!completionResponse.objective_completed && !sourceMessage.requiredObjectiveItem) {
+        if (
+          !completionResponse.objective_completed
+          && !sourceMessage.requiredObjectiveItem
+          && !nextStep
+        ) {
           const missingItems = completionResponse.missing_completion_items || [];
           const missingActivity = missingItems.find(
             (item) => ["activity", "practice"].includes(item.type),
@@ -580,7 +602,7 @@ export default function ChatPage() {
           });
         }
       } catch (error) {
-        if (isActivityConfirmation) {
+        if (isActivitySubmission) {
           activityCompletionInFlight.current.delete(sourceMessage.id);
           setLoading(false);
         }
@@ -631,7 +653,9 @@ export default function ChatPage() {
               {
                 source: "chatbot",
                 interaction_id: sourceMessage.interactionId,
-                quick_check_answer: ["true", "yes"].includes(text.trim().toLowerCase()),
+                quick_check_answer: typeof sourceMessage.step?.correct_answer === "string"
+                  ? text.trim()
+                  : ["true", "yes"].includes(text.trim().toLowerCase()),
               },
             );
           } catch (error) {
@@ -644,6 +668,28 @@ export default function ChatPage() {
             });
             return;
           }
+        } else {
+          const conceptStep = flowSteps.find(
+            (step) => step?.type === "learning_objective",
+          );
+          addMessage({
+            id: createId(),
+            role: "assistant",
+            content: `Not quite. Let's explain the idea another way:\n\n${conceptStep?.content || "Review the concept once more, then try the check again."}`,
+            timestamp: ts(),
+            skill: sourceMessage.skill,
+            step: sourceMessage.step,
+            flowAction: "practice",
+            flowIndex: sourceMessage.flowIndex,
+            learningSteps: flowSteps,
+            recommendedActivity: sourceMessage.recommendedActivity,
+            learningObjective: sourceMessage.learningObjective,
+            interactionId: sourceMessage.interactionId,
+            progressItemId: sourceMessage.progressItemId,
+            progressObjectiveId: sourceMessage.progressObjectiveId,
+            progressItemType: sourceMessage.progressItemType,
+          });
+          return;
         }
         await recommendNextObjective(sourceMessage, result);
       } else {
