@@ -3,13 +3,14 @@ import { useState, useRef, useEffect } from "react";
 import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
-import { sendMessage } from "../api/chatApi";
+import { getSafetyStatus, sendMessage, submitSafetyScreening } from "../api/chatApi";
 import { completeItem, completeObjective, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
 import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
 import { verifyQuickCheckAnswer } from "../utils/quickCheck";
 import { Mic, Send } from "lucide-react";
 import "./ChatPages.css";
+import SafetyGate from "../components/chat/SafetyGate";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
 // This pulls just the first token for the greeting store, falling back
@@ -113,6 +114,9 @@ export default function ChatPage() {
   const [answerStyle, setAnswerStyle] = useState("short");
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+  const [safetyStatus, setSafetyStatus] = useState(null);
+  const [screeningLoading, setScreeningLoading] = useState(false);
+  const [screeningError, setScreeningError] = useState("");
   const recommendationKeys = useRef(new Set());
   const activityCompletionInFlight = useRef(new Set());
   const requestInFlight = useRef(false);
@@ -133,6 +137,37 @@ export default function ChatPage() {
   useEffect(() => {
     if (firstName) setGreetingName(firstName);
   }, [firstName, setGreetingName]);
+
+  useEffect(() => {
+    let active = true;
+    getSafetyStatus()
+      .then((status) => {
+        if (active && (status.restriction_active || status.screening_required)) {
+          setSafetyStatus(status);
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const handleSafetyScreening = async (answers) => {
+    setScreeningLoading(true);
+    setScreeningError("");
+    try {
+      const status = await submitSafetyScreening(answers);
+      if (status.access_restored) {
+        setSafetyStatus(null);
+      } else {
+        setSafetyStatus(status);
+      }
+    } catch (error) {
+      setScreeningError(
+        error?.response?.data?.error || "The screening could not be saved. Please try again.",
+      );
+    } finally {
+      setScreeningLoading(false);
+    }
+  };
 
   const ts = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -404,6 +439,26 @@ export default function ChatPage() {
 
     try {
       const res = await sendMessage(question, style);
+      if (res.safety) {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: [res.message, res.urgentGuidance].filter(Boolean).join("\n\n"),
+          timestamp: ts(),
+          emotion: "concerned",
+        });
+        if (res.restrictionActive || res.screeningRequired) {
+          setSafetyStatus({
+            message: res.message,
+            restriction_active: res.restrictionActive,
+            screening_required: res.screeningRequired,
+            restriction_expires_at: res.restrictionExpiresAt,
+            counsellor_contacts: res.counsellorContacts,
+            urgent_guidance: res.urgentGuidance,
+          });
+        }
+        return;
+      }
       const context = res.learning_context || res;
 
 console.log("Selected objective title:", context.learning_objective?.title);
@@ -421,6 +476,9 @@ console.log("Question-relevant content:", context.question_relevant_content);
     } catch (err) {
       setSuggestedQuestions([]);
       const isUnauth = err?.response?.status === 401;
+      if (err?.response?.status === 423 && err.response.data?.safety) {
+        setSafetyStatus(err.response.data);
+      }
       addMessage({
         id:        createId(),
         role:      "assistant",
@@ -781,6 +839,16 @@ console.log("Question-relevant content:", context.question_relevant_content);
           />
         </div>
       </div>
+
+      {safetyStatus && (
+        <SafetyGate
+          mode={safetyStatus.restriction_active ? "restricted" : "screening"}
+          status={safetyStatus}
+          onSubmit={handleSafetyScreening}
+          loading={screeningLoading}
+          error={screeningError}
+        />
+      )}
     </div>
   );
 }
