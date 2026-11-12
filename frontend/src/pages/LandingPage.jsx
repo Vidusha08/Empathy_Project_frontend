@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import landing from "../assets/images/landing.webp";
+import "./PublicPages.css";
  
-const SERIF = { fontFamily: "'Newsreader', Georgia, serif" };
+const SERIF = { fontFamily: "var(--font-sans)" };
  
 const SKILLS = [
   {
@@ -83,7 +84,7 @@ export default function LandingPage() {
   };
  
   return (
-    <div className="min-h-screen bg-white text-gray-800">
+    <div className="public-page landing-page min-h-screen bg-white text-gray-800">
       <style>{`
         @keyframes lp-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-12px) } }
         .lp-float { animation: lp-float 4s ease-in-out infinite; }

@@ -1,5 +1,5 @@
 //src/components/chat/chatInput.jsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Send, Play, Wind, Anchor } from "lucide-react";
  
 const quickActions = [

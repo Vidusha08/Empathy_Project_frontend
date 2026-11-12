@@ -1,13 +1,14 @@
 // src/components/assessment/TestParts.jsx
 import { useEffect, useRef } from "react";
 import { CRISIS_RESOURCES } from "../../utils/screeningData";
+import "./Assessment.css";
 
 export const Choice = ({ selected, onClick, children }) => (
   <button
     type="button"
     onClick={onClick}
     aria-pressed={selected}
-    className={`flex-1 min-w-[110px] px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+    className={`assessment-choice flex-1 min-w-[110px] px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
       selected
         ? "bg-indigo-600 border-indigo-600 text-white shadow-md"
         : "bg-white border-gray-200 text-gray-600 hover:border-indigo-300"
@@ -18,7 +19,7 @@ export const Choice = ({ selected, onClick, children }) => (
 );
 
 export const Question = ({ number, text, options, value, onChange, invalid, stacked = false }) => (
-  <div className={`rounded-2xl border-2 p-4 transition-colors ${invalid ? "border-red-300 bg-red-50" : "border-gray-100"}`}>
+  <div className={`assessment-question rounded-2xl border-2 p-4 transition-colors ${invalid ? "border-red-300 bg-red-50" : "border-gray-100"}`}>
     <p className="text-sm font-semibold text-gray-800 mb-3">
       {number != null && <span className="text-indigo-500 mr-1.5">{number}.</span>}
       {text}
@@ -65,8 +66,8 @@ export function ModalShell({ title, subtitle, progress, scrollKey, children, foo
   }, [scrollKey]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="w-full max-w-2xl max-h-[92vh] flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div className="assessment-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="assessment-modal w-full max-w-2xl max-h-[92vh] flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden">
         <div className="px-6 md:px-10 pt-6 pb-5 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-500 text-white shrink-0">
           <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
           {subtitle && <p className="text-indigo-100 text-sm mt-1">{subtitle}</p>}

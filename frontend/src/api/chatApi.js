@@ -5,6 +5,7 @@ export async function sendMessage(question, answerStyle = "short") {
   const { data } = await api.post("/api/learning-response", {
     question,
     answer_style: answerStyle,
+    request_id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
   });
 
   const context = data.learning_context ?? data;
@@ -33,7 +34,25 @@ export async function sendMessage(question, answerStyle = "short") {
         .map((question) => question.trim())
       : [],
     interactionId: data.interaction_id ?? null,
+    safety: data.safety === true,
+    riskLevel: data.risk_level ?? null,
+    qualifyingEventCount: data.qualifying_event_count ?? null,
+    restrictionActive: data.restriction_active === true,
+    screeningRequired: data.screening_required === true,
+    restrictionExpiresAt: data.restriction_expires_at ?? null,
+    counsellorContacts: data.counsellor_contacts ?? [],
+    urgentGuidance: data.urgent_guidance ?? null,
   };
+}
+
+export async function getSafetyStatus() {
+  const { data } = await api.get("/api/safety/status");
+  return data;
+}
+
+export async function submitSafetyScreening(answers) {
+  const { data } = await api.post("/api/safety/screening", answers);
+  return data;
 }
 
 export async function getLearningHistory() {

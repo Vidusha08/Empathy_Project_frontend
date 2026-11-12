@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
-
 .progress-page {
   --progress-ink: #1f2937;
   --progress-muted: #64748b;
@@ -16,7 +14,7 @@
   background:
     radial-gradient(circle at 92% 0%, rgba(206, 235, 220, 0.55), transparent 34%),
     #f7f9f8;
-  font-family: "Nunito Sans", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .progress-page::-webkit-scrollbar {
@@ -40,6 +38,56 @@
 .progress-page {
   scrollbar-color: #c8d8cf #f7f9f8;
   scrollbar-width: thin;
+}
+
+.progress-page,
+.progress-page * {
+  letter-spacing: normal;
+}
+
+.overall-progress-card,
+.skill-card,
+.objective-card {
+  box-shadow: var(--app-shadow);
+}
+
+.progress-header,
+.overall-progress-card,
+.skills-list,
+.skill-card {
+  width: min(100%, 980px);
+}
+
+.app-shell[data-color-mode="dark"] .progress-page {
+  --progress-panel: #1f2937;
+  --progress-soft: #273449;
+  --progress-line: #374151;
+  --progress-ink: #f3f4f6;
+  --progress-muted: #cbd5e1;
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  .progress-page {
+    padding: 20px 14px 90px;
+  }
+
+  .overall-progress-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skill-header {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .skill-progress,
+  .mini-progress-bar {
+    width: 110px;
+  }
 }
 
 .progress-header {

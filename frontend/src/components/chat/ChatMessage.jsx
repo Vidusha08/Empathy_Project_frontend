@@ -1,4 +1,5 @@
 //src/components/chat/chatMessage.jsx
+import { useState } from "react";
 import {
   Check,
   CheckCircle2,
@@ -17,10 +18,11 @@ function ActionButton({
   hasChosen = false,
   isAnswer = false,
   ariaLabel,
+  buttonType = "button",
 }) {
   return (
     <button
-      type="button"
+      type={buttonType}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
@@ -109,6 +111,8 @@ export default function ChatMessage({
   onFlowMessage,
   selectedAnswers,
 }) {
+  const [activityResponse, setActivityResponse] = useState("");
+  const [activityConfirmed, setActivityConfirmed] = useState(false);
   const { role, content, timestamp, flowAction, step, skill, flowHandled } = message;
   const isUser = role === "user";
   const selectedAnswer = selectedAnswers?.[message.id];
@@ -120,7 +124,10 @@ export default function ChatMessage({
     .replace(/\s+/g, "_")
     .replace(/([a-z])([A-Z])/g, "$1_$2");
   const isYesNoQuestion = normalizedQuestionType === "yes_no" || normalizedQuestionType === "yesno";
+  const isMultipleChoiceQuestion = normalizedQuestionType === "multiple_choice";
   const hasApprovedActivity = Boolean(step?.activity?.id);
+  const activityMode = step?.activity?.interaction_type
+    || (step?.activity?.type === "reflection" ? "reflective" : "practical");
 
   if (isUser) {
     return (
@@ -169,11 +176,15 @@ export default function ChatMessage({
           {flowAction === "activity" && (
             <p className="mt-4 text-sm font-medium text-gray-800">
               {hasApprovedActivity
-                ? "Try just this first step now. You can describe what you notice in the chat, or confirm when you've tried it."
-                : "No approved activity was selected. Continue when you're ready for a quick understanding check."}
+                ? activityMode === "practical"
+                  ? "Try this short practice, then confirm when you've finished."
+                  : activityMode === "combined"
+                    ? "Complete the practice, then share a short reflection and confirm when you're finished."
+                    : "Think about the prompt and share a short reflection."
+                : "No practice activity is available for this objective yet."}
             </p>
           )}
-          {flowAction === "activity" && (
+          {flowAction === "activity" && hasApprovedActivity && activityMode === "practical" && (
             <div className="mt-4 flex gap-2">
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
@@ -181,14 +192,64 @@ export default function ChatMessage({
                 hasChosen={hasChosen}
                 isAnswer
                 onClick={() => emit(
-                  hasApprovedActivity ? "I've tried this step" : "Continue",
-                  { activityConfirmation: hasApprovedActivity },
+                  "I've completed this activity.",
+                  { activitySubmission: true, activityConfirmation: true },
                 )}
               >
-                <Check size={14} />{hasApprovedActivity ? "I've tried this step" : "Continue"}
+                <Check size={14} />I've completed this activity
               </ActionButton>
             </div>
           )}
+          {flowAction === "activity"
+            && hasApprovedActivity
+            && ["reflective", "combined"].includes(activityMode) && (
+              <form
+                className="mt-4 space-y-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const response = activityResponse.trim();
+                  if (!response || (activityMode === "combined" && !activityConfirmed)) return;
+                  emit(response, {
+                    activitySubmission: true,
+                    activityResponse: response,
+                    activityConfirmation: activityMode === "combined" && activityConfirmed,
+                  });
+                }}
+              >
+                <label className="sr-only" htmlFor={`activity-response-${message.id}`}>
+                  Your reflection
+                </label>
+                <textarea
+                  id={`activity-response-${message.id}`}
+                  value={activityResponse}
+                  onChange={(event) => setActivityResponse(event.target.value)}
+                  disabled={flowHandled || isLoading}
+                  required
+                  rows={3}
+                  maxLength={1000}
+                  placeholder="Write a short reflection..."
+                  className="w-full rounded-lg border border-gray-200 p-3 text-sm leading-6 text-gray-700 focus:border-indigo-400 focus:outline-none"
+                />
+                {activityMode === "combined" && (
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={activityConfirmed}
+                      onChange={(event) => setActivityConfirmed(event.target.checked)}
+                      disabled={flowHandled || isLoading}
+                    />
+                    I&apos;ve completed the practice
+                  </label>
+                )}
+                <ActionButton
+                  buttonType="submit"
+                  disabled={flowHandled || isLoading || !activityResponse.trim() || (activityMode === "combined" && !activityConfirmed)}
+                  isAnswer
+                >
+                  <Check size={14} />Submit reflection
+                </ActionButton>
+              </form>
+            )}
 
           {flowAction === "complete" && (
             <ActionButton disabled={flowHandled || isLoading} onClick={() => emit("I've completed it.")}><CheckCircle2 size={14} />I&apos;ve completed it</ActionButton>
@@ -201,29 +262,46 @@ export default function ChatMessage({
           )}
 
           {flowAction === "practice" && (
-            <div className="mt-4 flex gap-3" role="group" aria-label={isYesNoQuestion ? "Yes or no answer" : "True or false answer"}>
-              <ActionButton
-                disabled={flowHandled || hasChosen || isLoading}
-                isChosen={selectedAnswer === (isYesNoQuestion ? "Yes" : "True")}
-                hasChosen={hasChosen}
-                isAnswer
-                ariaLabel={isYesNoQuestion ? "Answer Yes" : "Answer True"}
-                onClick={() => emit(isYesNoQuestion ? "Yes" : "True")}
-              >
-                <Check size={14} />{isYesNoQuestion ? "Yes" : "True"}
-              </ActionButton>
-              <ActionButton
-                disabled={flowHandled || hasChosen || isLoading}
-                secondary
-                isChosen={selectedAnswer === (isYesNoQuestion ? "No" : "False")}
-                hasChosen={hasChosen}
-                isAnswer
-                ariaLabel={isYesNoQuestion ? "Answer No" : "Answer False"}
-                onClick={() => emit(isYesNoQuestion ? "No" : "False")}
-              >
-                <X size={14} />{isYesNoQuestion ? "No" : "False"}
-              </ActionButton>
-            </div>
+            isMultipleChoiceQuestion ? (
+              <div className="mt-4 flex flex-col gap-2" role="group" aria-label="Multiple-choice answer">
+                {(Array.isArray(step?.options) ? step.options : []).map((option) => (
+                  <ActionButton
+                    key={option}
+                    disabled={flowHandled || hasChosen || isLoading}
+                    isChosen={selectedAnswer === option}
+                    hasChosen={hasChosen}
+                    isAnswer
+                    onClick={() => emit(option)}
+                  >
+                    {option}
+                  </ActionButton>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 flex gap-3" role="group" aria-label={isYesNoQuestion ? "Yes or no answer" : "True or false answer"}>
+                <ActionButton
+                  disabled={flowHandled || hasChosen || isLoading}
+                  isChosen={selectedAnswer === (isYesNoQuestion ? "Yes" : "True")}
+                  hasChosen={hasChosen}
+                  isAnswer
+                  ariaLabel={isYesNoQuestion ? "Answer Yes" : "Answer True"}
+                  onClick={() => emit(isYesNoQuestion ? "Yes" : "True")}
+                >
+                  <Check size={14} />{isYesNoQuestion ? "Yes" : "True"}
+                </ActionButton>
+                <ActionButton
+                  disabled={flowHandled || hasChosen || isLoading}
+                  secondary
+                  isChosen={selectedAnswer === (isYesNoQuestion ? "No" : "False")}
+                  hasChosen={hasChosen}
+                  isAnswer
+                  ariaLabel={isYesNoQuestion ? "Answer No" : "Answer False"}
+                  onClick={() => emit(isYesNoQuestion ? "No" : "False")}
+                >
+                  <X size={14} />{isYesNoQuestion ? "No" : "False"}
+                </ActionButton>
+              </div>
+            )
           )}
 
           {timestamp && <p className="mt-2 text-[10px] text-gray-400">{timestamp}</p>}

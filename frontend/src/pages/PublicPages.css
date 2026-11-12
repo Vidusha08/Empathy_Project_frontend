@@ -1,0 +1,42 @@
+.public-page {
+  font-family: var(--font-sans);
+}
+
+.public-page h1,
+.public-page h2,
+.public-page h3 {
+  font-family: var(--font-sans) !important;
+}
+
+.assessment-page {
+  color: #202938;
+}
+
+.assessment-page > div {
+  width: min(100%, 720px);
+}
+
+.assessment-hero {
+  box-shadow: var(--app-shadow);
+}
+
+.assessment-page .bg-white,
+.assessment-page [class*="bg-white"] {
+  border-color: var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+.landing-page .lp-float {
+  will-change: transform;
+}
+
+@media (max-width: 640px) {
+  .assessment-page {
+    padding: 18px 14px 90px;
+  }
+
+  .assessment-hero {
+    padding: 22px;
+    border-radius: 20px;
+  }
+}

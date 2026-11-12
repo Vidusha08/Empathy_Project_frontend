@@ -1,0 +1,45 @@
+.auth-page {
+  --auth-surface: #ffffff;
+  --auth-border: #e5e7eb;
+  --auth-muted: #697586;
+}
+
+.auth-card {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: color-mix(in srgb, var(--auth-surface) 97%, transparent);
+  box-shadow: 0 24px 60px rgba(31, 41, 55, 0.2);
+}
+
+.auth-card input,
+.auth-card select {
+  min-height: 46px;
+  border-color: var(--auth-border);
+  background: var(--auth-surface);
+}
+
+.auth-card input:hover,
+.auth-card select:hover {
+  border-color: color-mix(in srgb, var(--app-accent, #4f46e5) 45%, var(--auth-border));
+}
+
+.auth-card input:focus,
+.auth-card select:focus {
+  border-color: var(--app-accent, #4f46e5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent, #4f46e5) 14%, transparent);
+}
+
+.auth-card button[type="submit"] {
+  min-height: 48px;
+  border-radius: 12px;
+}
+
+@media (max-width: 520px) {
+  .auth-card {
+    padding: 1.25rem;
+    border-radius: 20px;
+  }
+
+  .auth-page h1 {
+    font-size: 1.75rem;
+  }
+}

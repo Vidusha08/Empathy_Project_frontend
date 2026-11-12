@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getSkill } from "../api/contentApi";
 import progressApi from "../api/progressApi";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import "./QuizPage.css";
 
 const listOf = (value) => (Array.isArray(value) ? value : []);
 
@@ -112,12 +114,12 @@ function QuizPage() {
     setError("");
   };
 
-  if (loading) return <main className="p-6">Loading quiz...</main>;
-  if (error && !quiz) return <main className="p-6"><p role="alert">{error}</p><Link to="/content">Back to content</Link></main>;
-  if (!quiz) return <main className="p-6"><p role="alert">Quiz data is unavailable.</p><Link to="/content">Back to content</Link></main>;
+  if (loading) return <main className="quiz-page quiz-page--state"><div className="quiz-skeleton" aria-label="Loading quiz" /><LoadingSpinner label="Loading quiz" /></main>;
+  if (error && !quiz) return <main className="quiz-page quiz-page--state"><p role="alert">{error}</p><Link to="/content">Back to content</Link></main>;
+  if (!quiz) return <main className="quiz-page quiz-page--state"><p role="alert">Quiz data is unavailable.</p><Link to="/content">Back to content</Link></main>;
 
   return (
-    <main className="p-6 max-w-3xl mx-auto">
+    <main className="quiz-page max-w-3xl mx-auto">
       <header className="quiz-page__header mb-6">
         <Link to="/content" className="text-indigo-600">← Back to content</Link>
         <h1 className="text-2xl font-bold mt-4">{quiz.title || "Quiz"}</h1>
@@ -127,7 +129,7 @@ function QuizPage() {
       {error && <p className="mt-4 text-red-600" role="alert">{error}</p>}
 
       {result && (
-        <div className="mt-6 rounded-xl border p-4" role="status">
+        <div className="quiz-result mt-6 rounded-xl border p-4" role="status">
           <strong>Score: {result.score}% ({result.correct}/{result.total})</strong>
           {result.completed
             ? result.objectiveCompleted
@@ -156,7 +158,7 @@ function QuizPage() {
       {!result?.completed && questions.length > 0 && (
         <form onSubmit={submitQuiz} className="mt-6 space-y-6">
           {questions.map((question, index) => (
-            <fieldset key={question.question_id || index} className="rounded-xl border p-4">
+            <fieldset key={question.question_id || index} className="quiz-question rounded-xl border p-4">
               <legend className="font-semibold">{index + 1}. {question.question}</legend>
               <div className="mt-3 space-y-2">
                 {listOf(question.options).map((option) => (

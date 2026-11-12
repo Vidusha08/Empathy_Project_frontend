@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertCircle, Heart, LoaderCircle, Send, Sparkles } from "lucide-react";
 import { sendGeneralEmpathyMessage } from "../api/generalEmpathyApi";
+import "./ChatPages.css";
 
 const welcomeMessage = {
   id: "welcome",
@@ -87,7 +88,7 @@ export default function GeneralEmpathyChatPage() {
   };
 
   return (
-    <section className="mx-auto flex min-h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6">
+    <section className="chat-page chat-page--general mx-auto flex min-h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6">
       <header className="flex items-center gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
           <Heart size={21} />
@@ -100,7 +101,7 @@ export default function GeneralEmpathyChatPage() {
         </div>
       </header>
 
-      <div className="flex min-h-[440px] flex-1 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="chat-surface flex min-h-[440px] flex-1 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 sm:px-6">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
             <Sparkles size={18} />
