@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, ChevronDown, MessageCircle } from "lucide-react";
 import { getLearningHistory } from "../api/chatApi";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import "./ChatHistoryPage.css";
 
 function displayResponse(response) {
@@ -79,7 +80,7 @@ export default function ChatHistoryPage() {
       </header>
 
       {error && <p className="history-state history-state--error">{error}</p>}
-      {loading && <p className="history-state">Loading saved conversations...</p>}
+      {loading && <p className="history-state"><LoadingSpinner label="Loading saved conversations" /></p>}
       {!loading && !error && interactions.length === 0 && <p className="history-state">No saved conversations yet.</p>}
 
       {!loading && !error && dateGroups.length > 0 && (

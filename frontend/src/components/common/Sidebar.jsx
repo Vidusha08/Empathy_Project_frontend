@@ -1,7 +1,6 @@
 //src/components/common/Sidebar.jsx
 import { NavLink } from "react-router-dom";
 import {
-  MessageSquare,
   Sparkles,
   BookOpen,
   History,
@@ -17,7 +16,6 @@ import { themeOptions, useSettingsStore } from "../../store/settingsStore";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, path: "/dashboard" },
-  { label: "Chat", icon: MessageSquare, path: "/chat" },
   { label: "Empathy Chat", icon: Sparkles, path: "/general-empathy-chat" },
   { label: "Content", icon: BookOpen, path: "/content" },
   { label: "Progress", icon: BarChart2, path: "/progress" },
@@ -27,14 +25,44 @@ const navItems = [
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useSettingsStore((state) => state.theme);
   const activeTheme = themeOptions.find((option) => option.id === theme) ?? themeOptions[0];
 
+  const links = navItems.map(({ label, icon: Icon, path }) => (
+    <NavLink
+      key={path}
+      to={path}
+      onClick={() => setMobileOpen(false)}
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+          isActive
+            ? "bg-white/15 text-white font-semibold"
+            : "text-white/70 hover:bg-white/10 hover:text-white"
+        }`
+      }
+    >
+      <Icon size={20} className="flex-shrink-0" />
+      {!collapsed && <span className="text-sm font-medium">{label}</span>}
+    </NavLink>
+  ));
+
   return (
-    <aside
-      className={`relative flex flex-col h-screen text-white transition-all duration-300 ${
-        collapsed ? "w-16" : "w-56"
-      }`}
+    <>
+      <button
+        type="button"
+        className="sidebar-mobile-trigger"
+        aria-label="Open navigation"
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen(true)}
+      >
+        <LayoutDashboardIcon size={19} />
+      </button>
+      {mobileOpen && <button type="button" className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
+      <aside
+        className={`app-sidebar relative flex flex-col h-screen text-white transition-all duration-300 ${
+          collapsed ? "w-16" : "w-56"
+        } ${mobileOpen ? "is-mobile-open" : ""}`}
       style={{ minWidth: collapsed ? "4rem" : "14rem", backgroundColor: activeTheme.sidebar }}
     >
       {/* Logo Empathy Buddy */}
@@ -51,24 +79,7 @@ export default function Sidebar() {
 
       {/* Nav Links*/}
       <nav className="px-2 py-4 space-y-1">
-        {navItems.map(({ label, icon: Icon, path }) => (
-          <NavLink
-            key={path}
-            to={path}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? "bg-white/15 text-white font-semibold"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <Icon size={20} className="flex-shrink-0" />
-            {!collapsed && (
-              <span className="text-sm font-medium">{label}</span>
-            )}
-          </NavLink>
-        ))}
+        {links}
       </nav>
 
       {/* Spacer pushes the Settings section down without growing the nav itself */}
@@ -82,6 +93,19 @@ export default function Sidebar() {
       >
         {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
-    </aside>
+      </aside>
+      <nav className="sidebar-mobile-nav" aria-label="Quick navigation">
+        {navItems.slice(0, 4).map(({ label, icon: Icon, path }) => (
+          <NavLink key={path} to={path} onClick={() => setMobileOpen(false)}>
+            <Icon size={18} />
+            <span>{label === "Empathy Chat" ? "Empathy" : label}</span>
+          </NavLink>
+        ))}
+        <button type="button" onClick={() => setMobileOpen(true)}>
+          <Settings size={18} />
+          <span>More</span>
+        </button>
+      </nav>
+    </>
   );
 }

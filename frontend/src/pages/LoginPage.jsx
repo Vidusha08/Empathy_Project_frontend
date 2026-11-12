@@ -1,7 +1,8 @@
 // src/pages/LoginPage.jsx
-import { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import "./AuthPages.css";
 
 export default function LoginPage() {
   const location = useLocation();
@@ -41,7 +42,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
+    <div className="auth-page auth-page--login min-h-screen bg-linear-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
         {/* Header */}
@@ -57,7 +58,7 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
+        <div className="auth-card bg-white rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Welcome Back!</h2>
             <p className="text-gray-500 mt-1 text-sm">Sign in to continue your journey</p>

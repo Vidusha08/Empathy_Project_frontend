@@ -1,0 +1,27 @@
+.loading-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--app-muted, #697586);
+  font-size: 0.875rem;
+}
+
+.loading-spinner__ring {
+  width: 22px;
+  height: 22px;
+  border: 3px solid color-mix(in srgb, var(--app-accent, #4f46e5) 18%, transparent);
+  border-top-color: var(--app-accent, #4f46e5);
+  border-radius: 999px;
+  animation: loading-spinner-rotate 750ms linear infinite;
+}
+
+.loading-spinner--compact .loading-spinner__ring {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+@keyframes loading-spinner-rotate {
+  to { transform: rotate(360deg); }
+}

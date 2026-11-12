@@ -1,0 +1,207 @@
+.chat-page {
+  --chat-surface: #ffffff;
+  --chat-border: #e5e7eb;
+  --chat-muted: #697586;
+  --chat-soft: #f8fafc;
+  color: #202938;
+}
+
+/* The SEEK conversation owns the available app-main height. */
+.app-main:has(.chat-page--seek) {
+  overflow: hidden;
+}
+
+.chat-page--seek {
+  min-height: 0;
+}
+
+.app-shell main .chat-page--seek .chat-page__header {
+  margin: 0 12px 4px;
+  padding: 6px 12px !important;
+  border-radius: 10px;
+}
+
+.chat-page--seek .chat-page__body {
+  min-height: 0;
+}
+
+.chat-page--seek .chat-page__conversation {
+  margin: 0 12px 4px;
+  min-height: 0;
+}
+
+.chat-page__header {
+  margin: 12px 20px 10px;
+  padding: 16px 18px !important;
+  border: 1px solid var(--chat-border);
+  border-radius: var(--app-radius);
+  background: color-mix(in srgb, var(--chat-surface) 94%, transparent);
+}
+
+.chat-surface {
+  border-color: var(--chat-border) !important;
+  background: var(--chat-surface) !important;
+  box-shadow: var(--app-shadow) !important;
+}
+
+.chat-page .chat-composer {
+  padding: 0 12px 6px;
+}
+
+.chat-page .chat-composer > div {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.chat-page--seek .chat-composer__inner {
+  display: grid;
+  gap: 3px;
+}
+
+.chat-response-style {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+}
+
+.chat-response-style__label {
+  color: var(--chat-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chat-response-style__options {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--chat-border);
+  border-radius: 7px;
+  background: var(--chat-soft);
+}
+
+.chat-response-style__option {
+  min-height: 24px;
+  padding: 2px 9px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--chat-muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chat-response-style__option[aria-pressed="true"] {
+  background: var(--chat-surface);
+  color: var(--app-accent, #4f46e5);
+  box-shadow: 0 1px 2px rgba(31, 41, 55, 0.12);
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 5px 8px 5px 12px;
+  border: 1px solid var(--chat-border);
+  border-radius: 14px;
+  background: var(--chat-surface);
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.06);
+}
+
+.chat-input-row:focus-within {
+  border-color: var(--app-accent, #4f46e5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent, #4f46e5) 12%, transparent);
+}
+
+.chat-input-row textarea {
+  min-height: 28px !important;
+  max-height: 76px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.chat-input-row__mic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.chat-page textarea {
+  border-color: var(--chat-border);
+  background: var(--chat-soft);
+}
+
+.chat-page textarea:focus {
+  border-color: var(--app-accent, #4f46e5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent, #4f46e5) 12%, transparent);
+}
+
+.chat-page .rounded-2xl.rounded-br-sm,
+.chat-page .rounded-2xl.rounded-bl-sm {
+  box-shadow: 0 4px 14px rgba(31, 41, 55, 0.05);
+}
+
+.chat-page--general > header {
+  padding: 2px 2px 4px;
+}
+
+.chat-page--general .chat-surface {
+  min-height: min(680px, calc(100vh - 180px));
+}
+
+.chat-page--general .chat-surface > div:last-child {
+  background: var(--chat-surface);
+}
+
+.chat-page--general textarea {
+  background: var(--chat-soft);
+}
+
+.app-shell[data-color-mode="dark"] .chat-page {
+  --chat-surface: #1f2937;
+  --chat-border: #374151;
+  --chat-muted: #cbd5e1;
+  --chat-soft: #273449;
+  color: #f3f4f6;
+}
+
+.app-shell[data-color-mode="dark"] .chat-page .text-gray-800,
+.app-shell[data-color-mode="dark"] .chat-page .text-gray-700,
+.app-shell[data-color-mode="dark"] .chat-page .text-gray-600,
+.app-shell[data-color-mode="dark"] .chat-page .text-gray-500 {
+  color: #e5e7eb;
+}
+
+@media (max-width: 640px) {
+  .chat-page__header {
+    margin: 8px 12px;
+  }
+
+  .chat-page .chat-composer {
+    padding: 0 8px 5px;
+  }
+
+  .chat-page--seek .chat-page__header {
+    margin: 0 8px 3px;
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+  }
+
+  .chat-page--seek .chat-page__conversation {
+    margin-right: 8px;
+    margin-left: 8px;
+  }
+
+  .chat-page--general {
+    padding: 12px !important;
+  }
+
+  .chat-page--general .chat-surface {
+    min-height: 0;
+  }
+}

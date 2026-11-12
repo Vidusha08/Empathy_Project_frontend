@@ -3,12 +3,14 @@ import { useState, useRef, useEffect } from "react";
 import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
-import { sendMessage } from "../api/chatApi";
+import { getSafetyStatus, sendMessage, submitSafetyScreening } from "../api/chatApi";
 import { completeItem, completeObjective, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
 import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
 import { verifyQuickCheckAnswer } from "../utils/quickCheck";
 import { Mic, Send } from "lucide-react";
+import "./ChatPages.css";
+import SafetyGate from "../components/chat/SafetyGate";
 
 // Backend returns the student's full name at user.name (e.g. "Jane Doe").
 // This pulls just the first token for the greeting store, falling back
@@ -21,18 +23,11 @@ function getFirstName(user) {
 }
 
 function fallbackObjectiveQuestions(objective) {
-  const items = Array.isArray(objective?.items) ? objective.items : [];
-  const source = items.find((item) => typeof item?.content === "string" && item.content.trim());
   const title = titleOf(objective);
-  const topic = (source?.title || source?.content || objective?.content || title || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(/(?<=[.!?])\s+/)[0]
-    .slice(0, 72)
-    .replace(/[.,;:]$/, "");
+  const topic = title || "";
   if (!topic) return [];
 
-  const objectiveTitle = title || topic;
+  const objectiveTitle = topic;
   return [
     `What does the approved SEEK content say about ${topic}?`,
     `How does ${topic} relate to ${objectiveTitle}?`,
@@ -53,10 +48,10 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
   };
 
   return (
-    <div className="px-5 pb-4 pt-1">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-medium text-gray-500">Response style:</span>
-        <div className="flex rounded-lg bg-gray-100 p-0.5" role="group" aria-label="Response style">
+    <div className="chat-composer__inner">
+      <div className="chat-response-style" role="group" aria-label="Response style">
+        <span className="chat-response-style__label">Response:</span>
+        <div className="chat-response-style__options">
           {[
             { value: "short", label: "Short" },
             { value: "long", label: "Long" },
@@ -66,7 +61,7 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
               type="button"
               onClick={() => onAnswerStyleChange(style.value)}
               aria-pressed={answerStyle === style.value}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              className={`chat-response-style__option ${
                 answerStyle === style.value
                   ? "bg-white text-indigo-700 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -77,7 +72,7 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
           ))}
         </div>
       </div>
-      <div className="flex items-end gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-2.5 shadow-sm focus-within:border-indigo-300 transition-colors">
+      <div className="chat-input-row">
         <textarea
           ref={ref}
           value={text}
@@ -91,11 +86,12 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
           className="flex-1 resize-none outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent leading-relaxed max-h-28 overflow-y-auto"
           style={{ minHeight: 24 }}
         />
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button type="button" className="chat-input-row__mic text-gray-400 hover:text-gray-600 transition-colors p-1" aria-label="Use microphone">
             <Mic size={16} />
           </button>
           <button
+            type="button"
             onClick={submit}
             disabled={!text.trim() || isLoading || disabled}
             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all
@@ -118,6 +114,9 @@ export default function ChatPage() {
   const [answerStyle, setAnswerStyle] = useState("short");
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+  const [safetyStatus, setSafetyStatus] = useState(null);
+  const [screeningLoading, setScreeningLoading] = useState(false);
+  const [screeningError, setScreeningError] = useState("");
   const recommendationKeys = useRef(new Set());
   const activityCompletionInFlight = useRef(new Set());
   const requestInFlight = useRef(false);
@@ -138,6 +137,37 @@ export default function ChatPage() {
   useEffect(() => {
     if (firstName) setGreetingName(firstName);
   }, [firstName, setGreetingName]);
+
+  useEffect(() => {
+    let active = true;
+    getSafetyStatus()
+      .then((status) => {
+        if (active && (status.restriction_active || status.screening_required)) {
+          setSafetyStatus(status);
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const handleSafetyScreening = async (answers) => {
+    setScreeningLoading(true);
+    setScreeningError("");
+    try {
+      const status = await submitSafetyScreening(answers);
+      if (status.access_restored) {
+        setSafetyStatus(null);
+      } else {
+        setSafetyStatus(status);
+      }
+    } catch (error) {
+      setScreeningError(
+        error?.response?.data?.error || "The screening could not be saved. Please try again.",
+      );
+    } finally {
+      setScreeningLoading(false);
+    }
+  };
 
   const ts = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -409,6 +439,31 @@ export default function ChatPage() {
 
     try {
       const res = await sendMessage(question, style);
+      if (res.safety) {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: [res.message, res.urgentGuidance].filter(Boolean).join("\n\n"),
+          timestamp: ts(),
+          emotion: "concerned",
+        });
+        if (res.restrictionActive || res.screeningRequired) {
+          setSafetyStatus({
+            message: res.message,
+            restriction_active: res.restrictionActive,
+            screening_required: res.screeningRequired,
+            restriction_expires_at: res.restrictionExpiresAt,
+            counsellor_contacts: res.counsellorContacts,
+            urgent_guidance: res.urgentGuidance,
+          });
+        }
+        return;
+      }
+      const context = res.learning_context || res;
+
+console.log("Selected objective title:", context.learning_objective?.title);
+console.log("Selected objective ID:", context.learning_objective?.objective_id);
+console.log("Question-relevant content:", context.question_relevant_content);
       const questions = Array.isArray(res.suggested_questions)
         ? res.suggested_questions
         : [];
@@ -421,6 +476,9 @@ export default function ChatPage() {
     } catch (err) {
       setSuggestedQuestions([]);
       const isUnauth = err?.response?.status === 401;
+      if (err?.response?.status === 423 && err.response.data?.safety) {
+        setSafetyStatus(err.response.data);
+      }
       addMessage({
         id:        createId(),
         role:      "assistant",
@@ -444,14 +502,32 @@ export default function ChatPage() {
       || isLoading
     ) return;
 
-    const isActivityConfirmation = action === "activity"
-      && options.activityConfirmation === true
-      && Boolean(sourceMessage.recommendedActivity);
-    if (isActivityConfirmation) {
+    const activityMode = sourceMessage.step?.activity?.interaction_type
+      || (sourceMessage.step?.activity?.type === "reflection" ? "reflective" : "practical");
+    const hasActivityResponse = typeof options.activityResponse === "string"
+      && Boolean(options.activityResponse.trim());
+    const isActivitySubmission = action === "activity"
+      && options.activitySubmission === true
+      && Boolean(sourceMessage.recommendedActivity?.id)
+      && (
+        (activityMode === "practical" && options.activityConfirmation === true)
+        || (activityMode === "reflective" && hasActivityResponse)
+        || (activityMode === "combined" && hasActivityResponse && options.activityConfirmation === true)
+      );
+    if (isActivitySubmission) {
       if (activityCompletionInFlight.current.has(sourceMessage.id)) return;
       activityCompletionInFlight.current.add(sourceMessage.id);
       setLoading(true);
     } else {
+      if (action === "activity") {
+        addMessage({
+          id: createId(),
+          role: "assistant",
+          content: "Please complete the activity response before continuing.",
+          timestamp: ts(),
+        });
+        return;
+      }
       markMessageHandled(sourceMessage.id);
       setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
     }
@@ -472,7 +548,7 @@ export default function ChatPage() {
       );
       return;
     }
-    if (!isActivityConfirmation) addUserMessage(text);
+    if (!isActivitySubmission) addUserMessage(text);
 
     if (text === "No" && ["learn", "understanding"].includes(action)) {
       addMessage({
@@ -514,7 +590,7 @@ export default function ChatPage() {
     const nextStep = flowSteps[nextIndex];
     if (
       action === "complete"
-      || isActivityConfirmation
+      || isActivitySubmission
     ) {
       if (!skillId || !itemId || !itemType) {
         console.error("[chatbot-progress] missing completion metadata", {
@@ -531,7 +607,7 @@ export default function ChatPage() {
           content: "I could not identify the recommended curriculum item to save your progress.",
           timestamp: ts(),
         });
-        if (isActivityConfirmation) {
+        if (isActivitySubmission) {
           activityCompletionInFlight.current.delete(sourceMessage.id);
           setLoading(false);
         }
@@ -554,14 +630,20 @@ export default function ChatPage() {
         });
         const completionResponse = await completeItem(skillId, itemId, itemType, "chatbot");
         console.info("[chatbot-progress] completion response", completionResponse);
-        if (isActivityConfirmation) {
+        if (isActivitySubmission) {
           markMessageHandled(sourceMessage.id);
           setSelectedAnswers((prev) => ({ ...prev, [sourceMessage.id]: text }));
-          addUserMessage(text);
+          addUserMessage(hasActivityResponse
+            ? `Reflection: ${options.activityResponse.trim()}`
+            : text);
           activityCompletionInFlight.current.delete(sourceMessage.id);
           setLoading(false);
         }
-        if (!completionResponse.objective_completed && !sourceMessage.requiredObjectiveItem) {
+        if (
+          !completionResponse.objective_completed
+          && !sourceMessage.requiredObjectiveItem
+          && !nextStep
+        ) {
           const missingItems = completionResponse.missing_completion_items || [];
           const missingActivity = missingItems.find(
             (item) => ["activity", "practice"].includes(item.type),
@@ -580,7 +662,7 @@ export default function ChatPage() {
           });
         }
       } catch (error) {
-        if (isActivityConfirmation) {
+        if (isActivitySubmission) {
           activityCompletionInFlight.current.delete(sourceMessage.id);
           setLoading(false);
         }
@@ -631,7 +713,9 @@ export default function ChatPage() {
               {
                 source: "chatbot",
                 interaction_id: sourceMessage.interactionId,
-                quick_check_answer: ["true", "yes"].includes(text.trim().toLowerCase()),
+                quick_check_answer: typeof sourceMessage.step?.correct_answer === "string"
+                  ? text.trim()
+                  : ["true", "yes"].includes(text.trim().toLowerCase()),
               },
             );
           } catch (error) {
@@ -644,6 +728,28 @@ export default function ChatPage() {
             });
             return;
           }
+        } else {
+          const conceptStep = flowSteps.find(
+            (step) => step?.type === "learning_objective",
+          );
+          addMessage({
+            id: createId(),
+            role: "assistant",
+            content: `Not quite. Let's explain the idea another way:\n\n${conceptStep?.content || "Review the concept once more, then try the check again."}`,
+            timestamp: ts(),
+            skill: sourceMessage.skill,
+            step: sourceMessage.step,
+            flowAction: "practice",
+            flowIndex: sourceMessage.flowIndex,
+            learningSteps: flowSteps,
+            recommendedActivity: sourceMessage.recommendedActivity,
+            learningObjective: sourceMessage.learningObjective,
+            interactionId: sourceMessage.interactionId,
+            progressItemId: sourceMessage.progressItemId,
+            progressObjectiveId: sourceMessage.progressObjectiveId,
+            progressItemType: sourceMessage.progressItemType,
+          });
+          return;
         }
         await recommendNextObjective(sourceMessage, result);
       } else {
@@ -700,19 +806,19 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="chat-page flex flex-col h-full overflow-hidden">
+    <div className="chat-page chat-page--seek flex h-full min-h-0 flex-col overflow-hidden">
 
       {/* Chat area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="chat-page__header px-6 pt-5 pb-2 flex-shrink-0">
-          <div className="flex items-center gap-2 mb-1">
+      <div className="chat-page__body flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="chat-page__header shrink-0">
+          <div className="flex items-center gap-2">
             <span className="text-xl">💬</span>
             <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru</h1>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 mx-5 mb-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="chat-surface chat-page__conversation flex min-h-0 flex-1 flex-col overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-sm">
           <ChatWindow
             messages={messages}
             isLoading={isLoading}
@@ -724,7 +830,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input */}
-        <div className="flex-shrink-0">
+        <div className="chat-composer shrink-0">
           <ChatInputArea
             onSend={handleSend}
             isLoading={isLoading}
@@ -733,6 +839,16 @@ export default function ChatPage() {
           />
         </div>
       </div>
+
+      {safetyStatus && (
+        <SafetyGate
+          mode={safetyStatus.restriction_active ? "restricted" : "screening"}
+          status={safetyStatus}
+          onSubmit={handleSafetyScreening}
+          loading={screeningLoading}
+          error={screeningError}
+        />
+      )}
     </div>
   );
 }

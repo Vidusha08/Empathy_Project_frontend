@@ -3,6 +3,7 @@
 }*/
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, CheckCircle2, Brain, Lightbulb, ShieldCheck } from "lucide-react";
+import "./PublicPages.css";
  
 const seekPrinciples = [
   {
@@ -35,11 +36,11 @@ export default function AssessmentPage() {
   const navigate = useNavigate();
  
   return (
-    <div className="min-h-screen bg-gray-50 overflow-y-auto p-6">
+    <div className="public-page assessment-page min-h-screen bg-gray-50 overflow-y-auto p-6">
       <div className="max-w-2xl mx-auto">
  
         {/* Hero card */}
-        <div className="bg-gradient-to-br from-[#1a237e] to-[#3949ab] rounded-3xl p-8 text-white mb-6 relative overflow-hidden">
+        <div className="assessment-hero bg-gradient-to-br from-[#1a237e] to-[#3949ab] rounded-3xl p-8 text-white mb-6 relative overflow-hidden">
           <div className="absolute -right-6 -top-6 w-36 h-36 rounded-full bg-white/5" />
           <div className="absolute right-4 bottom-0 w-24 h-24 rounded-full bg-white/5" />
           <div className="relative z-10">

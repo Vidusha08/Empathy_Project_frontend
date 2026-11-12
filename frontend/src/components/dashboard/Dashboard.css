@@ -1,0 +1,105 @@
+.dashboard-page,
+.student-dashboard {
+  --dashboard-ink: #3a342b;
+  --dashboard-muted: #6b6255;
+  --dashboard-border: #ede6d9;
+  --dashboard-surface: #ffffff;
+  --dashboard-soft: #faf7f1;
+}
+
+.dashboard-header,
+.dashboard-card,
+.dashboard-action {
+  border: 1px solid var(--dashboard-border);
+  box-shadow: var(--app-shadow);
+}
+
+.dashboard-header {
+  padding: 18px 20px;
+  border-radius: var(--app-radius);
+  background: color-mix(in srgb, var(--dashboard-surface) 92%, transparent);
+}
+
+.dashboard-eyebrow {
+  margin-bottom: 5px;
+  color: var(--app-accent, #4f46e5);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-subtitle {
+  margin-top: 5px;
+  color: var(--dashboard-muted);
+  font-size: 0.85rem;
+}
+
+.dashboard-card {
+  border-radius: var(--app-radius);
+  background: var(--dashboard-surface);
+}
+
+.dashboard-stat {
+  min-height: 62px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+}
+
+.dashboard-progress-summary {
+  padding: 10px 14px;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+}
+
+.dashboard-action {
+  min-height: 180px;
+  padding: 18px;
+  border-radius: var(--app-radius);
+  background: var(--dashboard-soft);
+  box-shadow: 0 8px 20px rgba(31, 41, 55, 0.06);
+}
+
+.dashboard-action--chat {
+  background: linear-gradient(135deg, #efe6f5, #f6f2ec);
+}
+
+.dashboard-action--content {
+  background: linear-gradient(135deg, #e8f0e9, #f6f2ec);
+}
+
+.dashboard-chart {
+  min-height: 240px;
+  padding: 16px;
+}
+
+.dashboard-empty {
+  color: var(--dashboard-muted);
+}
+
+.app-shell[data-color-mode="dark"] .dashboard-page,
+.app-shell[data-color-mode="dark"] .student-dashboard {
+  --dashboard-ink: #f3f4f6;
+  --dashboard-muted: #cbd5e1;
+  --dashboard-border: #374151;
+  --dashboard-surface: #1f2937;
+  --dashboard-soft: #273449;
+}
+
+.app-shell[data-color-mode="dark"] .dashboard-action--chat,
+.app-shell[data-color-mode="dark"] .dashboard-action--content {
+  background: var(--dashboard-soft);
+}
+
+@media (max-width: 640px) {
+  .dashboard-header {
+    padding: 16px;
+  }
+
+  .dashboard-action {
+    min-height: 0;
+  }
+
+  .dashboard-action .rabbit-idle {
+    display: none;
+  }
+}

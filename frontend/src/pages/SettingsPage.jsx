@@ -1,4 +1,4 @@
-import { Check, Headphones, Image, Moon, Palette, Sun, UserRound } from "lucide-react";
+import { Check, Image, Moon, Palette, Sun, UserRound } from "lucide-react";
 import { useSettingsStore, themeOptions } from "../store/settingsStore";
 import "./SettingsPage.css";
 
@@ -12,11 +12,9 @@ export default function SettingsPage() {
   const colorMode = useSettingsStore((state) => state.colorMode);
   const backgroundScene = useSettingsStore((state) => state.backgroundScene);
   const theme = useSettingsStore((state) => state.theme);
-  const backgroundColor = useSettingsStore((state) => state.backgroundColor);
   const setColorMode = useSettingsStore((state) => state.setColorMode);
   const setBackgroundScene = useSettingsStore((state) => state.setBackgroundScene);
   const setTheme = useSettingsStore((state) => state.setTheme);
-  const setBackgroundColor = useSettingsStore((state) => state.setBackgroundColor);
 
   return (
     <div className="settings-page">

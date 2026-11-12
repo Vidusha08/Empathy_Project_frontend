@@ -1,0 +1,40 @@
+.assessment-modal {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.26);
+}
+
+.assessment-modal input[type="checkbox"],
+.assessment-modal input[type="radio"] {
+  accent-color: var(--app-accent, #4f46e5);
+}
+
+.assessment-choice,
+.assessment-question,
+.assessment-modal textarea {
+  transition: border-color var(--app-transition), background-color var(--app-transition), box-shadow var(--app-transition);
+}
+
+.assessment-choice:hover {
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.06);
+}
+
+.assessment-question:focus-within {
+  border-color: color-mix(in srgb, var(--app-accent, #4f46e5) 48%, #e5e7eb);
+}
+
+.assessment-modal textarea:focus {
+  border-color: var(--app-accent, #4f46e5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent, #4f46e5) 14%, transparent);
+}
+
+@media (max-width: 640px) {
+  .assessment-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .assessment-modal {
+    max-height: 94vh;
+    border-radius: 20px 20px 0 0;
+  }
+}

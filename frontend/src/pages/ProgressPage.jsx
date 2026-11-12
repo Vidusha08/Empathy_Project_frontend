@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Circle } from "lucide-react";
 import { completeItem, getOverallProgress, getProgress, getProgressStructure } from "../api/progressApi";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import "./ProgressPage.css";
 
 const valueOf = (record, ...keys) => {
@@ -87,7 +88,7 @@ function ProgressPage() {
     finally { setCompleting(false); }
   }
 
-  if (loading) return <div className="progress-page"><div className="progress-loading">Loading your learning progress...</div></div>;
+  if (loading) return <div className="progress-page"><div className="progress-loading"><LoadingSpinner label="Loading your learning progress" /></div></div>;
   if (error && !progress) return <div className="progress-page"><div className="progress-error"><h2>Unable to load progress</h2><p>{error}</p><button type="button" onClick={loadProgress}>Try Again</button></div></div>;
 
   if (!path.skill) return <div className="progress-page"><div className="progress-header"><h1>Your Learning Progress</h1><p>Track the learning items you have completed across each skill.</p></div><ProgressSummary progress={progress} /><section className="journey-list" aria-label="Skills">{skills.map((skill, index) => { const skillProgress = skillProgressOf(progress, skillIdOf(skill)); const percentage = percentageOf(skillProgress); return <button type="button" className="journey-row" key={skillIdOf(skill)} onClick={() => selectSkill(skill)}><span className="journey-number">{String(index + 1).padStart(2, "0")}</span><span className="journey-main"><strong>{skill.title || skill.name}</strong><span>{percentage === null ? "Progress unavailable" : `${percentage}% Complete · ${statusOf(skillProgress)}`}</span>{percentage !== null && <span className="journey-track"><span style={{ width: `${percentage}%` }} /></span>}</span></button>; })}</section></div>;

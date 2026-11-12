@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
-
 .content-page {
   --progress-ink: #1f2937;
   --progress-muted: #64748b;
@@ -14,7 +12,7 @@
   padding: clamp(24px, 4vw, 48px);
   color: var(--progress-ink);
   background: transparent;
-  font-family: "Nunito Sans", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .content-page::-webkit-scrollbar {
@@ -38,6 +36,68 @@
 .content-page {
   scrollbar-width: thin;
   scrollbar-color: #c8d8cf #f7f9f8;
+}
+
+.content-page,
+.content-page * {
+  letter-spacing: normal;
+}
+
+.content-page__header,
+.content-page__card,
+.skill-detail__hero,
+.panel-block,
+.meta-panel,
+.skill-card {
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+}
+
+.content-page__grid,
+.skill-detail {
+  width: min(100%, 980px);
+}
+
+.content-page__loading,
+.content-page__error {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border: 1px dashed var(--progress-line);
+  border-radius: var(--app-radius);
+  background: color-mix(in srgb, var(--progress-panel) 92%, transparent);
+}
+
+.app-shell[data-color-mode="dark"] .content-page {
+  --progress-panel: #1f2937;
+  --progress-line: #374151;
+  --progress-ink: #f3f4f6;
+  --progress-muted: #cbd5e1;
+}
+
+@media (max-width: 640px) {
+  .content-page {
+    padding: 20px 14px 90px;
+  }
+
+  .content-skills {
+    grid-template-columns: 1fr;
+  }
+
+  .content-page__stats {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .content-page__stat-divider {
+    display: none;
+  }
+
+  .content-chatbot-link {
+    right: 16px;
+    bottom: 86px;
+  }
 }
 
 .content-chatbot-link {

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import RabbitIdle from "../chat/RabbitIdle";
+import "./Dashboard.css";
 
 // NOTE: ids here should match whatever skill_id values your backend's
 // knowledge_base.json / keyword_skill_map.json actually use.
@@ -33,7 +34,7 @@ const MOCK_PROGRESS = SKILLS.reduce((acc, skill, i) => {
 
 function StatCard({ icon: Icon, label, value, accent }) {
   return (
-    <div className="bg-white rounded-xl p-3 border border-[#EDE6D9] shadow-sm flex items-center gap-2.5">
+    <div className="dashboard-stat dashboard-card flex items-center gap-2.5">
       <div
         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
         style={{ background: `${accent}22` }}
@@ -118,15 +119,15 @@ export default function StudentDashboard() {
       <div className="p-4 md:p-5" >
 
         {/* Header style={{ fontFamily: "'Work Sans', sans-serif" }}*/}
-        <div className="student-dashboard__header flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div className="student-dashboard__header dashboard-header flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <div>
             <p className="text-xs text-[#9B8E7E] font-medium mb-0.5">Welcome back</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#3A342B]" style={{ fontFamily: "'Newsreader', serif" }}>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#3A342B]">
               Hi, {username} 👋
             </h1>
             <p className="text-sm text-[#6B6255] mt-0.5">Let's keep building your empathy skills today.</p>
           </div>
-          <div className="flex items-center gap-2.5 bg-white rounded-xl px-4 py-2.5 shadow-sm border border-[#EDE6D9] self-start">
+          <div className="dashboard-card dashboard-progress-summary flex items-center gap-2.5 self-start">
             <Trophy size={18} className="text-[#D9A85E]" />
             <div>
               <p className="text-[11px] text-[#9B8E7E] leading-tight">Overall progress</p>
@@ -137,7 +138,7 @@ export default function StudentDashboard() {
 
         {/* Quick actions */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div className="student-dashboard__quick-action student-dashboard__quick-action--chat bg-gradient-to-br from-[#EFE6F5] to-[#F6F2EC] rounded-2xl p-4 border border-[#E7DEEF] flex items-center justify-between gap-3">
+          <div className="student-dashboard__quick-action student-dashboard__quick-action--chat dashboard-action dashboard-action--chat flex items-center justify-between gap-3">
             <div className="min-w-0">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#8B6FA8] bg-white/70 px-2.5 py-0.5 rounded-full mb-2">
                 <MessageSquare size={12} /> Chatbot
@@ -158,7 +159,7 @@ export default function StudentDashboard() {
             <RabbitIdle onClick={() => navigate("/chat")} size={90} />
           </div>
 
-          <div className="student-dashboard__quick-action student-dashboard__quick-action--content bg-gradient-to-br from-[#E8F0E9] to-[#F6F2EC] rounded-2xl p-4 border border-[#DCEADD] flex flex-col justify-between">
+          <div className="student-dashboard__quick-action student-dashboard__quick-action--content dashboard-action dashboard-action--content flex flex-col justify-between">
             <div>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#5C8A6B] bg-white/70 px-2.5 py-0.5 rounded-full mb-2">
                 <BookOpen size={12} /> Learn
@@ -189,7 +190,7 @@ export default function StudentDashboard() {
 
         {/* Charts */}
         <div className="grid lg:grid-cols-3 gap-4 mb-4">
-          <div className="lg:col-span-2 bg-white rounded-2xl p-4 border border-[#EDE6D9] shadow-sm">
+          <div className="dashboard-card dashboard-chart lg:col-span-2">
             <h3 className="text-sm font-bold text-[#3A342B] mb-2" >
               Progress by skill
             </h3>
@@ -211,7 +212,7 @@ export default function StudentDashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-[#EDE6D9] shadow-sm flex flex-col">
+          <div className="dashboard-card dashboard-chart flex flex-col">
             <h3 className="text-sm font-bold text-[#3A342B] mb-2" >
               Skill status
             </h3>
