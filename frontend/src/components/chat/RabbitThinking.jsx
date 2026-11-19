@@ -1,6 +1,7 @@
 // src/components/chat/RabbitThinking.jsx
 import { useEffect, useState } from "react";
-import rabbit from "../../assets/images/rabbit.webp";
+import rabbit from "../../assets/images/robot_thinking.png"; // Updated image for the thinking state
+//import rabbit from "../../assets/images/rabbit.webp";
 import "./RabbitThinking.css";
 
 // Plays a one-off "greeting" entrance, then settles into a
