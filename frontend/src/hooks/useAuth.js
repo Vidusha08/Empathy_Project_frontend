@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import useChatStore from "../store/chatStore";
 import {
   loginUser, registerUser, logoutUser,
   validateRegistration, completeRegistration,
@@ -32,6 +33,9 @@ export function useAuth() {
 
       localStorage.setItem("token", access_token);
       setAuth(student, access_token);
+      if (student?.student_id) {
+        useChatStore.getState().setStudentId(student.student_id);
+      }
 
       navigate("/dashboard");
     } catch (err) {
@@ -78,18 +82,19 @@ export function useAuth() {
     try {
       return await completeRegistration(payload);
     } catch (err) {
-      throw new Error(extractErrorMessage(err));
+      throw new Error(extractErrorMessage(err), { cause: err });
     }
   };
 
   const logout = async () => {
-     await logoutUser();
-    //const logoutRequest = logoutUser();
+    try {
+      await logoutUser();
+    } catch (_) {}
     localStorage.removeItem("token");
+    localStorage.removeItem("chat-storage");
+    useChatStore.getState().clearMessages();
     clearAuth();
     navigate("/");
-    //navigate("/", { replace: true });
-    //await logoutRequest;
   };
 
   return {

@@ -17,26 +17,34 @@ function ActionButton({
   isChosen = false,
   hasChosen = false,
   isAnswer = false,
+  variant,
   ariaLabel,
   buttonType = "button",
+  className = "",
 }) {
+  let styleClasses = "";
+
+  if (isChosen) {
+    styleClasses = "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-400 ring-offset-1";
+  } else if (hasChosen) {
+    styleClasses = "cursor-not-allowed bg-gray-100 text-gray-400 border border-gray-200";
+  } else if (variant === "yes") {
+    styleClasses = "chat-action-btn--yes bg-indigo-600 text-white hover:bg-indigo-700 border border-indigo-600 shadow-sm";
+  } else if (variant === "no" || secondary) {
+    styleClasses = "chat-action-btn--no bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm";
+  } else if (isAnswer) {
+    styleClasses = "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50";
+  } else {
+    styleClasses = "bg-indigo-600 text-white hover:bg-indigo-700";
+  }
+
   return (
     <button
       type={buttonType}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition-colors ${
-        isChosen
-          ? "bg-indigo-600 text-white"
-          : hasChosen
-            ? "cursor-not-allowed bg-gray-100 text-gray-400"
-            : isAnswer
-              ? "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-            : secondary
-              ? "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
-      }`}
+      className={`chat-action-btn inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold min-w-[76px] transition-all ${styleClasses} ${className}`}
     >
       {children}
     </button>
@@ -69,6 +77,11 @@ function StepContent({ step, skill }) {
   }
 
   if (step?.type === "activity") {
+    const hasTitle = Boolean(step.activity?.title && step.activity.title !== "No activity selected");
+    const sectionTitle = hasTitle ? step.activity.title : "Reflection";
+    const sectionBadge = hasTitle ? "Try this" : "Reflection";
+    const scenario = step.activity?.scenario;
+
     return (
       <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
         <div className="flex items-start gap-3">
@@ -76,11 +89,17 @@ function StepContent({ step, skill }) {
             <Play size={16} className="text-emerald-600" />
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">Try this</p>
-            <h3 className="mt-1 text-sm font-semibold text-gray-900">{step.activity?.title || "No activity selected"}</h3>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">{sectionBadge}</p>
+            <h3 className="mt-1 text-sm font-semibold text-gray-900">{sectionTitle}</h3>
           </div>
         </div>
-        <p className="mt-4 whitespace-pre-line text-sm leading-6 text-gray-700">{step.content}</p>
+        {scenario && (
+          <div className="mt-3 rounded-lg border border-emerald-200/80 bg-white p-3 text-sm text-gray-800 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-800">Situation</p>
+            <p className="mt-1 text-sm leading-relaxed text-gray-800">{scenario}</p>
+          </div>
+        )}
+        <p className="mt-3 whitespace-pre-line text-sm leading-6 text-gray-700">{step.content}</p>
       </div>
     );
   }
@@ -113,6 +132,7 @@ export default function ChatMessage({
 }) {
   const [activityResponse, setActivityResponse] = useState("");
   const [activityConfirmed, setActivityConfirmed] = useState(false);
+  const [selectedActivityOption, setSelectedActivityOption] = useState(null);
   const { role, content, timestamp, flowAction, step, skill, flowHandled } = message;
   const isUser = role === "user";
   const selectedAnswer = selectedAnswers?.[message.id];
@@ -126,6 +146,7 @@ export default function ChatMessage({
   const isYesNoQuestion = normalizedQuestionType === "yes_no" || normalizedQuestionType === "yesno";
   const isMultipleChoiceQuestion = normalizedQuestionType === "multiple_choice";
   const hasApprovedActivity = Boolean(step?.activity?.id);
+  const hasScenarioOptions = Array.isArray(step?.activity?.options) && step.activity.options.length > 0;
   const activityMode = step?.activity?.interaction_type
     || (step?.activity?.type === "reflection" ? "reflective" : "practical");
 
@@ -150,25 +171,28 @@ export default function ChatMessage({
           {flowAction === "learn" && <p className="mt-4 text-sm font-medium text-gray-800">Does this answer your question so far? Choose Yes to explore the learning objective, or No to ask for clarification.</p>}
           {flowAction === "understanding" && <p className="mt-4 text-sm font-medium text-gray-800">Does this explanation make sense so far? Choose Yes to continue, or No to ask for clarification.</p>}
           {(flowAction === "learn" || flowAction === "understanding") && (
-            <div className="mt-4 flex gap-2">
+            <div className="chat-choice-group mt-4 flex items-center gap-3">
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
                 isChosen={selectedAnswer === "Yes"}
                 hasChosen={hasChosen}
-                isAnswer
+                variant="yes"
+                ariaLabel="Yes, continue"
                 onClick={() => emit("Yes")}
               >
-                <Check size={14} />Yes
+                <Check size={14} className="shrink-0" />Yes
               </ActionButton>
+              <span className="sr-only"> </span>
               <ActionButton
                 disabled={flowHandled || hasChosen || isLoading}
                 secondary
                 isChosen={selectedAnswer === "No"}
                 hasChosen={hasChosen}
-                isAnswer
+                variant="no"
+                ariaLabel="No, ask for clarification"
                 onClick={() => emit("No")}
               >
-                <X size={14} />No
+                <X size={14} className="shrink-0" />No
               </ActionButton>
             </div>
           )}
@@ -176,33 +200,106 @@ export default function ChatMessage({
           {flowAction === "activity" && (
             <p className="mt-4 text-sm font-medium text-gray-800">
               {hasApprovedActivity
-                ? activityMode === "practical"
-                  ? "Try this short practice, then confirm when you've finished."
-                  : activityMode === "combined"
-                    ? "Complete the practice, then share a short reflection and confirm when you're finished."
-                    : "Think about the prompt and share a short reflection."
-                : "No practice activity is available for this objective yet."}
+                ? hasScenarioOptions
+                  ? "Read the scenario above and choose the response that shows the most empathy."
+                  : activityMode === "practical"
+                    ? "Try this short practice, then confirm when you've finished."
+                    : activityMode === "combined"
+                      ? "Complete the practice, then share a short reflection and confirm when you're finished."
+                      : "Think about the prompt and share a short reflection."
+                : "Think about the prompt and share a short reflection."}
             </p>
           )}
           {flowAction === "activity" && hasApprovedActivity && activityMode === "practical" && (
-            <div className="mt-4 flex gap-2">
-              <ActionButton
-                disabled={flowHandled || hasChosen || isLoading}
-                isChosen={hasChosen}
-                hasChosen={hasChosen}
-                isAnswer
-                onClick={() => emit(
-                  "I've completed this activity.",
-                  { activitySubmission: true, activityConfirmation: true },
+            hasScenarioOptions ? (
+              <div className="mt-4 space-y-3">
+                <div className="flex flex-col gap-2" role="group" aria-label="Activity choices">
+                  {step.activity.options.map((opt) => {
+                    const isOptSelected = selectedActivityOption === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        disabled={flowHandled || hasChosen || isLoading}
+                        onClick={() => setSelectedActivityOption(opt.id)}
+                        className={`flex items-start gap-2.5 rounded-lg border p-3 text-left text-xs transition-all ${
+                          isOptSelected
+                            ? "border-emerald-600 bg-emerald-50 font-medium text-emerald-950 ring-1 ring-emerald-500"
+                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                          isOptSelected ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {opt.id}
+                        </span>
+                        <span className="leading-5">{opt.text}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedActivityOption && (
+                  <div className={`rounded-lg p-3 text-xs leading-relaxed ${
+                    selectedActivityOption === step.activity.best_answer
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border border-amber-200 bg-amber-50 text-amber-800"
+                  }`}>
+                    <p className="font-semibold">
+                      {selectedActivityOption === step.activity.best_answer ? "✓ Best choice" : "Consider this:"}
+                    </p>
+                    <p className="mt-1">
+                      {selectedActivityOption === step.activity.best_answer
+                        ? (step.activity.feedback?.correct || step.activity.feedback?.[selectedActivityOption])
+                        : (step.activity.feedback?.[selectedActivityOption] || step.activity.feedback?.correct)}
+                    </p>
+                  </div>
                 )}
-              >
-                <Check size={14} />I've completed this activity
-              </ActionButton>
-            </div>
+
+                <div className="pt-1">
+                  <ActionButton
+                    disabled={flowHandled || hasChosen || isLoading || !selectedActivityOption}
+                    isChosen={hasChosen}
+                    hasChosen={hasChosen}
+                    isAnswer
+                    onClick={() => {
+                      const opt = step.activity.options.find((o) => o.id === selectedActivityOption);
+                      emit(
+                        `Option ${selectedActivityOption}: "${opt?.text || selectedActivityOption}"`,
+                        {
+                          activitySubmission: true,
+                          activityConfirmation: true,
+                          activityResponse: `Option ${selectedActivityOption}: "${opt?.text || selectedActivityOption}"`,
+                        },
+                      );
+                    }}
+                  >
+                    <Check size={14} />I&apos;ve completed this activity
+                  </ActionButton>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 flex gap-2">
+                <ActionButton
+                  disabled={flowHandled || hasChosen || isLoading}
+                  isChosen={hasChosen}
+                  hasChosen={hasChosen}
+                  isAnswer
+                  onClick={() => emit(
+                    "I've completed this activity.",
+                    { activitySubmission: true, activityConfirmation: true },
+                  )}
+                >
+                  <Check size={14} />I've completed this activity
+                </ActionButton>
+              </div>
+            )
           )}
           {flowAction === "activity"
-            && hasApprovedActivity
-            && ["reflective", "combined"].includes(activityMode) && (
+            && (
+              (hasApprovedActivity && ["reflective", "combined"].includes(activityMode))
+              || !hasApprovedActivity
+            ) && (
               <form
                 className="mt-4 space-y-3"
                 onSubmit={(event) => {
@@ -210,9 +307,9 @@ export default function ChatMessage({
                   const response = activityResponse.trim();
                   if (!response || (activityMode === "combined" && !activityConfirmed)) return;
                   emit(response, {
-                    activitySubmission: true,
+                    activitySubmission: hasApprovedActivity,
                     activityResponse: response,
-                    activityConfirmation: activityMode === "combined" && activityConfirmed,
+                    activityConfirmation: (activityMode === "combined" && activityConfirmed) || !hasApprovedActivity,
                   });
                 }}
               >
@@ -224,13 +321,13 @@ export default function ChatMessage({
                   value={activityResponse}
                   onChange={(event) => setActivityResponse(event.target.value)}
                   disabled={flowHandled || isLoading}
-                  required
+                  required={hasApprovedActivity}
                   rows={3}
                   maxLength={1000}
                   placeholder="Write a short reflection..."
                   className="w-full rounded-lg border border-gray-200 p-3 text-sm leading-6 text-gray-700 focus:border-indigo-400 focus:outline-none"
                 />
-                {activityMode === "combined" && (
+                {activityMode === "combined" && hasApprovedActivity && (
                   <label className="flex items-center gap-2 text-sm text-gray-700">
                     <input
                       type="checkbox"
@@ -241,13 +338,25 @@ export default function ChatMessage({
                     I&apos;ve completed the practice
                   </label>
                 )}
-                <ActionButton
-                  buttonType="submit"
-                  disabled={flowHandled || isLoading || !activityResponse.trim() || (activityMode === "combined" && !activityConfirmed)}
-                  isAnswer
-                >
-                  <Check size={14} />Submit reflection
-                </ActionButton>
+                <div className="flex items-center gap-2">
+                  <ActionButton
+                    buttonType="submit"
+                    disabled={flowHandled || isLoading || !activityResponse.trim() || (activityMode === "combined" && hasApprovedActivity && !activityConfirmed)}
+                    isAnswer
+                  >
+                    <Check size={14} />Submit reflection
+                  </ActionButton>
+                  {!hasApprovedActivity && (
+                    <ActionButton
+                      disabled={flowHandled || hasChosen || isLoading}
+                      secondary
+                      variant="no"
+                      onClick={() => emit("Continue to quick check")}
+                    >
+                      Continue
+                    </ActionButton>
+                  )}
+                </div>
               </form>
             )}
 
@@ -278,27 +387,28 @@ export default function ChatMessage({
                 ))}
               </div>
             ) : (
-              <div className="mt-4 flex gap-3" role="group" aria-label={isYesNoQuestion ? "Yes or no answer" : "True or false answer"}>
+              <div className="chat-choice-group mt-4 flex items-center gap-3" role="group" aria-label={isYesNoQuestion ? "Yes or no answer" : "True or false answer"}>
                 <ActionButton
                   disabled={flowHandled || hasChosen || isLoading}
                   isChosen={selectedAnswer === (isYesNoQuestion ? "Yes" : "True")}
                   hasChosen={hasChosen}
-                  isAnswer
+                  variant="yes"
                   ariaLabel={isYesNoQuestion ? "Answer Yes" : "Answer True"}
                   onClick={() => emit(isYesNoQuestion ? "Yes" : "True")}
                 >
-                  <Check size={14} />{isYesNoQuestion ? "Yes" : "True"}
+                  <Check size={14} className="shrink-0" />{isYesNoQuestion ? "Yes" : "True"}
                 </ActionButton>
+                <span className="sr-only"> </span>
                 <ActionButton
                   disabled={flowHandled || hasChosen || isLoading}
                   secondary
                   isChosen={selectedAnswer === (isYesNoQuestion ? "No" : "False")}
                   hasChosen={hasChosen}
-                  isAnswer
+                  variant="no"
                   ariaLabel={isYesNoQuestion ? "Answer No" : "Answer False"}
                   onClick={() => emit(isYesNoQuestion ? "No" : "False")}
                 >
-                  <X size={14} />{isYesNoQuestion ? "No" : "False"}
+                  <X size={14} className="shrink-0" />{isYesNoQuestion ? "No" : "False"}
                 </ActionButton>
               </div>
             )

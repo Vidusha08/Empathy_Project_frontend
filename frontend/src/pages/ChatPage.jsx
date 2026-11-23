@@ -52,24 +52,27 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
       <div className="chat-response-style" role="group" aria-label="Response style">
         <span className="chat-response-style__label">Response:</span>
         <div className="chat-response-style__options">
-          {[
-            { value: "short", label: "Short" },
-            { value: "long", label: "Long" },
-          ].map((style) => (
-            <button
-              key={style.value}
-              type="button"
-              onClick={() => onAnswerStyleChange(style.value)}
-              aria-pressed={answerStyle === style.value}
-              className={`chat-response-style__option ${
-                answerStyle === style.value
-                  ? "bg-white text-indigo-700 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {style.label}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => onAnswerStyleChange("short")}
+            aria-pressed={answerStyle === "short"}
+            className={`chat-response-style__option ${
+              answerStyle === "short" ? "chat-response-style__option--active" : ""
+            }`}
+          >
+            Short
+          </button>
+          <span className="sr-only"> </span>
+          <button
+            type="button"
+            onClick={() => onAnswerStyleChange("long")}
+            aria-pressed={answerStyle === "long"}
+            className={`chat-response-style__option ${
+              answerStyle === "long" ? "chat-response-style__option--active" : ""
+            }`}
+          >
+            Long
+          </button>
         </div>
       </div>
       <div className="chat-input-row">
@@ -519,7 +522,10 @@ console.log("Question-relevant content:", context.question_relevant_content);
       activityCompletionInFlight.current.add(sourceMessage.id);
       setLoading(true);
     } else {
-      if (action === "activity") {
+      const hasRecommendedActivity = Boolean(
+        sourceMessage.recommendedActivity?.id || sourceMessage.recommended_activity?.id
+      );
+      if (action === "activity" && hasRecommendedActivity) {
         addMessage({
           id: createId(),
           role: "assistant",
