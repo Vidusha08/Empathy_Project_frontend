@@ -28,7 +28,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/chat" element={<ChatPage />} />
-            <Route path="/general-empathy-chat" element={<GeneralEmpathyChatPage />} />
+            <Route path="/general-empathy-chat" element={<Navigate to="/chat" replace />} />
             <Route path="/content" element={<ContentPage />} />
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/progress" element={<ProgressPage />} />
