@@ -20,9 +20,21 @@ test("rejects incorrect answers", () => {
   );
 });
 
+test("verifies matching string answers for multiple choice", () => {
+  assert.equal(
+    verifyQuickCheckAnswer({ correct_answer: "Self-compassion" }, "Self-compassion"),
+    true,
+  );
+  assert.equal(
+    verifyQuickCheckAnswer({ correct_answer: "Self-compassion" }, "Criticism"),
+    false,
+  );
+});
+
 test("does not verify missing or invalid answer keys or responses", () => {
   assert.equal(verifyQuickCheckAnswer({}, "True"), null);
-  assert.equal(verifyQuickCheckAnswer({ correct_answer: "true" }, "True"), null);
   assert.equal(verifyQuickCheckAnswer({ correct_answer: 1 }, "True"), null);
+  assert.equal(verifyQuickCheckAnswer({ correct_answer: null }, "True"), null);
   assert.equal(verifyQuickCheckAnswer({ correct_answer: true }, "Maybe"), null);
+  assert.equal(verifyQuickCheckAnswer({ correct_answer: "Option" }, null), null);
 });

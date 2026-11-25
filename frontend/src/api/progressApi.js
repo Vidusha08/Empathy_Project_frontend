@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
+const API_BASE_URL = RAW_BASE_URL.endsWith('/api') ? RAW_BASE_URL : `${RAW_BASE_URL}/api`;
 
 const getToken = () => {
   try {
@@ -29,6 +30,7 @@ const apiRequest = async (endpoint, options = {}) => {
       localStorage.removeItem('auth-storage');
       localStorage.removeItem('token');
       localStorage.removeItem('access_token');
+      localStorage.removeItem('chat-storage');
       window.location.assign('/login');
       //window.location.assign('/');
     }

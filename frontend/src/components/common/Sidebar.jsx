@@ -16,7 +16,7 @@ import { themeOptions, useSettingsStore } from "../../store/settingsStore";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, path: "/dashboard" },
-  { label: "Empathy Chat", icon: Sparkles, path: "/general-empathy-chat" },
+  { label: "Empathy Chat", icon: Sparkles, path: "/chat" },
   { label: "Content", icon: BookOpen, path: "/content" },
   { label: "Progress", icon: BarChart2, path: "/progress" },
   { label: "Chat History", icon: History, path: "/history" },
