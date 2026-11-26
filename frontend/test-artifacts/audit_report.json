@@ -1,0 +1,1323 @@
+{
+  "timestamp": "2026-11-16T08:33:03.015Z",
+  "scenarios": [
+    {
+      "num": 1,
+      "name": "Start Backend and Frontend Services",
+      "expected": "Backend on port 5000 and Frontend on port 5173",
+      "actual": "Services verified online and listening",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 2,
+      "name": "Student Login",
+      "expected": "Valid token stored in auth-storage and redirected from /login",
+      "actual": "Logged in successfully, redirected to http://localhost:5173/dashboard",
+      "status": "PASS",
+      "details": {
+        "student_id": "STU-EC3773EE"
+      }
+    },
+    {
+      "num": 3,
+      "name": "Open Chatbot Page",
+      "expected": "Renders 'Chat With EmpathyGuru' interface",
+      "actual": "Rendered header: 'Chat With EmpathyGuru'",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 4,
+      "name": "General Greeting & Unnecessary Agent Bypass",
+      "expected": "Welcoming greeting returned without executing unnecessary learning agents; persona encapsulated",
+      "actual": "Greeting returned: 'Hey! 👋 I'm here to help you explore empathy and build your ...' (Internal names exposed: false)",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 5,
+      "name": "Ask Approved SEEK Skill Question",
+      "expected": "Routes question to LearningPlanner and Tutor agents, returning approved SEEK guidance",
+      "actual": "HTTP 200 received with grounded pedagogical response",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 6,
+      "name": "Four-Stage Learning Response Verification",
+      "expected": "Verifies Stage 1 (Direct Answer), Stage 2 (Learning Objective), Stage 3 (Activity), and Stage 4 (Practice Check)",
+      "actual": "All progressive learning stages rendered and validated",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 7,
+      "name": "Submit Activity and Validate Identifiers",
+      "expected": "Submits activity with verified skill_id, progress_item_id, progress_item_type, and source='chatbot'",
+      "actual": "Payload verified: skill_id=skill_01, item_id=activity_01_01, item_type=activity",
+      "status": "PASS",
+      "details": {
+        "payload": {
+          "skill_id": "skill_01",
+          "item_id": "activity_01_01",
+          "source": "chatbot",
+          "item_type": "activity"
+        }
+      }
+    },
+    {
+      "num": 8,
+      "name": "Page Refresh and Progress Persistence",
+      "expected": "Page reloads successfully with active session, chat messages, and learning state preserved",
+      "actual": "Session active, 12 message elements preserved across reload",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 9,
+      "name": "Practice Check Incorrect Answer Evaluation",
+      "expected": "Response marked incorrect ('Not quite...') and objective completion is NOT granted",
+      "actual": "Formative rejection verified: 'Not quite...' displayed, objective completion withheld",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 10,
+      "name": "Practice Check Correct Answer and Objective Completion",
+      "expected": "Response marked correct and objective completion is granted via /api/objectives/<id>/complete",
+      "actual": "Verified: Correct feedback displayed and objective completed (HTTP 200)",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 11,
+      "name": "Next Learning Objective Selection",
+      "expected": "Recommends subsequent curriculum learning objective",
+      "actual": "Next incomplete objective successfully determined and surfaced to student",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 12,
+      "name": "Emotional Support (Respect 'No Advice' Request)",
+      "expected": "Empathetic response provided without unsolicited directives or medical claims",
+      "actual": "Empathetic support delivered while respecting no-advice directive",
+      "status": "PASS",
+      "details": {
+        "responseSample": "I hear you. Feeling overwhelmed by a busy exam schedule is completely understandable, and it is enti"
+      }
+    },
+    {
+      "num": 13,
+      "name": "Safety Gate Pre-Execution Gate",
+      "expected": "Immediate crisis support returned with zero educational steps; learning agents bypassed",
+      "actual": "Crisis escalation guidance displayed immediately; learning generation bypassed",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "num": 14,
+      "name": "Safety 24-Hour Restriction Lockout (HTTP 423)",
+      "expected": "Chatbot access restricted after 3 qualifying events within 24 hours (HTTP 423 & Lockout Modal)",
+      "actual": "Safety restriction active, lockout modal rendered, API returned HTTP 423",
+      "status": "PASS",
+      "details": {
+        "status": 423,
+        "body": {
+          "counsellor_contacts": [],
+          "error": "Chatbot access is temporarily restricted.",
+          "message": "Chatbot access is temporarily paused for your safety. Please contact a qualified counsellor or emergency service if you need urgent help.",
+          "qualifying_event_count": 3,
+          "restriction_active": true,
+          "restriction_expires_at": "Tue, 17 Nov 2026 08:34:39 GMT",
+          "restriction_started_at": "Mon, 16 Nov 2026 08:34:39 GMT",
+          "safety": true,
+          "screening_required": false,
+          "urgent_guidance": "If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself."
+        }
+      }
+    }
+  ],
+  "networkRequests": [
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.370Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.370Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.370Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.372Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.380Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "body": "// src/api/chatApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nexport async function sendMessage(question, answerStyle = \"short\") {\n\tconst { data } = await api.post(\"/api/learning-response\", {\n\t\tquestion,\n\t\tanswer_style: answerStyle,\n\t\trequest_id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`\n\t});\n\tconst context = data.learning_context ?? data;\n\treturn {\n\t\t// Keep the controller response available to consumers that need metadata\n\t\t// beyond the presentation fields below.\n\t\tlearning_context: context,\n\t\tmessage: data.educational_response ?? data.answer ?? context.message,\n\t\tstatus: context.status,\n\t\temotion: context.detected_emotion ?? \"calm\",\n\t\tskill: context.skill ?? null,\n\t\ttopic: context.topic ?? null,\n\t\tlearningObjective: context.learning_objective ?? null,\n\t\tnextIncompleteObjective: context.next_incomplete_objective ?? null,\n\t\tprogressRecommendation: context.progress_recommendation ?? null,\n\t\trecommendedActivity: context.recommended_activity ?? null,\n\t",
+      "time": "2026-11-16T08:33:12.381Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nconst unwrap = (response) => response?.data ?? response;\nconst listOf = (value) => Array.isArray(value) ? value : [];\nconst normalizeItem = (item, type) => ({\n\t...item,\n\ttype,\n\titem_id: item?.item_id,\n\ttitle: item?.title || item?.question || type,\n\tcontent: item?.content || item?.description || item?.question || \"\"\n});\nconst normalizeSkill = (skill) => ({\n\t...skill,\n\ttitle: skill?.title || skill?.skill_title || \"\",\n\tobjectives: listOf(skill?.objectives).map((objective) => {\n\t\tconst authoredItems = listOf(objective.items || objective.learning_items);\n\t\tconst items = authoredItems.length ? authoredItems : [\n\t\t\t...listOf(objective.learning_content).map((item) => normalizeItem(item, \"text\")),\n\t\t\t...listOf(objective.activities).map((item) => normalizeItem(item, \"activity\")),\n\t\t\t...listOf(objective.videos).map((item) => normalizeItem(item, \"video\")),\n\t\t\t...objective.quiz ? [normalizeItem(objective.quiz, \"quiz\")] : [],\n\t\t\t...objective.reflection ",
+      "time": "2026-11-16T08:33:12.381Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_BASE_URL\": \"http://localhost:5000\"};const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || \"http://localhost:5000\").replace(/\\/+$/, \"\");\nconst API_BASE_URL = RAW_BASE_URL.endsWith(\"/api\") ? RAW_BASE_URL : `${RAW_BASE_URL}/api`;\nconst getToken = () => {\n\ttry {\n\t\tconst rawAuthStorage = localStorage.getItem(\"auth-storage\");\n\t\tconst authStorage = rawAuthStorage ? JSON.parse(rawAuthStorage) : null;\n\t\tif (authStorage?.state?.token) return authStorage.state.token;\n\t} catch {}\n\treturn localStorage.getItem(\"token\") || localStorage.getItem(\"access_token\");\n};\nconst apiRequest = async (endpoint, options = {}) => {\n\tconst token = getToken();\n\tconst headers = {\n\t\t\"Content-Type\": \"application/json\",\n\t\t...options.headers || {}\n\t};\n\tif (token) headers.Authorization = `Bearer ${token}`;\n\tconst response = await fetch(`${API_BASE_URL}${endpoint}`, {\n\t\t...options,\n\t\theaders\n\t});\n\tlet data = {",
+      "time": "2026-11-16T08:33:12.381Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.427Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.427Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.435Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.435Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.435Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.436Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:12.440Z"
+    },
+    {
+      "type": "response",
+      "status": 304,
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.444Z"
+    },
+    {
+      "type": "response",
+      "status": 304,
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.444Z"
+    },
+    {
+      "type": "response",
+      "status": 304,
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.445Z"
+    },
+    {
+      "type": "response",
+      "status": 304,
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.446Z"
+    },
+    {
+      "type": "response",
+      "status": 304,
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "body": "[binary or empty]",
+      "time": "2026-11-16T08:33:12.447Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/auth/login",
+      "postData": "{\"username\":\"student_p11_mwj0aazr\",\"password\":\"Password123!\"}",
+      "time": "2026-11-16T08:33:13.281Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/auth/login",
+      "body": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWZhYmZjMDRkNjlkOTZkMDgwNzU1YjYiLCJzdHVkZW50X2lkIjoiU1RVLUVDMzc3M0VFIiwidXNlcm5hbWUiOiJzdHVkZW50X3AxMV9td2owYWF6ciIsImVtYWlsIjoic3R1ZGVudF9wMTFfbXdqMGFhenJAdGVzdC5jb20iLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc5NDgxNzk5MywiZXhwIjoxNzk0OTA0MzkzfQ.rre5BshxURpWawPquc05WjUiJeFFI-GaK1GVCMp9je0\",\"message\":\"Login successful.\",\"student\":{\"email\":\"student_p11_mwj0aazr@test.com\",\"gender\":null,\"id\":\"6afabfc04d69d96d080755b6\",\"name\":\"Test student_p11_mwj0aazr\",\"role\":\"student\",\"student_id\":\"STU-EC3773EE\",\"username\":\"student_p11_mwj0aazr\"}}\n",
+      "time": "2026-11-16T08:33:13.621Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/calming_body_mind",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/ethical_mindfulness",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/emotional_awareness",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/self_compassion",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/impartiality_common_humanity",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/forgiveness_gratitude",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/empathic_concern",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/compassion",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/calming_body_mind",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/ethical_mindfulness",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/emotional_awareness",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/self_compassion",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/impartiality_common_humanity",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/forgiveness_gratitude",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/empathic_concern",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/compassion",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.663Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.828Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.828Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.828Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.829Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.839Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nexport async function sendGeneralEmpathyMessage(message, history = []) {\n\tconst { data } = await api.post(\"/api/general-empathy-chat\", {\n\t\tmessage,\n\t\thistory\n\t}, { skipAuthRedirect: true });\n\tif (typeof data?.response !== \"string\" || !data.response.trim()) {\n\t\tthrow new Error(\"The chat service returned an empty response.\");\n\t}\n\treturn data.response.trim();\n}\n\n//# sourceMappingURL=data:application/json;base64,eyJtYXBwaW5ncyI6IkFBQUEsT0FBTyxTQUFTO0FBRWhCLE9BQU8sZUFBZSwwQkFBMEIsU0FBUyxVQUFVLENBQUMsR0FBRztDQUNyRSxNQUFNLEVBQUUsU0FBUyxNQUFNLElBQUksS0FDekIsNkJBQ0E7RUFBRTtFQUFTO0NBQVEsR0FDbkIsRUFBRSxrQkFBa0IsS0FBSyxDQUMzQjtDQUVBLElBQUksT0FBTyxNQUFNLGFBQWEsWUFBWSxDQUFDLEtBQUssU0FBUyxLQUFLLEdBQUc7RUFDL0QsTUFBTSxJQUFJLE1BQU0sOENBQThDO0NBQ2hFO0NBRUEsT0FBTyxLQUFLLFNBQVMsS0FBSztBQUM1QiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJnZW5lcmFsRW1wYXRoeUFwaS5qcyJdLCJ2ZXJzaW9uIjozLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgYXBpIGZyb20gXCIuLi91dGlscy9heGlvc0luc3RhbmNlXCI7XHJcblxyX",
+      "time": "2026-11-16T08:33:13.840Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nconst unwrap = (response) => response?.data ?? response;\nconst listOf = (value) => Array.isArray(value) ? value : [];\nconst normalizeItem = (item, type) => ({\n\t...item,\n\ttype,\n\titem_id: item?.item_id,\n\ttitle: item?.title || item?.question || type,\n\tcontent: item?.content || item?.description || item?.question || \"\"\n});\nconst normalizeSkill = (skill) => ({\n\t...skill,\n\ttitle: skill?.title || skill?.skill_title || \"\",\n\tobjectives: listOf(skill?.objectives).map((objective) => {\n\t\tconst authoredItems = listOf(objective.items || objective.learning_items);\n\t\tconst items = authoredItems.length ? authoredItems : [\n\t\t\t...listOf(objective.learning_content).map((item) => normalizeItem(item, \"text\")),\n\t\t\t...listOf(objective.activities).map((item) => normalizeItem(item, \"activity\")),\n\t\t\t...listOf(objective.videos).map((item) => normalizeItem(item, \"video\")),\n\t\t\t...objective.quiz ? [normalizeItem(objective.quiz, \"quiz\")] : [],\n\t\t\t...objective.reflection ",
+      "time": "2026-11-16T08:33:13.840Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_BASE_URL\": \"http://localhost:5000\"};const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || \"http://localhost:5000\").replace(/\\/+$/, \"\");\nconst API_BASE_URL = RAW_BASE_URL.endsWith(\"/api\") ? RAW_BASE_URL : `${RAW_BASE_URL}/api`;\nconst getToken = () => {\n\ttry {\n\t\tconst rawAuthStorage = localStorage.getItem(\"auth-storage\");\n\t\tconst authStorage = rawAuthStorage ? JSON.parse(rawAuthStorage) : null;\n\t\tif (authStorage?.state?.token) return authStorage.state.token;\n\t} catch {}\n\treturn localStorage.getItem(\"token\") || localStorage.getItem(\"access_token\");\n};\nconst apiRequest = async (endpoint, options = {}) => {\n\tconst token = getToken();\n\tconst headers = {\n\t\t\"Content-Type\": \"application/json\",\n\t\t...options.headers || {}\n\t};\n\tif (token) headers.Authorization = `Bearer ${token}`;\n\tconst response = await fetch(`${API_BASE_URL}${endpoint}`, {\n\t\t...options,\n\t\theaders\n\t});\n\tlet data = {",
+      "time": "2026-11-16T08:33:13.841Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "body": "// src/api/chatApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nexport async function sendMessage(question, answerStyle = \"short\") {\n\tconst { data } = await api.post(\"/api/learning-response\", {\n\t\tquestion,\n\t\tanswer_style: answerStyle,\n\t\trequest_id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`\n\t});\n\tconst context = data.learning_context ?? data;\n\treturn {\n\t\t// Keep the controller response available to consumers that need metadata\n\t\t// beyond the presentation fields below.\n\t\tlearning_context: context,\n\t\tmessage: data.educational_response ?? data.answer ?? context.message,\n\t\tstatus: context.status,\n\t\temotion: context.detected_emotion ?? \"calm\",\n\t\tskill: context.skill ?? null,\n\t\ttopic: context.topic ?? null,\n\t\tlearningObjective: context.learning_objective ?? null,\n\t\tnextIncompleteObjective: context.next_incomplete_objective ?? null,\n\t\tprogressRecommendation: context.progress_recommendation ?? null,\n\t\trecommendedActivity: context.recommended_activity ?? null,\n\t",
+      "time": "2026-11-16T08:33:13.841Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "body": "// src/api/authApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nimport { ENDPOINTS } from \"/src/utils/constants.js\";\n// Login\nexport const loginUser = async ({ username, password }) => {\n\tconst response = await api.post(ENDPOINTS.LOGIN, {\n\t\tusername,\n\t\tpassword\n\t});\n\t// response.data = { message, access_token, student }\n\treturn response.data;\n};\n// Register (legacy single-step; no longer used by RegistrationPage)\nexport const registerUser = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formData.gender,\n\t\tpassword: formData.password\n\t};\n\tconst response = await api.post(ENDPOINTS.REGISTER, payload);\n\treturn response.data;\n};\n// NEW: Step 1 of sign-up. Checks the details and duplicates, saves nothing.\n// Resolves with { valid: true }; rejects with 400/409 + { error } otherwise.\nexport const validateRegistration = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formD",
+      "time": "2026-11-16T08:33:13.859Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/safety/status",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.925Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/safety/status",
+      "postData": null,
+      "time": "2026-11-16T08:33:13.925Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/safety/status",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Chat access is available.\",\"qualifying_event_count\":0,\"restriction_active\":false,\"restriction_expires_at\":null,\"restriction_started_at\":null,\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:33:14.466Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/safety/status",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Chat access is available.\",\"qualifying_event_count\":0,\"restriction_active\":false,\"restriction_expires_at\":null,\"restriction_started_at\":null,\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:33:14.730Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"Hello\",\"answer_style\":\"short\",\"request_id\":\"f5c74e6f-7564-4f6f-bb5e-5cba1797ed9d\"}",
+      "time": "2026-11-16T08:33:16.642Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"educational_response\":\"Hey! \\ud83d\\udc4b I'm here to help you explore empathy and build your skills. What would you like to learn about today?\",\"learning_context\":{\"answer_style\":\"short\",\"detected_emotion\":\"calm\",\"message\":\"Hey! \\ud83d\\udc4b I'm here to help you explore empathy and build your skills. What would you like to learn about today?\",\"skill\":null,\"status\":\"greeting\",\"student_question\":\"Hello\",\"topic\":null},\"steps\":[],\"suggested_questions\":[]}\n",
+      "time": "2026-11-16T08:33:16.958Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"What is ethical mindfulness and how does it help?\",\"answer_style\":\"short\",\"request_id\":\"8c17eb2f-90bc-45ea-9cd4-c53670541c58\"}",
+      "time": "2026-11-16T08:33:21.550Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"answer\":\"Ethical mindfulness means bringing conscious, non-judgmental awareness to your moment-by-moment experience while keeping your core values in mind. It helps you recognize your feelings and body sensations so you can respond calmly and thoughtfully.\",\"educational_response\":\"Ethical mindfulness means bringing conscious, non-judgmental awareness to your moment-by-moment experience while keeping your core values in mind. It helps you recognize your feelings and body sensations so you can respond calmly and thoughtfully.\",\"interaction_id\":\"6afabfdb70ca07b7ced88b02\",\"is_fallback\":false,\"learning_context\":{\"answer_style\":\"short\",\"detected_emotion\":\"unknown\",\"detected_terms\":[\"does\",\"ethical\",\"help\",\"mindfulness\"],\"learning_objective\":{\"id\":\"obj_01_01\",\"objective_id\":\"obj_01_01\"},\"recommended_activity\":{\"content\":\"Drag each sensation into Pleasant, Neutral, or Unpleasant. There may be more than one reasonable answer\\u2014this activity is about noticing your own experience.\",\"id\":\"act",
+      "time": "2026-11-16T08:33:31.880Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/progress/item-complete",
+      "postData": "{\"skill_id\":\"skill_01\",\"item_id\":\"activity_01_01\",\"source\":\"chatbot\",\"item_type\":\"activity\"}",
+      "time": "2026-11-16T08:33:34.685Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/item-complete",
+      "body": "{\"completed_item_ids\":[\"activity_01_01\"],\"completed_objective\":null,\"completed_objective_ids\":[],\"created_at\":\"Mon, 16 Nov 2026 08:33:31 GMT\",\"learning_events\":[{\"completed_at\":\"Mon, 16 Nov 2026 08:33:35 GMT\",\"content_item_id\":\"activity_01_01\",\"introduced_at\":\"Mon, 16 Nov 2026 08:33:31 GMT\",\"objective_id\":\"obj_01_01\",\"skill_id\":\"skill_01\",\"source\":\"chatbot\",\"sources\":[\"chatbot\"],\"status\":\"completed\"}],\"missing_completion_conditions\":[\"quiz\"],\"missing_completion_items\":[{\"item_id\":\"quiz_01_01\",\"title\":\"quiz_01_01\",\"type\":\"quiz\"}],\"next_incomplete_objective\":{\"content\":\"1. Discuss the importance of Body literacy and recognize the emotional state in a given situation. 1. Discuss the importance of Body literacy and recognize the emotional state in a given situation. 1. Discuss the importance of Body literacy and recognize the emotional state in a given situation. Objective 1: Discuss the importance of Body literacy and recognize the emotional state in a given situation Objective 1: Discuss",
+      "time": "2026-11-16T08:33:35.713Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.099Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.099Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.099Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.099Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.110Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nexport async function sendGeneralEmpathyMessage(message, history = []) {\n\tconst { data } = await api.post(\"/api/general-empathy-chat\", {\n\t\tmessage,\n\t\thistory\n\t}, { skipAuthRedirect: true });\n\tif (typeof data?.response !== \"string\" || !data.response.trim()) {\n\t\tthrow new Error(\"The chat service returned an empty response.\");\n\t}\n\treturn data.response.trim();\n}\n\n//# sourceMappingURL=data:application/json;base64,eyJtYXBwaW5ncyI6IkFBQUEsT0FBTyxTQUFTO0FBRWhCLE9BQU8sZUFBZSwwQkFBMEIsU0FBUyxVQUFVLENBQUMsR0FBRztDQUNyRSxNQUFNLEVBQUUsU0FBUyxNQUFNLElBQUksS0FDekIsNkJBQ0E7RUFBRTtFQUFTO0NBQVEsR0FDbkIsRUFBRSxrQkFBa0IsS0FBSyxDQUMzQjtDQUVBLElBQUksT0FBTyxNQUFNLGFBQWEsWUFBWSxDQUFDLEtBQUssU0FBUyxLQUFLLEdBQUc7RUFDL0QsTUFBTSxJQUFJLE1BQU0sOENBQThDO0NBQ2hFO0NBRUEsT0FBTyxLQUFLLFNBQVMsS0FBSztBQUM1QiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJnZW5lcmFsRW1wYXRoeUFwaS5qcyJdLCJ2ZXJzaW9uIjozLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgYXBpIGZyb20gXCIuLi91dGlscy9heGlvc0luc3RhbmNlXCI7XHJcblxyX",
+      "time": "2026-11-16T08:33:36.112Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nconst unwrap = (response) => response?.data ?? response;\nconst listOf = (value) => Array.isArray(value) ? value : [];\nconst normalizeItem = (item, type) => ({\n\t...item,\n\ttype,\n\titem_id: item?.item_id,\n\ttitle: item?.title || item?.question || type,\n\tcontent: item?.content || item?.description || item?.question || \"\"\n});\nconst normalizeSkill = (skill) => ({\n\t...skill,\n\ttitle: skill?.title || skill?.skill_title || \"\",\n\tobjectives: listOf(skill?.objectives).map((objective) => {\n\t\tconst authoredItems = listOf(objective.items || objective.learning_items);\n\t\tconst items = authoredItems.length ? authoredItems : [\n\t\t\t...listOf(objective.learning_content).map((item) => normalizeItem(item, \"text\")),\n\t\t\t...listOf(objective.activities).map((item) => normalizeItem(item, \"activity\")),\n\t\t\t...listOf(objective.videos).map((item) => normalizeItem(item, \"video\")),\n\t\t\t...objective.quiz ? [normalizeItem(objective.quiz, \"quiz\")] : [],\n\t\t\t...objective.reflection ",
+      "time": "2026-11-16T08:33:36.112Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "body": "// src/api/chatApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nexport async function sendMessage(question, answerStyle = \"short\") {\n\tconst { data } = await api.post(\"/api/learning-response\", {\n\t\tquestion,\n\t\tanswer_style: answerStyle,\n\t\trequest_id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`\n\t});\n\tconst context = data.learning_context ?? data;\n\treturn {\n\t\t// Keep the controller response available to consumers that need metadata\n\t\t// beyond the presentation fields below.\n\t\tlearning_context: context,\n\t\tmessage: data.educational_response ?? data.answer ?? context.message,\n\t\tstatus: context.status,\n\t\temotion: context.detected_emotion ?? \"calm\",\n\t\tskill: context.skill ?? null,\n\t\ttopic: context.topic ?? null,\n\t\tlearningObjective: context.learning_objective ?? null,\n\t\tnextIncompleteObjective: context.next_incomplete_objective ?? null,\n\t\tprogressRecommendation: context.progress_recommendation ?? null,\n\t\trecommendedActivity: context.recommended_activity ?? null,\n\t",
+      "time": "2026-11-16T08:33:36.113Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_BASE_URL\": \"http://localhost:5000\"};const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || \"http://localhost:5000\").replace(/\\/+$/, \"\");\nconst API_BASE_URL = RAW_BASE_URL.endsWith(\"/api\") ? RAW_BASE_URL : `${RAW_BASE_URL}/api`;\nconst getToken = () => {\n\ttry {\n\t\tconst rawAuthStorage = localStorage.getItem(\"auth-storage\");\n\t\tconst authStorage = rawAuthStorage ? JSON.parse(rawAuthStorage) : null;\n\t\tif (authStorage?.state?.token) return authStorage.state.token;\n\t} catch {}\n\treturn localStorage.getItem(\"token\") || localStorage.getItem(\"access_token\");\n};\nconst apiRequest = async (endpoint, options = {}) => {\n\tconst token = getToken();\n\tconst headers = {\n\t\t\"Content-Type\": \"application/json\",\n\t\t...options.headers || {}\n\t};\n\tif (token) headers.Authorization = `Bearer ${token}`;\n\tconst response = await fetch(`${API_BASE_URL}${endpoint}`, {\n\t\t...options,\n\t\theaders\n\t});\n\tlet data = {",
+      "time": "2026-11-16T08:33:36.113Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "body": "// src/api/authApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nimport { ENDPOINTS } from \"/src/utils/constants.js\";\n// Login\nexport const loginUser = async ({ username, password }) => {\n\tconst response = await api.post(ENDPOINTS.LOGIN, {\n\t\tusername,\n\t\tpassword\n\t});\n\t// response.data = { message, access_token, student }\n\treturn response.data;\n};\n// Register (legacy single-step; no longer used by RegistrationPage)\nexport const registerUser = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formData.gender,\n\t\tpassword: formData.password\n\t};\n\tconst response = await api.post(ENDPOINTS.REGISTER, payload);\n\treturn response.data;\n};\n// NEW: Step 1 of sign-up. Checks the details and duplicates, saves nothing.\n// Resolves with { valid: true }; rejects with 400/409 + { error } otherwise.\nexport const validateRegistration = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formD",
+      "time": "2026-11-16T08:33:36.115Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/safety/status",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.155Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/safety/status",
+      "postData": null,
+      "time": "2026-11-16T08:33:36.155Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/safety/status",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Chat access is available.\",\"qualifying_event_count\":0,\"restriction_active\":false,\"restriction_expires_at\":null,\"restriction_started_at\":null,\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:33:36.440Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/safety/status",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Chat access is available.\",\"qualifying_event_count\":0,\"restriction_active\":false,\"restriction_expires_at\":null,\"restriction_started_at\":null,\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:33:36.715Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/objectives/obj_01_01/complete",
+      "postData": "{\"skill_id\":\"skill_01\",\"source\":\"chatbot\",\"interaction_id\":\"6afabfdb70ca07b7ced88b02\",\"quick_check_answer\":true}",
+      "time": "2026-11-16T08:33:41.361Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_01",
+      "postData": null,
+      "time": "2026-11-16T08:33:41.811Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/objectives/obj_01_01/complete",
+      "body": "{\"completed_item_ids\":[\"activity_01_01\"],\"completed_objective_ids\":[\"obj_01_01\"],\"created_at\":\"Mon, 16 Nov 2026 08:33:31 GMT\",\"learning_events\":[{\"completed_at\":\"Mon, 16 Nov 2026 08:33:35 GMT\",\"content_item_id\":\"activity_01_01\",\"introduced_at\":\"Mon, 16 Nov 2026 08:33:31 GMT\",\"objective_id\":\"obj_01_01\",\"skill_id\":\"skill_01\",\"source\":\"chatbot\",\"sources\":[\"chatbot\"],\"status\":\"completed\"}],\"next_recommended_learning_objective\":{\"content\":\"2. Identify the right vocabulary to name the different sensations in the body. 2. Identify the right vocabulary to name the different sensations in the body. 2. Identify the right vocabulary to name the different sensations in the body. Objective 2: Identify the right vocabulary to name the different sensations in the body Objective 2: Identify the right vocabulary to name the different sensations in the body Sensation Words vs. Emotion Words: Sensation words refer to the language of our autonomic nervous system, which register Sensation Words vs. Emotion",
+      "time": "2026-11-16T08:33:41.812Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_01",
+      "postData": null,
+      "time": "2026-11-16T08:33:41.818Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_01",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The ability to perceive, interpret, and name physical body sensations to understand underlying emotional states.\",\"term\":\"Body Literacy\"},{\"definition\":\"A state of nervous system equilibrium where an individual can process emotions effectively and make clear decisions under stress.\",\"term\":\"Resilient Zone\"},{\"definition\":\"A state where stress pushes the autonomic nervous system out of balance, resulting in hyper-arousal (stuck on high) or hypo-arousal (stuck on low).\",\"term\":\"Dysregulation\"},{\"definition\":\"The branch of the autonomic nervous system responsible for activating the fight, flight, or freeze threat-response mechanism.\",\"term\":\"Sympathetic Nervous System\"},{\"definition\":\"The branch of the autonomic nervous system that mediates relaxation, recovery, and bodily restoration.\",\"term\":\"Parasympathetic Nervous System\"},{\"definition\":\"Intentionally observing present physical sensations and labeling them as pleasant, unpleasant, or neut",
+      "time": "2026-11-16T08:33:41.819Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.009Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_01",
+      "body": "{\"completed_item_ids\":[\"activity_01_01\"],\"completed_objective_ids\":[\"obj_01_01\"],\"created_at\":\"Mon, 16 Nov 2026 08:33:31 GMT\",\"learning_events\":[{\"completed_at\":\"Mon, 16 Nov 2026 08:33:35 GMT\",\"content_item_id\":\"activity_01_01\",\"introduced_at\":\"Mon, 16 Nov 2026 08:33:31 GMT\",\"objective_id\":\"obj_01_01\",\"skill_id\":\"skill_01\",\"source\":\"chatbot\",\"sources\":[\"chatbot\"],\"status\":\"completed\"}],\"next_recommended_learning_objective\":{\"content\":\"2. Identify the right vocabulary to name the different sensations in the body. 2. Identify the right vocabulary to name the different sensations in the body. 2. Identify the right vocabulary to name the different sensations in the body. Objective 2: Identify the right vocabulary to name the different sensations in the body Objective 2: Identify the right vocabulary to name the different sensations in the body Sensation Words vs. Emotion Words: Sensation words refer to the language of our autonomic nervous system, which register Sensation Words vs. Emotion",
+      "time": "2026-11-16T08:33:42.009Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_02",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.014Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_02",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.014Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills",
+      "body": "{\"skills\":[{\"description\":\"Developing body literacy and mastering somatic regulation techniques to maintain autonomic equilibrium within the resilient zone.\",\"skill_id\":\"skill_01\",\"title\":\"Calming the Body and Mind\"},{\"description\":\"Aligning speech, actions, and attention with core values through heedfulness, mindfulness, and metacognitive awareness.\",\"skill_id\":\"skill_02\",\"title\":\"Ethical Mindfulness\"},{\"description\":\"Observing internal emotional dynamics moment by moment to distinguish between beneficial and harmful mental states using the Spark to Forest Fire model.\",\"skill_id\":\"skill_03\",\"title\":\"Emotional Awareness\"},{\"description\":\"Recognizing intrinsic self-worth, overcoming cognitive thinking traps, and navigating the Eight Worldly Concerns to foster genuine well-being.\",\"skill_id\":\"skill_04\",\"title\":\"Self-Compassion\"},{\"description\":\"Expanding compassion beyond immediate in-groups by recognizing universal human desires for happiness and freedom from suffering.\",\"skill_id\":\"ski",
+      "time": "2026-11-16T08:33:42.015Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_02",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The ability to maintain core values and personal integrity while speaking and acting under stress or external pressure.\",\"term\":\"Ethical Mindfulness\"},{\"definition\":\"A state of active caution and restraint regarding thoughts, speech, or actions that could cause harm to self or others.\",\"term\":\"Heedfulness\"},{\"definition\":\"Intentionally holding core values and positive behaviors in working memory to guide present conduct.\",\"term\":\"Mindfulness\"},{\"definition\":\"Real-time consciousness of one's immediate speech, actions, and mental states in the present moment.\",\"term\":\"Awareness\"},{\"definition\":\"The capacity to maintain continuous focus on a chosen object or task without distraction.\",\"term\":\"Attention Stability\"},{\"definition\":\"The ability to monitor mental processes and recognize when attention has drifted from its intended focus.\",\"term\":\"Metacognitive Awareness\"}],\"description\":\"Aligning speech, actions, and attention with core values thr",
+      "time": "2026-11-16T08:33:42.021Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_03",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.196Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_03",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.196Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_02",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":{\"content\":\"1. Define Ethical Mindfulness. 1. Define Ethical Mindfulness. 1. Define Ethical Mindfulness. Objective 1: Define Ethical Mindfulness Objective 1: Define Ethical Mindfulness Core Definition: Ethical Mindfulness is defined as the ability to maintain one's identity and core values while speaking Core Definition: Ethical Mindfulness is defined as the ability to maintain one's identity and core values while speaking and acting accordingly. It involves living in a way that consistently reflects our principles, even under stress or pressure. Role & Impact: Ethical mindfulness combines heedfulness, mindfulness, and awareness to help us act in ways that align wi Role & Impact: Ethical mindfulness combines heedfulness, mindfulness, and awareness to help us act in ways that align with our principles, even when our mind tries to wander. Practicing this allows us to improve f",
+      "time": "2026-11-16T08:33:42.196Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_03",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The continuous monitoring of internal psychological states to differentiate constructive emotions from destructive impulses.\",\"term\":\"Emotional Awareness\"},{\"definition\":\"Attitudes and emotional orientations (e.g., gratitude, generosity) that promote personal well-being and social harmony.\",\"term\":\"Beneficial Mental States\"},{\"definition\":\"Psychological conditions (e.g., resentment, envy, anger) that distort reality and generate suffering for oneself and others.\",\"term\":\"Harmful Mental States\"},{\"definition\":\"A framework illustrating how a minor emotional precondition escalates through triggers into destructive behavioral outbursts.\",\"term\":\"Spark to Forest Fire Model\"},{\"definition\":\"The intentional intervention during emotional arousal where an individual chooses constructive responses over automatic reactions.\",\"term\":\"Selective Filtering\"}],\"description\":\"Observing internal emotional dynamics moment by moment to distinguish between ben",
+      "time": "2026-11-16T08:33:42.202Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_04",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.380Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_04",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.380Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_03",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":{\"content\":\"1. Define emotional awareness. 1. Define emotional awareness. 1. Define emotional awareness. Objective 1: Define emotional awareness Objective 1: Define emotional awareness Core Definition: Emotional Awareness is the ability to be aware of our mental experiences at each moment and differentia Core Definition: Emotional Awareness is the ability to be aware of our mental experiences at each moment and differentiate between beneficial and potentially harmful mental states. Observational Capacity: Being emotionally aware means having the ability to observe our thoughts, feelings, emotions, an Observational Capacity: Being emotionally aware means having the ability to observe our thoughts, feelings, emotions, and bodily sensations with awareness as they arise in the mind. What Emotional Awareness Is NOT: It does not mean ignoring our thoughts or pushing away emotions.",
+      "time": "2026-11-16T08:33:42.380Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_04",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"Recognizing one's intrinsic value, treating oneself with understanding during setbacks, and actively supporting one's genuine well-being.\",\"term\":\"Self-Compassion\"},{\"definition\":\"The cognitive trap of perpetually pursuing external accomplishments or possessions without ever attaining lasting satisfaction.\",\"term\":\"Hedonic Treadmill\"},{\"definition\":\"Rigid, perfectionist standards that distort self-assessment and generate perpetual disappointment.\",\"term\":\"Unrealistic Expectations\"},{\"definition\":\"The cognitive tendency to overestimate one's abilities, status, or correctness relative to others.\",\"term\":\"Superiority Bias\"},{\"definition\":\"The habitual underestimation of one's intrinsic worth and capabilities leading to avoidance or burnout.\",\"term\":\"Inferiority Bias\"},{\"definition\":\"The insistence on flawlessness and severe self-judgment in response to minor errors.\",\"term\":\"Perfectionism\"},{\"definition\":\"Four dualities of external attachment",
+      "time": "2026-11-16T08:33:42.386Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_05",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.752Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_05",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.753Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_04",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":{\"content\":\"1. Define self compassion 1. Define self compassion 1. Define self compassion Objective 1: Define self compassion Objective 1: Define self compassion Core Definition: Self-compassion is about recognizing our own worth, understanding what truly makes us happy or unhappy, Core Definition: Self-compassion is about recognizing our own worth, understanding what truly makes us happy or unhappy, and finding ways to improve our well-being. Understanding Growth and Adaptation: Practicing self-compassion means realizing that you can change by understanding you Understanding Growth and Adaptation: Practicing self-compassion means realizing that you can change by understanding yourself better, developing new skills, and adopting positive attitudes. Goal of Self-Compassion: The goal of self-compassion is to build confidence in your ability to achieve lasting happiness Goal of",
+      "time": "2026-11-16T08:33:42.753Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_05",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The foundational recognition that all individuals share the basic human condition, seeking happiness and avoiding distress.\",\"term\":\"Common Humanity\"},{\"definition\":\"The practice of reducing group-based favoritism and extending compassionate consideration to all human beings.\",\"term\":\"Impartiality\"},{\"definition\":\"The systematic tendency to favor members of one's own social, cultural, or demographic group over outsiders.\",\"term\":\"In-Group Bias\"},{\"definition\":\"The inclination to view individuals outside one's immediate group with indifference, distrust, or hostility.\",\"term\":\"Out-Group Bias\"},{\"definition\":\"A standardized, oversimplified mental picture attributed to an entire group of people.\",\"term\":\"Stereotype\"},{\"definition\":\"A preconceived, ungrounded negative attitude directed toward an individual based on group identity.\",\"term\":\"Prejudice\"},{\"definition\":\"The false belief that social categories possess fixed, immutable characteristi",
+      "time": "2026-11-16T08:33:42.759Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_06",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.936Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_06",
+      "postData": null,
+      "time": "2026-11-16T08:33:42.936Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_05",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":null,\"objectives\":[],\"quiz_attempts\":[],\"quiz_scores\":{},\"skill\":null,\"skill_id\":\"skill_05\",\"student_id\":\"STU-EC3773EE\"}\n",
+      "time": "2026-11-16T08:33:42.936Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_06",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The intentional process of releasing anger and ill will toward an offender, replacing negative reactivity with mental peace.\",\"term\":\"Forgiveness\"},{\"definition\":\"The recognition of benefits received from others, nature, or existence, experienced as an immediate emotion or an enduring trait.\",\"term\":\"Gratitude\"},{\"definition\":\"An enduring disposition to easily and habitually recognize and appreciate positive benefits in daily life.\",\"term\":\"Trait Gratitude\"},{\"definition\":\"The cognitive error of attributing a complex outcome or harmful behavior to a single isolated cause.\",\"term\":\"Reductive Thinking\"},{\"definition\":\"Blaming another person's negative behavior entirely on internal character flaws while ignoring situational constraints.\",\"term\":\"Fatal Attribution Error\"},{\"definition\":\"A Japanese structured introspection method examining three questions: What have I received? What have I given? What trouble have I caused?\",\"term\":\"Naikan Prac",
+      "time": "2026-11-16T08:33:42.943Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_07",
+      "postData": null,
+      "time": "2026-11-16T08:33:43.354Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_07",
+      "postData": null,
+      "time": "2026-11-16T08:33:43.354Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_06",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":null,\"objectives\":[],\"quiz_attempts\":[],\"quiz_scores\":{},\"skill\":null,\"skill_id\":\"skill_06\",\"student_id\":\"STU-EC3773EE\"}\n",
+      "time": "2026-11-16T08:33:43.354Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_07",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The automatic, non-conscious spread of emotional states and bodily expressions between individuals.\",\"term\":\"Emotional Contagion\"},{\"definition\":\"Experiencing an emotional echo or felt sensation corresponding to another person's emotional state.\",\"term\":\"Affective Empathy\"},{\"definition\":\"Utilizing perspective-taking skills to intellectually understand another person's situation and feelings.\",\"term\":\"Cognitive Empathy\"},{\"definition\":\"A state of feeling overwhelmed, exhausted, or paralyzed by vicarious exposure to another's suffering.\",\"term\":\"Empathic Distress\"},{\"definition\":\"A balanced, outward-focused orientation of genuine care for another's well-being without becoming overwhelmed.\",\"term\":\"Empathic Concern\"},{\"definition\":\"The deliberate practice of feeling genuine happiness for the good fortune and achievements of others.\",\"term\":\"Sympathetic Joy\"},{\"definition\":\"The psychological tendency to feel intense empathy for a single ident",
+      "time": "2026-11-16T08:33:43.361Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/progress/skill_08",
+      "postData": null,
+      "time": "2026-11-16T08:33:43.769Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/content/skills/skill_08",
+      "postData": null,
+      "time": "2026-11-16T08:33:43.769Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_07",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":null,\"objectives\":[],\"quiz_attempts\":[],\"quiz_scores\":{},\"skill\":null,\"skill_id\":\"skill_07\",\"student_id\":\"STU-EC3773EE\"}\n",
+      "time": "2026-11-16T08:33:43.769Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/content/skills/skill_08",
+      "body": "{\"activities\":[],\"definitions\":[{\"definition\":\"The active motivation to relieve the suffering of others, rooted in genuine care, critical inquiry, and self-confidence.\",\"term\":\"Compassion\"},{\"definition\":\"The perceptive capacity to recognize visible pain as well as subtle, unseen emotional distress in others.\",\"term\":\"Noticing Suffering\"},{\"definition\":\"The internal confidence and belief that one's personal actions can produce meaningful relief.\",\"term\":\"Sense of Agency\"},{\"definition\":\"The passive desire for others to be free from suffering without taking personal responsibility or action.\",\"term\":\"Wishing Compassion\"},{\"definition\":\"The active intention to reduce suffering accompanied by preliminary or indirect personal efforts.\",\"term\":\"Aspiring Compassion\"},{\"definition\":\"Direct, committed, and sustained personal action taken to relieve suffering and address its root causes.\",\"term\":\"Engaged Compassion\"}],\"description\":\"Translating empathic concern into active, courageous efforts t",
+      "time": "2026-11-16T08:33:43.776Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"I'd like to learn about Define the resilient zone and recognize signs of hyper-arousal and hypo-arousal dysregulation..\",\"answer_style\":\"short\",\"request_id\":\"49ad74b2-d27e-4f89-9a0e-650ecac32913\"}",
+      "time": "2026-11-16T08:33:43.969Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/progress/skill_08",
+      "body": "{\"completed_item_ids\":[],\"completed_objective_ids\":[],\"learning_events\":[],\"next_recommended_learning_objective\":null,\"objectives\":[],\"quiz_attempts\":[],\"quiz_scores\":{},\"skill\":null,\"skill_id\":\"skill_08\",\"student_id\":\"STU-EC3773EE\"}\n",
+      "time": "2026-11-16T08:33:43.969Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"answer\":\"That sounds difficult. I don't have enough approved information to guide you reliably yet. What part would you most like help with?\",\"educational_response\":\"That sounds difficult. I don't have enough approved information to guide you reliably yet. What part would you most like help with?\",\"interaction_id\":\"6afabffd70ca07b7ced88b03\",\"is_fallback\":true,\"learning_context\":{\"answer_style\":\"short\",\"detected_emotion\":\"unknown\",\"detected_terms\":[\"arousal\",\"define\",\"dysregulation\",\"hyper\",\"hypo\",\"like\",\"recognize\",\"resilient\",\"signs\",\"zone\"],\"learning_objective\":{\"id\":\"obj_01_05\",\"objective_id\":\"obj_01_05\"},\"recommended_activity\":{},\"skill\":{\"id\":\"skill_01\",\"title\":\"Skill 1: Calming the Body and Mind\"},\"status\":\"learning_path_selected\",\"student_question\":\"I'd like to learn about Define the resilient zone and recognize signs of hyper-arousal and hypo-arousal dysregulation..\"},\"metadata\":{\"activity_included\":false,\"chunks_count\":0},\"objective_id\":\"obj_01_05\",\"skill_id\":\"skill_01\",\"ste",
+      "time": "2026-11-16T08:34:05.706Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"I feel really stressed and overwhelmed with my exam schedule. Please just listen, I don't want any advice or solutions.\",\"answer_style\":\"short\",\"request_id\":\"46eef7d2-f483-473e-a681-5721d98a14b7\"}",
+      "time": "2026-11-16T08:34:10.268Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"answer\":\"I hear you. Feeling overwhelmed by a busy exam schedule is completely understandable, and it is entirely valid to just want your feelings heard without receiving advice.\",\"educational_response\":\"I hear you. Feeling overwhelmed by a busy exam schedule is completely understandable, and it is entirely valid to just want your feelings heard without receiving advice.\",\"interaction_id\":\"6afac00b70ca07b7ced88b04\",\"is_fallback\":false,\"learning_context\":{\"answer_style\":\"short\",\"detected_emotion\":\"anxious\",\"detected_terms\":[\"advice\",\"any\",\"don\",\"exam\",\"just\",\"listen\",\"overwhelmed\",\"please\",\"really\",\"schedule\",\"solutions\",\"stress\"],\"learning_objective\":{\"id\":\"obj_01_05\",\"objective_id\":\"obj_01_05\"},\"recommended_activity\":{},\"skill\":{\"id\":\"skill_01\",\"title\":\"Skill 1: Calming the Body and Mind\"},\"status\":\"learning_path_selected\",\"student_question\":\"I feel really stressed and overwhelmed with my exam schedule. Please just listen, I don't want any advice or solutions.\"},\"metadata\":{\"activit",
+      "time": "2026-11-16T08:34:20.007Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"I am thinking about ending my life.\",\"answer_style\":\"short\",\"request_id\":\"2a768344-7073-43a3-9954-f4d8cc71a3a6\"}",
+      "time": "2026-11-16T08:34:24.598Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Thank you for telling me. You deserve immediate, real-world support. Please contact someone you trust and a qualified counsellor now.\",\"qualifying_event_count\":1,\"restriction_active\":false,\"risk_level\":\"high\",\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:34:25.294Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:27.373Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:27.373Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "postData": null,
+      "time": "2026-11-16T08:34:27.373Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:27.373Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:27.382Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nexport async function sendGeneralEmpathyMessage(message, history = []) {\n\tconst { data } = await api.post(\"/api/general-empathy-chat\", {\n\t\tmessage,\n\t\thistory\n\t}, { skipAuthRedirect: true });\n\tif (typeof data?.response !== \"string\" || !data.response.trim()) {\n\t\tthrow new Error(\"The chat service returned an empty response.\");\n\t}\n\treturn data.response.trim();\n}\n\n//# sourceMappingURL=data:application/json;base64,eyJtYXBwaW5ncyI6IkFBQUEsT0FBTyxTQUFTO0FBRWhCLE9BQU8sZUFBZSwwQkFBMEIsU0FBUyxVQUFVLENBQUMsR0FBRztDQUNyRSxNQUFNLEVBQUUsU0FBUyxNQUFNLElBQUksS0FDekIsNkJBQ0E7RUFBRTtFQUFTO0NBQVEsR0FDbkIsRUFBRSxrQkFBa0IsS0FBSyxDQUMzQjtDQUVBLElBQUksT0FBTyxNQUFNLGFBQWEsWUFBWSxDQUFDLEtBQUssU0FBUyxLQUFLLEdBQUc7RUFDL0QsTUFBTSxJQUFJLE1BQU0sOENBQThDO0NBQ2hFO0NBRUEsT0FBTyxLQUFLLFNBQVMsS0FBSztBQUM1QiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJnZW5lcmFsRW1wYXRoeUFwaS5qcyJdLCJ2ZXJzaW9uIjozLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgYXBpIGZyb20gXCIuLi91dGlscy9heGlvc0luc3RhbmNlXCI7XHJcblxyX",
+      "time": "2026-11-16T08:34:27.384Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "body": "// src/api/chatApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nexport async function sendMessage(question, answerStyle = \"short\") {\n\tconst { data } = await api.post(\"/api/learning-response\", {\n\t\tquestion,\n\t\tanswer_style: answerStyle,\n\t\trequest_id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`\n\t});\n\tconst context = data.learning_context ?? data;\n\treturn {\n\t\t// Keep the controller response available to consumers that need metadata\n\t\t// beyond the presentation fields below.\n\t\tlearning_context: context,\n\t\tmessage: data.educational_response ?? data.answer ?? context.message,\n\t\tstatus: context.status,\n\t\temotion: context.detected_emotion ?? \"calm\",\n\t\tskill: context.skill ?? null,\n\t\ttopic: context.topic ?? null,\n\t\tlearningObjective: context.learning_objective ?? null,\n\t\tnextIncompleteObjective: context.next_incomplete_objective ?? null,\n\t\tprogressRecommendation: context.progress_recommendation ?? null,\n\t\trecommendedActivity: context.recommended_activity ?? null,\n\t",
+      "time": "2026-11-16T08:34:27.386Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nconst unwrap = (response) => response?.data ?? response;\nconst listOf = (value) => Array.isArray(value) ? value : [];\nconst normalizeItem = (item, type) => ({\n\t...item,\n\ttype,\n\titem_id: item?.item_id,\n\ttitle: item?.title || item?.question || type,\n\tcontent: item?.content || item?.description || item?.question || \"\"\n});\nconst normalizeSkill = (skill) => ({\n\t...skill,\n\ttitle: skill?.title || skill?.skill_title || \"\",\n\tobjectives: listOf(skill?.objectives).map((objective) => {\n\t\tconst authoredItems = listOf(objective.items || objective.learning_items);\n\t\tconst items = authoredItems.length ? authoredItems : [\n\t\t\t...listOf(objective.learning_content).map((item) => normalizeItem(item, \"text\")),\n\t\t\t...listOf(objective.activities).map((item) => normalizeItem(item, \"activity\")),\n\t\t\t...listOf(objective.videos).map((item) => normalizeItem(item, \"video\")),\n\t\t\t...objective.quiz ? [normalizeItem(objective.quiz, \"quiz\")] : [],\n\t\t\t...objective.reflection ",
+      "time": "2026-11-16T08:34:27.386Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_BASE_URL\": \"http://localhost:5000\"};const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || \"http://localhost:5000\").replace(/\\/+$/, \"\");\nconst API_BASE_URL = RAW_BASE_URL.endsWith(\"/api\") ? RAW_BASE_URL : `${RAW_BASE_URL}/api`;\nconst getToken = () => {\n\ttry {\n\t\tconst rawAuthStorage = localStorage.getItem(\"auth-storage\");\n\t\tconst authStorage = rawAuthStorage ? JSON.parse(rawAuthStorage) : null;\n\t\tif (authStorage?.state?.token) return authStorage.state.token;\n\t} catch {}\n\treturn localStorage.getItem(\"token\") || localStorage.getItem(\"access_token\");\n};\nconst apiRequest = async (endpoint, options = {}) => {\n\tconst token = getToken();\n\tconst headers = {\n\t\t\"Content-Type\": \"application/json\",\n\t\t...options.headers || {}\n\t};\n\tif (token) headers.Authorization = `Bearer ${token}`;\n\tconst response = await fetch(`${API_BASE_URL}${endpoint}`, {\n\t\t...options,\n\t\theaders\n\t});\n\tlet data = {",
+      "time": "2026-11-16T08:34:27.386Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "body": "// src/api/authApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nimport { ENDPOINTS } from \"/src/utils/constants.js\";\n// Login\nexport const loginUser = async ({ username, password }) => {\n\tconst response = await api.post(ENDPOINTS.LOGIN, {\n\t\tusername,\n\t\tpassword\n\t});\n\t// response.data = { message, access_token, student }\n\treturn response.data;\n};\n// Register (legacy single-step; no longer used by RegistrationPage)\nexport const registerUser = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formData.gender,\n\t\tpassword: formData.password\n\t};\n\tconst response = await api.post(ENDPOINTS.REGISTER, payload);\n\treturn response.data;\n};\n// NEW: Step 1 of sign-up. Checks the details and duplicates, saves nothing.\n// Resolves with { valid: true }; rejects with 400/409 + { error } otherwise.\nexport const validateRegistration = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formD",
+      "time": "2026-11-16T08:34:27.388Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/auth/login",
+      "postData": "{\"username\":\"lockout_p11_mwj0aazr\",\"password\":\"Password123!\"}",
+      "time": "2026-11-16T08:34:27.982Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/auth/login",
+      "body": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWZhYmZjM2Y1YTY4ZDRmNjRiNTc1MmMiLCJzdHVkZW50X2lkIjoiU1RVLUIyRUI1ODYyIiwidXNlcm5hbWUiOiJsb2Nrb3V0X3AxMV9td2owYWF6ciIsImVtYWlsIjoibG9ja291dF9wMTFfbXdqMGFhenJAdGVzdC5jb20iLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc5NDgxODA2OCwiZXhwIjoxNzk0OTA0NDY4fQ.sfn_aId2AKWM36ltnsi0rYSkgEH-mdompbOE0RRQF0A\",\"message\":\"Login successful.\",\"student\":{\"email\":\"lockout_p11_mwj0aazr@test.com\",\"gender\":null,\"id\":\"6afabfc3f5a68d4f64b5752c\",\"name\":\"Test lockout_p11_mwj0aazr\",\"role\":\"student\",\"student_id\":\"STU-B2EB5862\",\"username\":\"lockout_p11_mwj0aazr\"}}\n",
+      "time": "2026-11-16T08:34:28.268Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.291Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.291Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.291Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.291Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.301Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/contentApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nconst unwrap = (response) => response?.data ?? response;\nconst listOf = (value) => Array.isArray(value) ? value : [];\nconst normalizeItem = (item, type) => ({\n\t...item,\n\ttype,\n\titem_id: item?.item_id,\n\ttitle: item?.title || item?.question || type,\n\tcontent: item?.content || item?.description || item?.question || \"\"\n});\nconst normalizeSkill = (skill) => ({\n\t...skill,\n\ttitle: skill?.title || skill?.skill_title || \"\",\n\tobjectives: listOf(skill?.objectives).map((objective) => {\n\t\tconst authoredItems = listOf(objective.items || objective.learning_items);\n\t\tconst items = authoredItems.length ? authoredItems : [\n\t\t\t...listOf(objective.learning_content).map((item) => normalizeItem(item, \"text\")),\n\t\t\t...listOf(objective.activities).map((item) => normalizeItem(item, \"activity\")),\n\t\t\t...listOf(objective.videos).map((item) => normalizeItem(item, \"video\")),\n\t\t\t...objective.quiz ? [normalizeItem(objective.quiz, \"quiz\")] : [],\n\t\t\t...objective.reflection ",
+      "time": "2026-11-16T08:34:28.302Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/generalEmpathyApi.js",
+      "body": "import api from \"/src/utils/axiosInstance.js\";\nexport async function sendGeneralEmpathyMessage(message, history = []) {\n\tconst { data } = await api.post(\"/api/general-empathy-chat\", {\n\t\tmessage,\n\t\thistory\n\t}, { skipAuthRedirect: true });\n\tif (typeof data?.response !== \"string\" || !data.response.trim()) {\n\t\tthrow new Error(\"The chat service returned an empty response.\");\n\t}\n\treturn data.response.trim();\n}\n\n//# sourceMappingURL=data:application/json;base64,eyJtYXBwaW5ncyI6IkFBQUEsT0FBTyxTQUFTO0FBRWhCLE9BQU8sZUFBZSwwQkFBMEIsU0FBUyxVQUFVLENBQUMsR0FBRztDQUNyRSxNQUFNLEVBQUUsU0FBUyxNQUFNLElBQUksS0FDekIsNkJBQ0E7RUFBRTtFQUFTO0NBQVEsR0FDbkIsRUFBRSxrQkFBa0IsS0FBSyxDQUMzQjtDQUVBLElBQUksT0FBTyxNQUFNLGFBQWEsWUFBWSxDQUFDLEtBQUssU0FBUyxLQUFLLEdBQUc7RUFDL0QsTUFBTSxJQUFJLE1BQU0sOENBQThDO0NBQ2hFO0NBRUEsT0FBTyxLQUFLLFNBQVMsS0FBSztBQUM1QiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJnZW5lcmFsRW1wYXRoeUFwaS5qcyJdLCJ2ZXJzaW9uIjozLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgYXBpIGZyb20gXCIuLi91dGlscy9heGlvc0luc3RhbmNlXCI7XHJcblxyX",
+      "time": "2026-11-16T08:34:28.302Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/progressApi.js?t=1794817790016",
+      "body": "import.meta.env = {\"BASE_URL\": \"/\", \"DEV\": true, \"MODE\": \"development\", \"PROD\": false, \"SSR\": false, \"VITE_API_BASE_URL\": \"http://localhost:5000\"};const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || \"http://localhost:5000\").replace(/\\/+$/, \"\");\nconst API_BASE_URL = RAW_BASE_URL.endsWith(\"/api\") ? RAW_BASE_URL : `${RAW_BASE_URL}/api`;\nconst getToken = () => {\n\ttry {\n\t\tconst rawAuthStorage = localStorage.getItem(\"auth-storage\");\n\t\tconst authStorage = rawAuthStorage ? JSON.parse(rawAuthStorage) : null;\n\t\tif (authStorage?.state?.token) return authStorage.state.token;\n\t} catch {}\n\treturn localStorage.getItem(\"token\") || localStorage.getItem(\"access_token\");\n};\nconst apiRequest = async (endpoint, options = {}) => {\n\tconst token = getToken();\n\tconst headers = {\n\t\t\"Content-Type\": \"application/json\",\n\t\t...options.headers || {}\n\t};\n\tif (token) headers.Authorization = `Bearer ${token}`;\n\tconst response = await fetch(`${API_BASE_URL}${endpoint}`, {\n\t\t...options,\n\t\theaders\n\t});\n\tlet data = {",
+      "time": "2026-11-16T08:34:28.303Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/chatApi.js",
+      "body": "// src/api/chatApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nexport async function sendMessage(question, answerStyle = \"short\") {\n\tconst { data } = await api.post(\"/api/learning-response\", {\n\t\tquestion,\n\t\tanswer_style: answerStyle,\n\t\trequest_id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`\n\t});\n\tconst context = data.learning_context ?? data;\n\treturn {\n\t\t// Keep the controller response available to consumers that need metadata\n\t\t// beyond the presentation fields below.\n\t\tlearning_context: context,\n\t\tmessage: data.educational_response ?? data.answer ?? context.message,\n\t\tstatus: context.status,\n\t\temotion: context.detected_emotion ?? \"calm\",\n\t\tskill: context.skill ?? null,\n\t\ttopic: context.topic ?? null,\n\t\tlearningObjective: context.learning_objective ?? null,\n\t\tnextIncompleteObjective: context.next_incomplete_objective ?? null,\n\t\tprogressRecommendation: context.progress_recommendation ?? null,\n\t\trecommendedActivity: context.recommended_activity ?? null,\n\t",
+      "time": "2026-11-16T08:34:28.303Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5173/src/api/authApi.js",
+      "body": "// src/api/authApi.js\nimport api from \"/src/utils/axiosInstance.js\";\nimport { ENDPOINTS } from \"/src/utils/constants.js\";\n// Login\nexport const loginUser = async ({ username, password }) => {\n\tconst response = await api.post(ENDPOINTS.LOGIN, {\n\t\tusername,\n\t\tpassword\n\t});\n\t// response.data = { message, access_token, student }\n\treturn response.data;\n};\n// Register (legacy single-step; no longer used by RegistrationPage)\nexport const registerUser = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formData.gender,\n\t\tpassword: formData.password\n\t};\n\tconst response = await api.post(ENDPOINTS.REGISTER, payload);\n\treturn response.data;\n};\n// NEW: Step 1 of sign-up. Checks the details and duplicates, saves nothing.\n// Resolves with { valid: true }; rejects with 400/409 + { error } otherwise.\nexport const validateRegistration = async (formData) => {\n\tconst payload = {\n\t\tusername: formData.username,\n\t\temail: formData.email,\n\t\tgender: formD",
+      "time": "2026-11-16T08:34:28.305Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/safety/status",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.334Z"
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:5000/api/safety/status",
+      "postData": null,
+      "time": "2026-11-16T08:34:28.334Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/safety/status",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Chat access is available.\",\"qualifying_event_count\":0,\"restriction_active\":false,\"restriction_expires_at\":null,\"restriction_started_at\":null,\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:34:28.646Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/safety/status",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Chat access is available.\",\"qualifying_event_count\":0,\"restriction_active\":false,\"restriction_expires_at\":null,\"restriction_started_at\":null,\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:34:28.917Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"I am thinking about ending my life.\",\"answer_style\":\"short\",\"request_id\":\"72f2da50-2f4c-459e-b642-91f336ae857f\"}",
+      "time": "2026-11-16T08:34:30.994Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Thank you for telling me. You deserve immediate, real-world support. Please contact someone you trust and a qualified counsellor now.\",\"qualifying_event_count\":1,\"restriction_active\":false,\"risk_level\":\"high\",\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:34:31.665Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"I am thinking about ending my life.\",\"answer_style\":\"short\",\"request_id\":\"9b1e3a84-e6fe-4fb1-96d4-797781c30e0c\"}",
+      "time": "2026-11-16T08:34:35.237Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"Thank you for telling me. You deserve immediate, real-world support. Please contact someone you trust and a qualified counsellor now.\",\"qualifying_event_count\":2,\"restriction_active\":false,\"risk_level\":\"high\",\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:34:35.928Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"I am thinking about ending my life.\",\"answer_style\":\"short\",\"request_id\":\"932ea4de-3b34-4ec5-8d2a-fe9d4cf64574\"}",
+      "time": "2026-11-16T08:34:39.493Z"
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:5000/api/learning-response",
+      "body": "{\"counsellor_contacts\":[],\"message\":\"For your safety, chatbot access is temporarily paused for 24 hours. Please contact a qualified counsellor or emergency service now.\",\"qualifying_event_count\":3,\"restriction_active\":true,\"restriction_expires_at\":\"Tue, 17 Nov 2026 08:34:39 GMT\",\"risk_level\":\"high\",\"safety\":true,\"screening_required\":false,\"urgent_guidance\":\"If you may act on these thoughts or are in immediate danger, call local emergency services or go to the nearest emergency department. Please stay with someone you trust and move away from anything you could use to hurt yourself.\"}\n",
+      "time": "2026-11-16T08:34:40.266Z"
+    },
+    {
+      "type": "request",
+      "method": "POST",
+      "url": "http://localhost:5000/api/learning-response",
+      "postData": "{\"question\":\"Can I ask a question now?\"}",
+      "time": "2026-11-16T08:34:44.346Z"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "text": "[chatbot-next-objective] guidance generation failed Error: The learning response did not match the next incomplete objective.\n    at recommendNextObjective (http://localhost:5173/src/pages/ChatPage.jsx?t=1794817790016:371:12)\n    at async handleFlowMessage (http://localhost:5173/src/pages/ChatPage.jsx?t=1794817790016:670:5)",
+      "location": {
+        "url": "http://localhost:5173/src/pages/ChatPage.jsx?t=1794817790016",
+        "line": 376,
+        "column": 12,
+        "lineNumber": 376,
+        "columnNumber": 12
+      },
+      "time": "2026-11-16T08:34:05.695Z"
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 423 (LOCKED)",
+      "location": {
+        "url": "http://localhost:5000/api/learning-response",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      },
+      "time": "2026-11-16T08:34:44.634Z"
+    }
+  ],
+  "databaseSnapshots": {
+    "preTest_student": {
+      "student_id": "STU-EC3773EE",
+      "username": "student_p11_mwj0aazr",
+      "progress_count": 0,
+      "safety_events_count": 0,
+      "interactions_count": 0,
+      "safety_status": null,
+      "progress": [],
+      "safety_events": []
+    },
+    "preTest_lockout": {
+      "student_id": "STU-B2EB5862",
+      "username": "lockout_p11_mwj0aazr",
+      "progress_count": 0,
+      "safety_events_count": 0,
+      "interactions_count": 0,
+      "safety_status": null,
+      "progress": [],
+      "safety_events": []
+    },
+    "postTest_student": {
+      "student_id": "STU-EC3773EE",
+      "username": "student_p11_mwj0aazr",
+      "progress_count": 1,
+      "safety_events_count": 1,
+      "interactions_count": 3,
+      "safety_status": null,
+      "progress": [
+        {
+          "skill_id": "skill_01",
+          "student_id": "STU-EC3773EE",
+          "created_at": "2026-11-16 08:33:31.563000",
+          "learning_events": [
+            {
+              "skill_id": "skill_01",
+              "objective_id": "obj_01_01",
+              "content_item_id": "activity_01_01",
+              "source": "chatbot",
+              "sources": [
+                "chatbot"
+              ],
+              "status": "completed",
+              "introduced_at": "2026-11-16 08:33:31.563000",
+              "completed_at": "2026-11-16 08:33:35.232000"
+            }
+          ],
+          "updated_at": "2026-11-16 08:33:41.620000",
+          "completed_item_ids": [
+            "activity_01_01"
+          ],
+          "completed_objective_ids": [
+            "obj_01_01"
+          ],
+          "quiz_attempts": [],
+          "quiz_scores": {},
+          "next_recommended_learning_objective": {
+            "id": "obj_01_05",
+            "title": "2. Identify the right vocabulary to name the different sensations in the body.",
+            "content": "2. Identify the right vocabulary to name the different sensations in the body. 2. Identify the right vocabulary to name the different sensations in the body. 2. Identify the right vocabulary to name the different sensations in the body. Objective 2: Identify the right vocabulary to name the different sensations in the body Objective 2: Identify the right vocabulary to name the different sensations in the body Sensation Words vs. Emotion Words: Sensation words refer to the language of our autonomic nervous system, which register Sensation Words vs. Emotion Words: Sensation words refer to the language of our autonomic nervous system, which registers safety and regulates our organs accordingly. While emotion words express how we are feeling emotionally, body sensation words provide additional physical information registered by the nervous system. Role in Emotional Regulation: Calming our body and mind starts with observing these physical sensations using precise vo Role in Emotional Regulation: Calming our body and mind starts with observing these physical sensations using precise vocabulary. Categorizing Physical Sensations: Sensation vocabulary helps us categorize physical experience into pleasant, unpleasant Categorizing Physical Sensations: Sensation vocabulary helps us categorize physical experience into pleasant, unpleasant, or neutral states. Identifying specific physical sensations (such as warmth, tightness, tingling, or firmness) rather than jumping directly to abstract emotions or thoughts allows us to stay connected to bodily signals."
+          }
+        }
+      ],
+      "safety_events": [
+        {
+          "student_id": "STU-EC3773EE",
+          "request_id": "2a768344-7073-43a3-9954-f4d8cc71a3a6",
+          "message": "I am thinking about ending my life.",
+          "risk_level": "high",
+          "category": "suicidal_ideation",
+          "immediate": false,
+          "historical": false,
+          "created_at": "2026-11-16 08:34:24.875000",
+          "qualifying_event_count": 1,
+          "restriction_active": false
+        }
+      ]
+    },
+    "postTest_lockout": {
+      "student_id": "STU-B2EB5862",
+      "username": "lockout_p11_mwj0aazr",
+      "progress_count": 0,
+      "safety_events_count": 3,
+      "interactions_count": 0,
+      "safety_status": null,
+      "progress": [],
+      "safety_events": [
+        {
+          "student_id": "STU-B2EB5862",
+          "request_id": "72f2da50-2f4c-459e-b642-91f336ae857f",
+          "message": "I am thinking about ending my life.",
+          "risk_level": "high",
+          "category": "suicidal_ideation",
+          "immediate": false,
+          "historical": false,
+          "created_at": "2026-11-16 08:34:31.268000",
+          "qualifying_event_count": 1,
+          "restriction_active": false
+        },
+        {
+          "student_id": "STU-B2EB5862",
+          "request_id": "932ea4de-3b34-4ec5-8d2a-fe9d4cf64574",
+          "message": "I am thinking about ending my life.",
+          "risk_level": "high",
+          "category": "suicidal_ideation",
+          "immediate": false,
+          "historical": false,
+          "created_at": "2026-11-16 08:34:39.787000",
+          "qualifying_event_count": 3,
+          "restriction_active": true
+        },
+        {
+          "student_id": "STU-B2EB5862",
+          "request_id": "9b1e3a84-e6fe-4fb1-96d4-797781c30e0c",
+          "message": "I am thinking about ending my life.",
+          "risk_level": "high",
+          "category": "suicidal_ideation",
+          "immediate": false,
+          "historical": false,
+          "created_at": "2026-11-16 08:34:35.511000",
+          "qualifying_event_count": 2,
+          "restriction_active": false
+        }
+      ]
+    }
+  }
+}

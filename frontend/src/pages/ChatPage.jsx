@@ -4,11 +4,12 @@ import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { getSafetyStatus, sendMessage, submitSafetyScreening } from "../api/chatApi";
+import { getLearningRecommendations } from "../api/generalEmpathyApi";
 import { completeItem, completeObjective, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
 import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
 import { verifyQuickCheckAnswer } from "../utils/quickCheck";
-import { Mic, Send } from "lucide-react";
+import { AlertCircle, LoaderCircle, LogOut, Mic, Send, Sparkles, X } from "lucide-react";
 import "./ChatPages.css";
 import SafetyGate from "../components/chat/SafetyGate";
 
@@ -52,24 +53,27 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
       <div className="chat-response-style" role="group" aria-label="Response style">
         <span className="chat-response-style__label">Response:</span>
         <div className="chat-response-style__options">
-          {[
-            { value: "short", label: "Short" },
-            { value: "long", label: "Long" },
-          ].map((style) => (
-            <button
-              key={style.value}
-              type="button"
-              onClick={() => onAnswerStyleChange(style.value)}
-              aria-pressed={answerStyle === style.value}
-              className={`chat-response-style__option ${
-                answerStyle === style.value
-                  ? "bg-white text-indigo-700 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {style.label}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => onAnswerStyleChange("short")}
+            aria-pressed={answerStyle === "short"}
+            className={`chat-response-style__option ${
+              answerStyle === "short" ? "chat-response-style__option--active" : ""
+            }`}
+          >
+            Short
+          </button>
+          <span className="sr-only"> </span>
+          <button
+            type="button"
+            onClick={() => onAnswerStyleChange("long")}
+            aria-pressed={answerStyle === "long"}
+            className={`chat-response-style__option ${
+              answerStyle === "long" ? "chat-response-style__option--active" : ""
+            }`}
+          >
+            Long
+          </button>
         </div>
       </div>
       <div className="chat-input-row">
@@ -117,6 +121,11 @@ export default function ChatPage() {
   const [safetyStatus, setSafetyStatus] = useState(null);
   const [screeningLoading, setScreeningLoading] = useState(false);
   const [screeningError, setScreeningError] = useState("");
+  const [completionModalOpen, setCompletionModalOpen] = useState(false);
+  const [isRecommending, setIsRecommending] = useState(false);
+  const [recommendations, setRecommendations] = useState(null);
+  const [recommendationError, setRecommendationError] = useState("");
+  const [conversationFinished, setConversationFinished] = useState(false);
   const recommendationKeys = useRef(new Set());
   const activityCompletionInFlight = useRef(new Set());
   const requestInFlight = useRef(false);
@@ -131,6 +140,75 @@ export default function ChatPage() {
   } = useChatStore();
 
   const firstName = getFirstName(user);
+
+  const hasUserMessages = messages.some((m) => m.role === "user");
+
+  const handleOpenCompletion = () => {
+    setCompletionModalOpen(true);
+    setRecommendations(null);
+    setRecommendationError("");
+  };
+
+  const handleFinishConversation = () => {
+    setCompletionModalOpen(false);
+    setRecommendations(null);
+    setRecommendationError("");
+    setConversationFinished(true);
+  };
+
+  const handleExploreRecommendations = async () => {
+    setIsRecommending(true);
+    setRecommendationError("");
+    const historyPayload = messages
+      .filter((m) => m && m.content && typeof m.content === "string")
+      .map((m) => ({
+        role: m.role === "user" ? "user" : "assistant",
+        content: m.content,
+      }));
+
+    try {
+      const result = await getLearningRecommendations(historyPayload);
+      if (result?.safety) {
+        setCompletionModalOpen(false);
+        setRecommendations(null);
+        if (result.restrictionActive || result.screeningRequired) {
+          setSafetyStatus({
+            message: result.message,
+            restriction_active: result.restrictionActive,
+            screening_required: result.screeningRequired,
+            restriction_expires_at: result.restrictionExpiresAt,
+            counsellor_contacts: result.counsellorContacts,
+            urgent_guidance: result.urgentGuidance,
+          });
+        }
+        return;
+      }
+      setRecommendations(result?.recommendations || []);
+    } catch (error) {
+      const status = error?.response?.status;
+      if (status === 423) {
+        setCompletionModalOpen(false);
+        setRecommendations(null);
+        const safetyPayload = error?.response?.data || {};
+        setSafetyStatus({
+          message: safetyPayload.message,
+          error: safetyPayload.error,
+          restriction_active: Boolean(safetyPayload.restriction_active),
+          screening_required: Boolean(safetyPayload.screening_required),
+          restriction_expires_at: safetyPayload.restriction_expires_at,
+          counsellor_contacts: safetyPayload.counsellor_contacts,
+          urgent_guidance: safetyPayload.urgent_guidance,
+        });
+        return;
+      }
+      setRecommendationError(
+        error?.response?.data?.error ||
+          "Unable to load learning recommendations right now. Please try again.",
+      );
+    } finally {
+      setIsRecommending(false);
+    }
+  };
 
   // Personalize the seeded greeting once the user's name is known
   // (it's created generically at store-init time, before login happens).
@@ -190,18 +268,19 @@ export default function ChatPage() {
     const progressRecommendation = learningContext.progress_recommendation
       || learningContext.progressRecommendation;
     const steps = Array.isArray(res.steps) ? res.steps : [];
-    const hasLearningFlow = steps.length > 0 && skill?.id;
+    const hasLearningFlow = steps.length > 0 && Boolean(skill?.id);
 
     addMessage({
       id: createId(),
       role: "assistant",
       content: [
         introduction,
-        res.message || steps[0]?.content || learningContext.message,
+        res.message || res.response || res.educational_response || steps[0]?.content || learningContext.message,
       ].filter(Boolean).join("\n\n"),
       timestamp: ts(),
       emotion: res.emotion ?? "calm",
       status: res.status,
+      activeAgent: res.active_agent,
       skill,
       topic: learningContext.topic,
       learningObjective,
@@ -436,9 +515,17 @@ export default function ChatPage() {
     setSuggestedQuestions([]);
     addUserMessage(question);
     setLoading(true);
+    setConversationFinished(false);
 
     try {
-      const res = await sendMessage(question, style);
+      const historyPayload = messages
+        .filter((m) => m && typeof m.content === "string" && m.content.trim() && (m.role === "user" || m.role === "assistant"))
+        .map((m) => ({
+          role: m.role,
+          content: m.content.trim(),
+        }));
+
+      const res = await sendMessage(question, style, historyPayload, "default");
       if (res.safety) {
         addMessage({
           id: createId(),
@@ -461,9 +548,6 @@ export default function ChatPage() {
       }
       const context = res.learning_context || res;
 
-console.log("Selected objective title:", context.learning_objective?.title);
-console.log("Selected objective ID:", context.learning_objective?.objective_id);
-console.log("Question-relevant content:", context.question_relevant_content);
       const questions = Array.isArray(res.suggested_questions)
         ? res.suggested_questions
         : [];
@@ -476,8 +560,19 @@ console.log("Question-relevant content:", context.question_relevant_content);
     } catch (err) {
       setSuggestedQuestions([]);
       const isUnauth = err?.response?.status === 401;
-      if (err?.response?.status === 423 && err.response.data?.safety) {
-        setSafetyStatus(err.response.data);
+      const status = err?.response?.status;
+      if (status === 423) {
+        const safetyPayload = err?.response?.data || {};
+        setSafetyStatus({
+          message: safetyPayload.message,
+          error: safetyPayload.error,
+          restriction_active: Boolean(safetyPayload.restriction_active),
+          screening_required: Boolean(safetyPayload.screening_required),
+          restriction_expires_at: safetyPayload.restriction_expires_at,
+          counsellor_contacts: safetyPayload.counsellor_contacts,
+          urgent_guidance: safetyPayload.urgent_guidance,
+        });
+        return;
       }
       addMessage({
         id:        createId(),
@@ -519,7 +614,10 @@ console.log("Question-relevant content:", context.question_relevant_content);
       activityCompletionInFlight.current.add(sourceMessage.id);
       setLoading(true);
     } else {
-      if (action === "activity") {
+      const hasRecommendedActivity = Boolean(
+        sourceMessage.recommendedActivity?.id || sourceMessage.recommended_activity?.id
+      );
+      if (action === "activity" && hasRecommendedActivity) {
         addMessage({
           id: createId(),
           role: "assistant",
@@ -810,11 +908,23 @@ console.log("Question-relevant content:", context.question_relevant_content);
 
       {/* Chat area */}
       <div className="chat-page__body flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="chat-page__header shrink-0">
+        <div className="chat-page__header shrink-0 flex items-center justify-between pb-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">💬</span>
             <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru</h1>
           </div>
+          {hasUserMessages && !conversationFinished && (
+            <button
+              type="button"
+              data-testid="end-conversation-button"
+              onClick={handleOpenCompletion}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 hover:text-gray-900 transition-colors shadow-sm"
+              title="End conversation and explore learning recommendations"
+            >
+              <LogOut size={14} className="text-gray-500" />
+              <span>End Conversation</span>
+            </button>
+          )}
         </div>
 
         {/* Messages */}
@@ -839,6 +949,151 @@ console.log("Question-relevant content:", context.question_relevant_content);
           />
         </div>
       </div>
+
+      {/* End Conversation & Recommendation Bridge Modal */}
+      {completionModalOpen && (
+        <div
+          data-testid="completion-modal-backdrop"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            data-testid="completion-modal"
+            className="w-full max-w-lg rounded-2xl border border-gray-100 bg-white p-6 shadow-2xl relative"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} className="text-indigo-600" />
+                <h2 className="text-base font-semibold text-gray-900">
+                  {recommendations ? "Recommended SEEK Opportunities" : "End Conversation"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCompletionModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg transition-colors"
+                aria-label="Close dialog"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {isRecommending ? (
+              <div className="py-8 flex flex-col items-center justify-center gap-3 text-center">
+                <LoaderCircle className="animate-spin text-indigo-600" size={28} />
+                <p className="text-sm font-medium text-gray-700">
+                  Reviewing conversation for relevant SEEK learning connections...
+                </p>
+                <p className="text-xs text-gray-500">Checking canonical curriculum objectives</p>
+              </div>
+            ) : recommendations ? (
+              <div className="py-4 space-y-4">
+                {recommendations.length > 0 ? (
+                  <>
+                    <p className="text-xs text-gray-600">
+                      Based on what you shared, here are learning areas from the approved SEEK curriculum that connect with your conversation:
+                    </p>
+                    <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                      {recommendations.map((rec) => (
+                        <div
+                          key={rec.skill_id}
+                          className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-4 transition text-left"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+                              {rec.skill_title}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCompletionModalOpen(false);
+                                setRecommendations(null);
+                                handleSend(`Can you teach me about ${rec.skill_title}?`);
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                            >
+                              Explore in chat
+                            </button>
+                          </div>
+                          <p className="mt-1.5 text-xs leading-5 text-gray-700">
+                            {rec.relevance_explanation}
+                          </p>
+                          <p className="mt-2 text-[11px] leading-4 text-gray-500 italic">
+                            {rec.learning_opportunity}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="py-4 text-center">
+                    <p className="text-sm font-medium text-gray-800">
+                      No specific learning recommendations found.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Thank you for taking time to reflect and talk things through today.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={handleFinishConversation}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Finish conversation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCompletionModalOpen(false);
+                      setRecommendations(null);
+                    }}
+                    className="rounded-xl bg-gray-100 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="py-5 space-y-4">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Would you like to explore SEEK learning opportunities related to what you shared today, or finish this conversation?
+                </p>
+
+                {recommendationError && (
+                  <div
+                    className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+                    role="alert"
+                  >
+                    <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                    <span>{recommendationError}</span>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={handleFinishConversation}
+                    className="w-full sm:w-auto rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  >
+                    Finish Conversation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExploreRecommendations}
+                    className="w-full sm:w-auto rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    Explore Learning Opportunities
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {safetyStatus && (
         <SafetyGate
