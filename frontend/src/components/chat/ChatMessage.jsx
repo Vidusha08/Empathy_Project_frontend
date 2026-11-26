@@ -8,6 +8,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import RabbitEmotion from "./RabbitEmotion";
 
 function ActionButton({
   children,
@@ -141,7 +142,8 @@ export default function ChatMessage({
   }
 
   return (
-    <div className="flex justify-start px-4 py-2">
+    <div className="flex items-end justify-start gap-2 px-4 py-2">
+      <RabbitEmotion emotion={message.emotion} content={content} />
       <div className="w-full max-w-[72%] rounded-2xl rounded-bl-sm border border-gray-100 bg-white text-gray-800 shadow-sm">
         {content && <div className="px-4 pt-4"><p className="whitespace-pre-line text-sm leading-6 text-gray-700">{content}</p></div>}
         <div className="px-4 pb-4">

@@ -1,0 +1,67 @@
+.rabbit-emotion {
+  display: inline-flex;
+  width: 52px;
+  height: 58px;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center bottom;
+}
+
+.rabbit-emotion img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.rabbit-emotion--welcoming {
+  animation: robotWelcome 2.2s ease-in-out infinite;
+}
+
+.rabbit-emotion--listening {
+  animation: robotListen 2.8s ease-in-out infinite;
+}
+
+.rabbit-emotion--celebrating {
+  animation: robotCelebrate 1.2s ease-in-out infinite;
+}
+
+.rabbit-emotion--relaxing {
+  animation: robotRelax 3s ease-in-out infinite;
+}
+
+.rabbit-emotion--comforting {
+  animation: robotComfort 2.5s ease-in-out infinite;
+}
+
+@keyframes robotWelcome {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-3px) rotate(-5deg); }
+  75% { transform: translateY(-3px) rotate(5deg); }
+}
+
+@keyframes robotListen {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-3px) rotate(-2deg); }
+}
+
+@keyframes robotCelebrate {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-7px) rotate(4deg); }
+}
+
+@keyframes robotRelax {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.03); }
+}
+
+@keyframes robotComfort {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-2px) rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rabbit-emotion {
+    animation: none;
+  }
+}
