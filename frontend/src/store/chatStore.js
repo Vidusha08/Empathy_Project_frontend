@@ -11,7 +11,7 @@ const useChatStore = create((set) => ({
       role: "assistant",
       content: defaultGreeting("there"),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      emotion: "welcome",
+      emotion: "calm",
     },
   ],
   isLoading: false,
