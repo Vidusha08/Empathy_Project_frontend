@@ -1,30 +1,36 @@
 .quiz-page {
   min-height: 100%;
   padding: 24px 20px 90px;
-  color: #202938;
+  color: var(--app-text, #202938);
   font-family: var(--font-sans);
+  background: transparent !important;
 }
 
 .quiz-page__header,
 .quiz-question,
 .quiz-result,
 .quiz-page--state {
-  border-color: var(--app-border);
+  border: 1px solid var(--app-border) !important;
   border-radius: var(--app-radius);
-  background: var(--app-surface);
-  box-shadow: var(--app-shadow);
+  background: var(--app-surface-card) !important;
+  color: var(--app-text) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .quiz-page__header {
   padding: 20px;
+  background: var(--app-header-bg, var(--app-surface-card)) !important;
+  border-color: var(--app-header-border, var(--app-border)) !important;
 }
 
 .quiz-question {
-  background: color-mix(in srgb, var(--app-surface) 94%, transparent);
+  background: var(--app-surface-card) !important;
 }
 
 .quiz-question:focus-within {
-  border-color: var(--app-accent, #4f46e5);
+  border-color: var(--app-accent, #4f46e5) !important;
 }
 
 .quiz-question input[type="radio"] {
@@ -32,7 +38,7 @@
 }
 
 .quiz-result {
-  border-color: color-mix(in srgb, var(--app-accent, #4f46e5) 25%, var(--app-border));
+  border-color: color-mix(in srgb, var(--app-accent, #4f46e5) 35%, var(--app-border)) !important;
 }
 
 .quiz-page--state {

@@ -152,19 +152,25 @@ export default function ChatMessage({
 
   if (isUser) {
     return (
-      <div className="flex justify-end px-4 py-2">
-        <div className="max-w-[72%] rounded-2xl rounded-br-sm bg-indigo-600 px-4 py-3 text-white shadow-sm">
-          <p className="whitespace-pre-line text-sm leading-6">{content}</p>
-          {timestamp && <p className="mt-2 text-[10px] text-indigo-200">{timestamp}</p>}
+      <div className="flex justify-end px-3 sm:px-4 py-2">
+        <div className="chat-bubble-user max-w-[85%] sm:max-w-[70%] rounded-2xl rounded-br-xs px-4 py-3 text-white shadow-sm">
+          <p className="whitespace-pre-line text-sm leading-relaxed">{content}</p>
+          {timestamp && <p className="mt-1.5 text-[10px] text-indigo-100/90 text-right">{timestamp}</p>}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-start px-4 py-2">
-      <div className="w-full max-w-[72%] rounded-2xl rounded-bl-sm border border-gray-100 bg-white text-gray-800 shadow-sm">
-        {content && <div className="px-4 pt-4"><p className="whitespace-pre-line text-sm leading-6 text-gray-700">{content}</p></div>}
+    <div className="flex justify-start items-start gap-2 sm:gap-2.5 px-3 sm:px-4 py-2">
+      <div
+        className="chat-ai-avatar flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-xs mt-0.5"
+        aria-hidden="true"
+      >
+        <Sparkles size={15} />
+      </div>
+      <div className="chat-bubble-ai w-full min-w-0 max-w-[86%] sm:max-w-[74%] rounded-2xl rounded-tl-xs backdrop-blur-md text-gray-800 shadow-sm overflow-hidden">
+        {content && <div className="px-4 pt-4"><p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">{content}</p></div>}
         <div className="px-4 pb-4">
           <StepContent step={step} skill={skill} />
 

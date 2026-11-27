@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="vSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#cfdcd3"/>
+      <stop offset="50%" stop-color="#e8ede6"/>
+      <stop offset="100%" stop-color="#fdfbf7"/>
+    </linearGradient>
+    <linearGradient id="vHillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9fb49a"/>
+      <stop offset="100%" stop-color="#82966B"/>
+    </linearGradient>
+    <linearGradient id="vHillMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#73895e"/>
+      <stop offset="100%" stop-color="#566943"/>
+    </linearGradient>
+    <linearGradient id="vHillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#51643c"/>
+      <stop offset="100%" stop-color="#3c4c2a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#vSky)"/>
+
+  <!-- Distant mountain peaks -->
+  <path d="M0,640 L280,480 L520,620 L860,420 L1200,610 L1540,460 L1920,650 L1920,1080 L0,1080 Z" fill="#b2c4ad" opacity="0.45"/>
+
+  <!-- Rolling Hills (Far) -->
+  <path d="M0,680 Q450,560 920,650 T1920,640 L1920,1080 L0,1080 Z" fill="url(#vHillFar)" opacity="0.6"/>
+
+  <!-- Midground with Cottages -->
+  <path d="M0,740 Q580,630 1140,730 T1920,710 L1920,1080 L0,1080 Z" fill="url(#vHillMid)" opacity="0.8"/>
+
+  <!-- Quaint Village Cottages -->
+  <g transform="translate(480, 640)">
+    <!-- Cottage 1 -->
+    <rect x="0" y="30" width="70" height="45" fill="#f4ebd9" rx="2"/>
+    <polygon points="-8,30 35,-5 78,30" fill="#99583d"/>
+    <rect x="26" y="48" width="18" height="27" fill="#6d4327"/>
+    <rect x="8" y="40" width="12" height="14" fill="#ffecb3"/>
+    <rect x="50" y="40" width="12" height="14" fill="#ffecb3"/>
+    <!-- Chimney -->
+    <rect x="52" y="5" width="10" height="20" fill="#7a422b"/>
+  </g>
+  <g transform="translate(620, 665)">
+    <!-- Cottage 2 -->
+    <rect x="0" y="25" width="85" height="50" fill="#e8dfce" rx="2"/>
+    <polygon points="-10,25 42,-8 95,25" fill="#824c36"/>
+    <rect x="36" y="45" width="16" height="30" fill="#543725"/>
+    <rect x="12" y="38" width="14" height="15" fill="#fff3c4"/>
+    <rect x="60" y="38" width="14" height="15" fill="#fff3c4"/>
+  </g>
+  <g transform="translate(1320, 670)">
+    <!-- Windmill / Tower -->
+    <polygon points="35,0 15,80 65,80 45,0" fill="#ded4c1"/>
+    <circle cx="40" cy="25" r="7" fill="#6d533f"/>
+    <!-- Windmill Blades -->
+    <line x1="40" y1="25" x2="10" y2="5" stroke="#5a422f" stroke-width="3"/>
+    <line x1="40" y1="25" x2="70" y2="45" stroke="#5a422f" stroke-width="3"/>
+    <line x1="40" y1="25" x2="20" y2="55" stroke="#5a422f" stroke-width="3"/>
+    <line x1="40" y1="25" x2="60" y2="-5" stroke="#5a422f" stroke-width="3"/>
+  </g>
+
+  <!-- Foreground Rolling Green Meadow -->
+  <path d="M0,820 Q480,720 1050,810 T1920,780 L1920,1080 L0,1080 Z" fill="url(#vHillNear)"/>
+
+  <!-- Peaceful Trees & Foliage -->
+  <g fill="#2e3d1f">
+    <ellipse cx="260" cy="770" rx="35" ry="50"/>
+    <ellipse cx="295" cy="760" rx="42" ry="60"/>
+    <ellipse cx="340" cy="780" rx="30" ry="45"/>
+
+    <ellipse cx="1020" cy="800" rx="45" ry="65"/>
+    <ellipse cx="1070" cy="790" rx="55" ry="75"/>
+    <ellipse cx="1120" cy="810" rx="40" ry="55"/>
+
+    <ellipse cx="1680" cy="780" rx="50" ry="70"/>
+    <ellipse cx="1740" cy="770" rx="60" ry="85"/>
+  </g>
+
+  <!-- Birds in the sky -->
+  <g stroke="#617056" stroke-width="2.5" fill="none">
+    <path d="M420,240 Q435,230 450,240 Q465,230 480,240"/>
+    <path d="M470,220 Q482,212 494,220 Q506,212 518,220"/>
+    <path d="M540,250 Q550,242 560,250 Q570,242 580,250"/>
+  </g>
+  <!-- Soft atmosphere -->
+  <rect width="1920" height="1080" fill="#82966B" opacity="0.05"/>
+</svg>

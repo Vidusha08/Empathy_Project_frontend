@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5c6a7e"/>
+      <stop offset="45%" stop-color="#8999B0"/>
+      <stop offset="75%" stop-color="#c1cbdb"/>
+      <stop offset="100%" stop-color="#e3e7ee"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="65%" cy="30%" r="45%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#d6e0ec" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#8999B0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="cBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#cSky)"/>
+  <rect width="1920" height="1080" fill="url(#sunGlow)"/>
+
+  <!-- Distant Foggy Cloud Layers -->
+  <g fill="#9cb0c9" opacity="0.45" filter="url(#cBlur)">
+    <ellipse cx="300" cy="380" rx="420" ry="180"/>
+    <ellipse cx="850" cy="320" rx="550" ry="210"/>
+    <ellipse cx="1450" cy="360" rx="520" ry="200"/>
+  </g>
+
+  <!-- Mid Clouds -->
+  <g fill="#b9c8db" opacity="0.7">
+    <ellipse cx="200" cy="520" rx="360" ry="140"/>
+    <ellipse cx="580" cy="460" rx="420" ry="170"/>
+    <ellipse cx="1100" cy="480" rx="480" ry="180"/>
+    <ellipse cx="1680" cy="510" rx="400" ry="150"/>
+  </g>
+
+  <!-- Billowing White Clouds with Depth -->
+  <g fill="#edf2f8" opacity="0.88">
+    <ellipse cx="400" cy="680" rx="420" ry="190"/>
+    <ellipse cx="750" cy="620" rx="360" ry="170"/>
+    <ellipse cx="1180" cy="640" rx="440" ry="190"/>
+    <ellipse cx="1620" cy="690" rx="380" ry="180"/>
+  </g>
+
+  <!-- Foreground Soft Fog/Misty Landscape Base -->
+  <path d="M0,860 Q480,820 960,860 T1920,850 L1920,1080 L0,1080 Z" fill="#6e7f97" opacity="0.75"/>
+  <path d="M0,940 Q520,900 1020,940 T1920,930 L1920,1080 L0,1080 Z" fill="#556479" opacity="0.9"/>
+  <!-- Ambient Tint -->
+  <rect width="1920" height="1080" fill="#8999B0" opacity="0.08"/>
+</svg>

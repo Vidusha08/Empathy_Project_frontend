@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="sgSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b6cde2"/>
+      <stop offset="45%" stop-color="#f5e1e5"/>
+      <stop offset="80%" stop-color="#fdf3f4"/>
+      <stop offset="100%" stop-color="#eaf3e7"/>
+    </linearGradient>
+    <radialGradient id="springSun" cx="20%" cy="25%" r="35%">
+      <stop offset="0%" stop-color="#fff8eb" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#fedbd0" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sgHillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a4bf9f"/>
+      <stop offset="100%" stop-color="#80a07a"/>
+    </linearGradient>
+    <linearGradient id="sgHillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#698e62"/>
+      <stop offset="100%" stop-color="#4d6f47"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#sgSky)"/>
+  <rect width="1920" height="1080" fill="url(#springSun)"/>
+
+  <!-- Distant Soft Spring Hills -->
+  <path d="M0,660 Q480,570 980,650 T1920,630 L1920,1080 L0,1080 Z" fill="url(#sgHillFar)" opacity="0.55"/>
+
+  <!-- Blooming Cherry Blossom / Magnolia Canopies (Midground) -->
+  <g fill="#D6A2AA" opacity="0.85">
+    <ellipse cx="280" cy="580" rx="130" ry="90"/>
+    <ellipse cx="360" cy="560" rx="160" ry="110"/>
+    <ellipse cx="440" cy="590" rx="120" ry="85"/>
+
+    <ellipse cx="1450" cy="570" rx="150" ry="100"/>
+    <ellipse cx="1560" cy="550" rx="170" ry="120"/>
+    <ellipse cx="1670" cy="580" rx="130" ry="90"/>
+  </g>
+  <!-- Dark tree trunks -->
+  <path d="M350,560 Q360,680 340,780 L380,780 Q370,680 370,560 Z" fill="#523932"/>
+  <path d="M1550,550 Q1560,670 1540,780 L1580,780 Q1570,670 1570,550 Z" fill="#523932"/>
+
+  <!-- Rolling Lush Spring Meadow (Foreground) -->
+  <path d="M0,760 Q560,680 1140,760 T1920,730 L1920,1080 L0,1080 Z" fill="url(#sgHillNear)"/>
+
+  <!-- Flower Garden Beds (Pink & White Petals) -->
+  <g fill="#fbe8ec">
+    <ellipse cx="15" cy="790" rx="7" ry="5"/>
+              <circle cx="15" cy="790" r="3" fill="#D6A2AA"/>
+    <ellipse cx="56" cy="819" rx="7" ry="5"/>
+              <circle cx="56" cy="819" r="3" fill="#D6A2AA"/>
+    <ellipse cx="97" cy="848" rx="7" ry="5"/>
+              <circle cx="97" cy="848" r="3" fill="#D6A2AA"/>
+    <ellipse cx="138" cy="877" rx="7" ry="5"/>
+              <circle cx="138" cy="877" r="3" fill="#D6A2AA"/>
+    <ellipse cx="179" cy="906" rx="7" ry="5"/>
+              <circle cx="179" cy="906" r="3" fill="#D6A2AA"/>
+    <ellipse cx="220" cy="935" rx="7" ry="5"/>
+              <circle cx="220" cy="935" r="3" fill="#D6A2AA"/>
+    <ellipse cx="261" cy="964" rx="7" ry="5"/>
+              <circle cx="261" cy="964" r="3" fill="#D6A2AA"/>
+    <ellipse cx="302" cy="993" rx="7" ry="5"/>
+              <circle cx="302" cy="993" r="3" fill="#D6A2AA"/>
+    <ellipse cx="343" cy="1022" rx="7" ry="5"/>
+              <circle cx="343" cy="1022" r="3" fill="#D6A2AA"/>
+    <ellipse cx="384" cy="811" rx="7" ry="5"/>
+              <circle cx="384" cy="811" r="3" fill="#D6A2AA"/>
+    <ellipse cx="425" cy="840" rx="7" ry="5"/>
+              <circle cx="425" cy="840" r="3" fill="#D6A2AA"/>
+    <ellipse cx="466" cy="869" rx="7" ry="5"/>
+              <circle cx="466" cy="869" r="3" fill="#D6A2AA"/>
+    <ellipse cx="507" cy="898" rx="7" ry="5"/>
+              <circle cx="507" cy="898" r="3" fill="#D6A2AA"/>
+    <ellipse cx="548" cy="927" rx="7" ry="5"/>
+              <circle cx="548" cy="927" r="3" fill="#D6A2AA"/>
+    <ellipse cx="589" cy="956" rx="7" ry="5"/>
+              <circle cx="589" cy="956" r="3" fill="#D6A2AA"/>
+    <ellipse cx="630" cy="985" rx="7" ry="5"/>
+              <circle cx="630" cy="985" r="3" fill="#D6A2AA"/>
+    <ellipse cx="671" cy="1014" rx="7" ry="5"/>
+              <circle cx="671" cy="1014" r="3" fill="#D6A2AA"/>
+    <ellipse cx="712" cy="803" rx="7" ry="5"/>
+              <circle cx="712" cy="803" r="3" fill="#D6A2AA"/>
+    <ellipse cx="753" cy="832" rx="7" ry="5"/>
+              <circle cx="753" cy="832" r="3" fill="#D6A2AA"/>
+    <ellipse cx="794" cy="861" rx="7" ry="5"/>
+              <circle cx="794" cy="861" r="3" fill="#D6A2AA"/>
+    <ellipse cx="835" cy="890" rx="7" ry="5"/>
+              <circle cx="835" cy="890" r="3" fill="#D6A2AA"/>
+    <ellipse cx="876" cy="919" rx="7" ry="5"/>
+              <circle cx="876" cy="919" r="3" fill="#D6A2AA"/>
+    <ellipse cx="917" cy="948" rx="7" ry="5"/>
+              <circle cx="917" cy="948" r="3" fill="#D6A2AA"/>
+    <ellipse cx="958" cy="977" rx="7" ry="5"/>
+              <circle cx="958" cy="977" r="3" fill="#D6A2AA"/>
+    <ellipse cx="999" cy="1006" rx="7" ry="5"/>
+              <circle cx="999" cy="1006" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1040" cy="795" rx="7" ry="5"/>
+              <circle cx="1040" cy="795" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1081" cy="824" rx="7" ry="5"/>
+              <circle cx="1081" cy="824" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1122" cy="853" rx="7" ry="5"/>
+              <circle cx="1122" cy="853" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1163" cy="882" rx="7" ry="5"/>
+              <circle cx="1163" cy="882" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1204" cy="911" rx="7" ry="5"/>
+              <circle cx="1204" cy="911" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1245" cy="940" rx="7" ry="5"/>
+              <circle cx="1245" cy="940" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1286" cy="969" rx="7" ry="5"/>
+              <circle cx="1286" cy="969" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1327" cy="998" rx="7" ry="5"/>
+              <circle cx="1327" cy="998" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1368" cy="1027" rx="7" ry="5"/>
+              <circle cx="1368" cy="1027" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1409" cy="816" rx="7" ry="5"/>
+              <circle cx="1409" cy="816" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1450" cy="845" rx="7" ry="5"/>
+              <circle cx="1450" cy="845" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1491" cy="874" rx="7" ry="5"/>
+              <circle cx="1491" cy="874" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1532" cy="903" rx="7" ry="5"/>
+              <circle cx="1532" cy="903" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1573" cy="932" rx="7" ry="5"/>
+              <circle cx="1573" cy="932" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1614" cy="961" rx="7" ry="5"/>
+              <circle cx="1614" cy="961" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1655" cy="990" rx="7" ry="5"/>
+              <circle cx="1655" cy="990" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1696" cy="1019" rx="7" ry="5"/>
+              <circle cx="1696" cy="1019" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1737" cy="808" rx="7" ry="5"/>
+              <circle cx="1737" cy="808" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1778" cy="837" rx="7" ry="5"/>
+              <circle cx="1778" cy="837" r="3" fill="#D6A2AA"/>
+    <ellipse cx="1819" cy="866" rx="7" ry="5"/>
+              <circle cx="1819" cy="866" r="3" fill="#D6A2AA"/>
+  </g>
+  <g fill="#ffffff">
+    <circle cx="45" cy="810" r="4"/>
+              <circle cx="45" cy="810" r="2" fill="#ffd479"/>
+    <circle cx="98" cy="841" r="4"/>
+              <circle cx="98" cy="841" r="2" fill="#ffd479"/>
+    <circle cx="151" cy="872" r="4"/>
+              <circle cx="151" cy="872" r="2" fill="#ffd479"/>
+    <circle cx="204" cy="903" r="4"/>
+              <circle cx="204" cy="903" r="2" fill="#ffd479"/>
+    <circle cx="257" cy="934" r="4"/>
+              <circle cx="257" cy="934" r="2" fill="#ffd479"/>
+    <circle cx="310" cy="965" r="4"/>
+              <circle cx="310" cy="965" r="2" fill="#ffd479"/>
+    <circle cx="363" cy="996" r="4"/>
+              <circle cx="363" cy="996" r="2" fill="#ffd479"/>
+    <circle cx="416" cy="1027" r="4"/>
+              <circle cx="416" cy="1027" r="2" fill="#ffd479"/>
+    <circle cx="469" cy="838" r="4"/>
+              <circle cx="469" cy="838" r="2" fill="#ffd479"/>
+    <circle cx="522" cy="869" r="4"/>
+              <circle cx="522" cy="869" r="2" fill="#ffd479"/>
+    <circle cx="575" cy="900" r="4"/>
+              <circle cx="575" cy="900" r="2" fill="#ffd479"/>
+    <circle cx="628" cy="931" r="4"/>
+              <circle cx="628" cy="931" r="2" fill="#ffd479"/>
+    <circle cx="681" cy="962" r="4"/>
+              <circle cx="681" cy="962" r="2" fill="#ffd479"/>
+    <circle cx="734" cy="993" r="4"/>
+              <circle cx="734" cy="993" r="2" fill="#ffd479"/>
+    <circle cx="787" cy="1024" r="4"/>
+              <circle cx="787" cy="1024" r="2" fill="#ffd479"/>
+    <circle cx="840" cy="835" r="4"/>
+              <circle cx="840" cy="835" r="2" fill="#ffd479"/>
+    <circle cx="893" cy="866" r="4"/>
+              <circle cx="893" cy="866" r="2" fill="#ffd479"/>
+    <circle cx="946" cy="897" r="4"/>
+              <circle cx="946" cy="897" r="2" fill="#ffd479"/>
+    <circle cx="999" cy="928" r="4"/>
+              <circle cx="999" cy="928" r="2" fill="#ffd479"/>
+    <circle cx="1052" cy="959" r="4"/>
+              <circle cx="1052" cy="959" r="2" fill="#ffd479"/>
+    <circle cx="1105" cy="990" r="4"/>
+              <circle cx="1105" cy="990" r="2" fill="#ffd479"/>
+    <circle cx="1158" cy="1021" r="4"/>
+              <circle cx="1158" cy="1021" r="2" fill="#ffd479"/>
+    <circle cx="1211" cy="832" r="4"/>
+              <circle cx="1211" cy="832" r="2" fill="#ffd479"/>
+    <circle cx="1264" cy="863" r="4"/>
+              <circle cx="1264" cy="863" r="2" fill="#ffd479"/>
+    <circle cx="1317" cy="894" r="4"/>
+              <circle cx="1317" cy="894" r="2" fill="#ffd479"/>
+    <circle cx="1370" cy="925" r="4"/>
+              <circle cx="1370" cy="925" r="2" fill="#ffd479"/>
+    <circle cx="1423" cy="956" r="4"/>
+              <circle cx="1423" cy="956" r="2" fill="#ffd479"/>
+    <circle cx="1476" cy="987" r="4"/>
+              <circle cx="1476" cy="987" r="2" fill="#ffd479"/>
+    <circle cx="1529" cy="1018" r="4"/>
+              <circle cx="1529" cy="1018" r="2" fill="#ffd479"/>
+    <circle cx="1582" cy="829" r="4"/>
+              <circle cx="1582" cy="829" r="2" fill="#ffd479"/>
+    <circle cx="1635" cy="860" r="4"/>
+              <circle cx="1635" cy="860" r="2" fill="#ffd479"/>
+    <circle cx="1688" cy="891" r="4"/>
+              <circle cx="1688" cy="891" r="2" fill="#ffd479"/>
+    <circle cx="1741" cy="922" r="4"/>
+              <circle cx="1741" cy="922" r="2" fill="#ffd479"/>
+    <circle cx="1794" cy="953" r="4"/>
+              <circle cx="1794" cy="953" r="2" fill="#ffd479"/>
+    <circle cx="1847" cy="984" r="4"/>
+              <circle cx="1847" cy="984" r="2" fill="#ffd479"/>
+    <circle cx="1900" cy="1015" r="4"/>
+              <circle cx="1900" cy="1015" r="2" fill="#ffd479"/>
+    <circle cx="33" cy="826" r="4"/>
+              <circle cx="33" cy="826" r="2" fill="#ffd479"/>
+    <circle cx="86" cy="857" r="4"/>
+              <circle cx="86" cy="857" r="2" fill="#ffd479"/>
+    <circle cx="139" cy="888" r="4"/>
+              <circle cx="139" cy="888" r="2" fill="#ffd479"/>
+    <circle cx="192" cy="919" r="4"/>
+              <circle cx="192" cy="919" r="2" fill="#ffd479"/>
+  </g>
+
+  <!-- Flying Gentle Petals & Songbirds -->
+  <g fill="#f1c2ca" opacity="0.8">
+    <ellipse cx="600" cy="420" rx="8" ry="4" transform="rotate(25, 600, 420)"/>
+    <ellipse cx="720" cy="380" rx="9" ry="5" transform="rotate(-15, 720, 380)"/>
+    <ellipse cx="850" cy="460" rx="7" ry="4" transform="rotate(40, 850, 460)"/>
+    <ellipse cx="1120" cy="410" rx="9" ry="5" transform="rotate(10, 1120, 410)"/>
+    <ellipse cx="1280" cy="480" rx="8" ry="4" transform="rotate(-30, 1280, 480)"/>
+  </g>
+  <!-- Birds in Flight -->
+  <g stroke="#7b555b" stroke-width="2.2" fill="none">
+    <path d="M880,260 Q892,252 904,260 Q916,252 928,260"/>
+    <path d="M940,240 Q950,234 960,240 Q970,234 980,240"/>
+  </g>
+  <!-- Spring Ambient Tint -->
+  <rect width="1920" height="1080" fill="#D6A2AA" opacity="0.06"/>
+</svg>

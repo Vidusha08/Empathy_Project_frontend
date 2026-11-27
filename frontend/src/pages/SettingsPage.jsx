@@ -1,32 +1,138 @@
-import { Check, Image, Moon, Palette, Sun, UserRound } from "lucide-react";
-import { useSettingsStore, themeOptions } from "../store/settingsStore";
+// src/pages/SettingsPage.jsx
+import { Check, Moon, Palette, Sun, Volume2, VolumeX, Music } from "lucide-react";
+import { useSettingsStore } from "../store/settingsStore";
+import { THEME_CONFIGS, getThemeConfig } from "../theme/themeConfig";
+import { ambientSoundManager } from "../theme/ambientSoundManager";
 import "./SettingsPage.css";
-
-const backgroundOptions = [
-  { id: "none", label: "Default", description: "Use your selected background color." },
-  { id: "beach", label: "Beach", description: "A calm beach scene." },
-  { id: "forest", label: "Forest", description: "A peaceful forest scene." },
-];
 
 export default function SettingsPage() {
   const colorMode = useSettingsStore((state) => state.colorMode);
-  const backgroundScene = useSettingsStore((state) => state.backgroundScene);
   const theme = useSettingsStore((state) => state.theme);
+  const isMuted = useSettingsStore((state) => state.isMuted);
   const setColorMode = useSettingsStore((state) => state.setColorMode);
-  const setBackgroundScene = useSettingsStore((state) => state.setBackgroundScene);
   const setTheme = useSettingsStore((state) => state.setTheme);
+  const toggleMute = useSettingsStore((state) => state.toggleMute);
+
+  const activeThemeConfig = getThemeConfig(theme);
+
+  const handleSelectTheme = (themeId) => {
+    setTheme(themeId);
+    const config = getThemeConfig(themeId);
+    // If sound is unmuted, immediately switch to the new theme sound with smooth crossfade
+    if (!isMuted && config.ambientSound) {
+      ambientSoundManager.play(config.themeId, config.ambientSound);
+    }
+  };
+
+  const handleToggleSound = () => {
+    toggleMute();
+    if (isMuted) {
+      ambientSoundManager.setMuted(false);
+      ambientSoundManager.play(activeThemeConfig.themeId, activeThemeConfig.ambientSound, true);
+    } else {
+      ambientSoundManager.setMuted(true);
+    }
+  };
 
   return (
     <div className="settings-page">
       <header className="settings-page__header">
         <p className="settings-page__eyebrow">Personalize your space</p>
         <h1>Settings</h1>
-        <p>Choose the look and feel that helps you feel comfortable.</p>
+        <p>Choose an immersive theme that combines your background, accent colour, and ambient sound together.</p>
       </header>
 
+      {/* Complete Theme System Gallery */}
+      <section className="settings-card" aria-labelledby="theme-gallery-title">
+        <div className="settings-card__heading">
+          <span className="settings-card__icon"><Palette size={20} /></span>
+          <div>
+            <h2 id="theme-gallery-title">Theme Experience</h2>
+            <p>Selecting a theme instantly bundles its unique background image, single accent colour, and soothing ambient sound.</p>
+          </div>
+        </div>
+
+        <div className="settings-theme-gallery" role="group" aria-label="Theme selection">
+          {THEME_CONFIGS.map((option) => {
+            const isSelected = theme === option.themeId;
+            return (
+              <button
+                key={option.themeId}
+                type="button"
+                className={`settings-theme-card ${isSelected ? "is-selected" : ""}`}
+                aria-pressed={isSelected}
+                onClick={() => handleSelectTheme(option.themeId)}
+                data-theme-id={option.themeId}
+              >
+                {/* Visual Background Image Preview */}
+                <div
+                  className={`settings-theme-card__preview ${option.isDefault ? "settings-theme-card__preview--default" : ""}`}
+                  style={{
+                    backgroundImage: option.backgroundImage ? `url("${option.backgroundImage}")` : "none",
+                  }}
+                >
+                  <div className="settings-theme-card__preview-overlay" />
+                  {isSelected && (
+                    <span className="settings-theme-card__badge" aria-label="Active theme">
+                      <Check size={16} strokeWidth={2.8} />
+                    </span>
+                  )}
+                </div>
+
+                {/* Theme Details Row */}
+                <div className="settings-theme-card__body">
+                  <div className="settings-theme-card__header">
+                    <span
+                      className="settings-theme-card__swatch"
+                      style={{ backgroundColor: option.accentColor }}
+                      title={`Primary colour: ${option.accentColor}`}
+                      aria-label={`Primary colour: ${option.accentColor}`}
+                    />
+                    <h3 className="settings-theme-card__name">{option.themeName}</h3>
+                  </div>
+
+                  <div className="settings-theme-card__meta">
+                    <span className="settings-theme-card__sound">
+                      <Music size={13} />
+                      <span className="truncate">{option.soundLabel}</span>
+                    </span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Ambient Sound Settings & Global Mute Control */}
+      <section className="settings-card" aria-labelledby="sound-title">
+        <div className="settings-card__heading">
+          <span className="settings-card__icon">
+            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </span>
+          <div>
+            <h2 id="sound-title">Ambient Sound Control</h2>
+            <p>Active audio: <strong>{activeThemeConfig.soundLabel}</strong></p>
+          </div>
+        </div>
+        <div className="settings-sound-row">
+          <button
+            type="button"
+            className={`settings-choice ${!isMuted ? "is-selected" : ""}`}
+            onClick={handleToggleSound}
+            aria-pressed={!isMuted}
+          >
+            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            <span>{isMuted ? "Sound Muted (Click to Unmute)" : "Sound Playing (Click to Mute)"}</span>
+            {!isMuted && <Check className="settings-choice__check" size={17} />}
+          </button>
+        </div>
+      </section>
+
+      {/* Appearance / Light & Dark Mode */}
       <section className="settings-card" aria-labelledby="appearance-title">
         <div className="settings-card__heading">
-          <span className="settings-card__icon"><Sun size={19} /></span>
+          <span className="settings-card__icon"><Sun size={20} /></span>
           <div>
             <h2 id="appearance-title">Appearance</h2>
             <p>Switch between light and dark mode.</p>
@@ -49,88 +155,6 @@ export default function SettingsPage() {
               {colorMode === id && <Check className="settings-choice__check" size={17} />}
             </button>
           ))}
-        </div>
-      </section>
-
-      <section className="settings-card" aria-labelledby="theme-title">
-        <div className="settings-card__heading">
-          <span className="settings-card__icon"><Palette size={19} /></span>
-          <div>
-            <h2 id="theme-title">Theme color</h2>
-            <p>Choose an accent color for your app navigation.</p>
-          </div>
-        </div>
-        <div className="settings-theme-options" role="group" aria-label="Theme color">
-          {themeOptions.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={`settings-theme ${theme === option.id ? "is-selected" : ""}`}
-              aria-pressed={theme === option.id}
-              onClick={() => setTheme(option.id)}
-            >
-              <span className="settings-theme__swatch" style={{ backgroundColor: option.accent }}>
-                {theme === option.id && <Check size={17} aria-hidden="true" />}
-              </span>
-              <span>{option.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="settings-card" aria-labelledby="background-title">
-        <div className="settings-card__heading">
-          <span className="settings-card__icon"><Image size={19} /></span>
-          <div>
-            <h2 id="background-title">Background</h2>
-            <p>Select a scene or choose a background color.</p>
-          </div>
-        </div>
-        <div className="settings-background-options" role="group" aria-label="Background scene">
-          {backgroundOptions.map(({ id, label, description }) => (
-            <button
-              key={id}
-              type="button"
-              aria-pressed={backgroundScene === id}
-              className={`settings-background ${backgroundScene === id ? "is-selected" : ""}`}
-              onClick={() => setBackgroundScene(id)}
-            >
-              <span className={`settings-background__preview settings-background__preview--${id}`}>
-                {backgroundScene === id && <Check size={18} aria-hidden="true" />}
-              </span>
-              <span className="settings-background__label">{label}</span>
-              <span className="settings-background__description">{description}</span>
-            </button>
-          ))}
-        </div>
-        {/*<label className="settings-color-picker">
-          <span>
-            <strong>Background color</strong>
-            <small>Used when the Default background is selected.</small>
-          </span>
-          <span className="settings-color-picker__control">
-            <span>{backgroundColor.toUpperCase()}</span>
-            <input
-              type="color"
-              value={backgroundColor}
-              aria-label="Choose background color"
-              onChange={(event) => setBackgroundColor(event.target.value)}
-            />
-          </span>
-        </label>*/}
-      </section>
-
-      <section className="settings-card settings-card--future" aria-label="More settings coming soon">
-        <div className="settings-card__heading">
-          <span className="settings-card__icon"><UserRound size={19} /></span>
-          <div>
-            <h2>More ways to personalize</h2>
-            <p>Character and more other options are planned for a future update.</p>
-          </div>
-        </div>
-        <div className="settings-future-options">
-          <span><UserRound size={17} /> Character <small>Coming soon</small></span>
-          {/* <span><Headphones size={17} /> Sound <small>Coming soon</small></span> */}
         </div>
       </section>
     </div>

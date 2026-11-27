@@ -84,7 +84,7 @@ export default function EditProfileModal({ user, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-profile-title"
-        className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl"
+        className="app-modal w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
           <div>

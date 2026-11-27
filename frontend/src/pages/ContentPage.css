@@ -1,11 +1,11 @@
 .content-page {
-  --progress-ink: #1f2937;
-  --progress-muted: #64748b;
-  --progress-line: #e2e8f0;
-  --progress-panel: #ffffff;
-  --progress-soft: #f8fafc;
-  --progress-accent: #4f46e5;
-  --progress-accent-dark: #4338ca;
+  --progress-ink: var(--app-text, #1f2937);
+  --progress-muted: var(--app-text-muted, #64748b);
+  --progress-line: var(--app-border, #e2e8f0);
+  --progress-panel: var(--app-surface-card, #ffffff);
+  --progress-soft: var(--app-surface-soft, #f8fafc);
+  --progress-accent: var(--app-accent, #4f46e5);
+  --progress-accent-dark: var(--app-accent-hover, #4338ca);
   min-height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
@@ -312,7 +312,9 @@
   align-items: flex-end;
   gap: 20px;
   padding: 26px 28px;
-  background: linear-gradient(135deg, #eef2ff 0%, rgba(255, 255, 255, 0.96) 48%);
+  background: var(--hero-card-bg, linear-gradient(135deg, #eef2ff 0%, rgba(255, 255, 255, 0.96) 48%));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .skill-detail__headline {

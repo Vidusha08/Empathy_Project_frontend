@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="zSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b6bc9f"/>
+      <stop offset="50%" stop-color="#d3d9c1"/>
+      <stop offset="100%" stop-color="#eef2e1"/>
+    </linearGradient>
+    <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dedecb"/>
+      <stop offset="100%" stop-color="#c5c6b0"/>
+    </linearGradient>
+    <linearGradient id="rockGrad" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#5e6653"/>
+      <stop offset="60%" stop-color="#3d4336"/>
+      <stop offset="100%" stop-color="#252a20"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#zSky)"/>
+
+  <!-- Gentle Bamboo / Maple Silhouettes in distance -->
+  <g fill="#8f9979" opacity="0.35">
+    <path d="M120,450 C140,300 200,220 280,180 C260,260 270,350 260,450 Z"/>
+    <path d="M220,460 C260,320 330,240 420,200 C390,290 380,380 350,470 Z"/>
+    <path d="M1520,480 C1560,310 1660,230 1780,190 C1730,280 1700,380 1670,490 Z"/>
+  </g>
+
+  <!-- Distant Wooden Pagoda / Pavilion Fence -->
+  <rect x="0" y="520" width="1920" height="12" fill="#525a47" opacity="0.5"/>
+  <g fill="#525a47" opacity="0.4">
+    <rect x="20" y="480" width="8" height="52"/>
+    <rect x="100" y="480" width="8" height="52"/>
+    <rect x="180" y="480" width="8" height="52"/>
+    <rect x="260" y="480" width="8" height="52"/>
+    <rect x="340" y="480" width="8" height="52"/>
+    <rect x="420" y="480" width="8" height="52"/>
+    <rect x="500" y="480" width="8" height="52"/>
+    <rect x="580" y="480" width="8" height="52"/>
+    <rect x="660" y="480" width="8" height="52"/>
+    <rect x="740" y="480" width="8" height="52"/>
+    <rect x="820" y="480" width="8" height="52"/>
+    <rect x="900" y="480" width="8" height="52"/>
+    <rect x="980" y="480" width="8" height="52"/>
+    <rect x="1060" y="480" width="8" height="52"/>
+    <rect x="1140" y="480" width="8" height="52"/>
+    <rect x="1220" y="480" width="8" height="52"/>
+    <rect x="1300" y="480" width="8" height="52"/>
+    <rect x="1380" y="480" width="8" height="52"/>
+    <rect x="1460" y="480" width="8" height="52"/>
+    <rect x="1540" y="480" width="8" height="52"/>
+    <rect x="1620" y="480" width="8" height="52"/>
+    <rect x="1700" y="480" width="8" height="52"/>
+    <rect x="1780" y="480" width="8" height="52"/>
+    <rect x="1860" y="480" width="8" height="52"/>
+  </g>
+
+  <!-- Raked Sand Garden Ground -->
+  <path d="M0,600 Q960,570 1920,600 L1920,1080 L0,1080 Z" fill="url(#sandGrad)"/>
+
+  <!-- Raked Concentric Sand Waves (Zen Patterns) -->
+  <g stroke="#9ba385" stroke-width="2.5" fill="none" opacity="0.6">
+    <!-- Around main rock group -->
+    <ellipse cx="680" cy="820" rx="140" ry="50"/>
+    <ellipse cx="680" cy="820" rx="190" ry="70"/>
+    <ellipse cx="680" cy="820" rx="250" ry="92"/>
+    <ellipse cx="680" cy="820" rx="320" ry="118"/>
+
+    <!-- Around second rock -->
+    <ellipse cx="1420" cy="860" rx="110" ry="40"/>
+    <ellipse cx="1420" cy="860" rx="160" ry="58"/>
+    <ellipse cx="1420" cy="860" rx="220" ry="78"/>
+
+    <!-- Linear Sand Rake Lines across garden -->
+    <path d="M0,680 Q960,650 1920,680"/>
+    <path d="M0,740 Q960,710 1920,740"/>
+    <path d="M0,940 Q960,910 1920,940"/>
+    <path d="M0,1020 Q960,990 1920,1020"/>
+  </g>
+
+  <!-- Moss Island & Rocks (Left Primary Group) -->
+  <ellipse cx="680" cy="820" rx="120" ry="42" fill="#707d5c"/>
+  <path d="M600,820 C590,750 630,680 690,690 C750,700 790,770 770,830 Z" fill="url(#rockGrad)"/>
+  <path d="M560,835 C550,790 580,750 620,760 C650,770 660,810 640,845 Z" fill="url(#rockGrad)" opacity="0.9"/>
+  <path d="M740,835 C730,800 760,770 790,780 C820,790 830,820 810,845 Z" fill="url(#rockGrad)" opacity="0.85"/>
+
+  <!-- Moss Island & Rock (Right Group) -->
+  <ellipse cx="1420" cy="860" rx="90" ry="32" fill="#707d5c"/>
+  <path d="M1360,865 C1350,810 1390,760 1440,770 C1490,780 1510,830 1490,875 Z" fill="url(#rockGrad)"/>
+
+  <!-- Gentle Bamboo Water Fountain (Shishi-odoshi) Accent -->
+  <rect x="240" y="730" width="14" height="110" rx="3" fill="#6c7857"/>
+  <line x1="220" y1="760" x2="280" y2="780" stroke="#7e8c67" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Peaceful Nature Tint -->
+  <rect width="1920" height="1080" fill="#A1A889" opacity="0.06"/>
+</svg>
