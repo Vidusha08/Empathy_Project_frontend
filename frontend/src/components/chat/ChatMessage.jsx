@@ -8,6 +8,33 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import robotWelcoming from "../../assets/images/robot_welcoming.png";
+import robotRelaxing from "../../assets/images/robot_relaxing.png";
+import robotListening from "../../assets/images/robot_listening.png";
+import robotComforting from "../../assets/images/robot_comforting.png";
+import robotCelebrating from "../../assets/images/robot_celebrating.png";
+
+function getRobotExpression(message) {
+  if (message.id === 1 || message.id === "welcome") {
+    return { image: robotWelcoming, label: "welcoming" };
+  }
+
+  const emotion = String(message.emotion || "").trim().toLowerCase();
+
+  if (["happy", "joy", "joyful", "excited", "proud", "grateful", "celebrating"].includes(emotion)) {
+    return { image: robotCelebrating, label: "celebrating" };
+  }
+  if (["anxious", "stressed", "tense", "nervous", "worried", "afraid"].includes(emotion)) {
+    return { image: robotRelaxing, label: "relaxing" };
+  }
+  if (["sad", "concerned", "angry", "fearful", "lonely", "upset", "overwhelmed", "disappointed"].includes(emotion)) {
+    return { image: robotComforting, label: "comforting" };
+  }
+  if (["calm", "neutral"].includes(emotion)) {
+    return { image: robotRelaxing, label: "relaxing" };
+  }
+  return { image: robotListening, label: "listening" };
+}
 
 function ActionButton({
   children,
@@ -152,25 +179,26 @@ export default function ChatMessage({
 
   if (isUser) {
     return (
-      <div className="flex justify-end px-3 sm:px-4 py-2">
-        <div className="chat-bubble-user max-w-[85%] sm:max-w-[70%] rounded-2xl rounded-br-xs px-4 py-3 text-white shadow-sm">
-          <p className="whitespace-pre-line text-sm leading-relaxed">{content}</p>
-          {timestamp && <p className="mt-1.5 text-[10px] text-indigo-100/90 text-right">{timestamp}</p>}
+      <div className="flex justify-end px-4 py-2">
+        <div className="max-w-[72%] rounded-2xl rounded-br-sm bg-indigo-600 px-4 py-3 text-white shadow-sm">
+          <p className="whitespace-pre-line text-sm leading-6">{content}</p>
+          {timestamp && <p className="mt-2 text-[10px] text-indigo-200">{timestamp}</p>}
         </div>
       </div>
     );
   }
 
+  const robotExpression = getRobotExpression(message);
+
   return (
-    <div className="flex justify-start items-start gap-2 sm:gap-2.5 px-3 sm:px-4 py-2">
-      <div
-        className="chat-ai-avatar flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-xs mt-0.5"
-        aria-hidden="true"
-      >
-        <Sparkles size={15} />
-      </div>
-      <div className="chat-bubble-ai w-full min-w-0 max-w-[86%] sm:max-w-[74%] rounded-2xl rounded-tl-xs backdrop-blur-md text-gray-800 shadow-sm overflow-hidden">
-        {content && <div className="px-4 pt-4"><p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">{content}</p></div>}
+    <div className="flex items-end justify-start gap-2 px-4 py-2">
+      <img
+        src={robotExpression.image}
+        alt={`Empathy Guide ${robotExpression.label}`}
+        className="chat-response-robot h-12 w-12 shrink-0 object-contain"
+      />
+      <div className="w-full min-w-0 max-w-[72%] rounded-2xl rounded-bl-sm border border-gray-100 bg-white text-gray-800 shadow-sm">
+        {content && <div className="px-4 pt-4"><p className="whitespace-pre-line text-sm leading-6 text-gray-700">{content}</p></div>}
         <div className="px-4 pb-4">
           <StepContent step={step} skill={skill} />
 

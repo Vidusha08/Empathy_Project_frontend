@@ -40,6 +40,27 @@
   color: var(--app-text);
 }
 
+.chat-response-robot {
+  transform-origin: center bottom;
+  animation: chatRobotEntrance 450ms ease-out both, chatRobotIdle 3s ease-in-out 450ms infinite;
+}
+
+@keyframes chatRobotEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chatRobotIdle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
 .chat-panel__header--collapsed {
   background: var(--chat-panel-bg, rgba(255, 255, 255, 0.5)) !important;
 }
