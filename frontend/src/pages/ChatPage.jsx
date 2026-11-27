@@ -4,12 +4,22 @@ import ChatWindow from "../components/chat/ChatWindow";
 import useAuthStore from "../store/authStore";
 import useChatStore from "../store/chatStore";
 import { getSafetyStatus, sendMessage, submitSafetyScreening } from "../api/chatApi";
-import { getLearningRecommendations } from "../api/generalEmpathyApi";
 import { completeItem, completeObjective, getProgress } from "../api/progressApi";
 import { getSkill, getSkills } from "../api/contentApi";
 import { findNextObjective, idOf, titleOf } from "../utils/nextObjective";
 import { verifyQuickCheckAnswer } from "../utils/quickCheck";
-import { AlertCircle, LoaderCircle, LogOut, Mic, Send, Sparkles, X } from "lucide-react";
+import {
+  AlignJustify,
+  AlignLeft,
+  ChevronDown,
+  ChevronUp,
+  Maximize2,
+  MessageSquare,
+  Mic,
+  Minimize2,
+  Paperclip,
+  Send,
+} from "lucide-react";
 import "./ChatPages.css";
 import SafetyGate from "../components/chat/SafetyGate";
 
@@ -36,75 +46,123 @@ function fallbackObjectiveQuestions(objective) {
   ];
 }
 
-// Chat Input 
-
+// Redesigned Slim Message Composer with integrated Short/Long controls
 function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyleChange }) {
   const [text, setText] = useState("");
-  const ref = useRef(null);
+  const textareaRef = useRef(null);
 
   const submit = () => {
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || disabled) return;
     onSend(text.trim(), answerStyle);
     setText("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+  };
+
+  const handleInput = (e) => {
+    setText(e.target.value);
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = "auto";
+      ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`;
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
   };
 
   return (
-    <div className="chat-composer__inner">
-      <div className="chat-response-style" role="group" aria-label="Response style">
-        <span className="chat-response-style__label">Response:</span>
-        <div className="chat-response-style__options">
-          <button
-            type="button"
-            onClick={() => onAnswerStyleChange("short")}
-            aria-pressed={answerStyle === "short"}
-            className={`chat-response-style__option ${
-              answerStyle === "short" ? "chat-response-style__option--active" : ""
-            }`}
-          >
-            Short
-          </button>
-          <span className="sr-only"> </span>
-          <button
-            type="button"
-            onClick={() => onAnswerStyleChange("long")}
-            aria-pressed={answerStyle === "long"}
-            className={`chat-response-style__option ${
-              answerStyle === "long" ? "chat-response-style__option--active" : ""
-            }`}
-          >
-            Long
-          </button>
+    <div className="chat-composer-box w-full rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-3 sm:py-2 transition-all">
+      {/* Multiline textarea with auto-expansion */}
+      <textarea
+        ref={textareaRef}
+        value={text}
+        onChange={handleInput}
+        onKeyDown={handleKeyDown}
+        placeholder="Chat with EmpathyGuru..."
+        rows={1}
+        disabled={isLoading || disabled}
+        className="w-full resize-none outline-none text-sm font-normal sm:font-medium text-gray-900 placeholder-gray-500 bg-transparent leading-relaxed max-h-24 overflow-y-auto px-1 py-0"
+        style={{ minHeight: 22 }}
+        aria-label="Chat message"
+      />
+
+      {/* Inside composer controls row: Short/Long selector on left, Attachment + Mic + Send on right */}
+      <div className="flex items-center justify-between pt-1 mt-0.5 border-t border-white/40">
+        {/* Integrated Response Length Selector */}
+        <div className="chat-response-style flex items-center gap-1.5" role="group" aria-label="Response style">
+          <span className="chat-response-style__label text-[10px] font-semibold text-gray-500 hidden sm:inline uppercase tracking-wider">
+            Response:
+          </span>
+          <div className="chat-response-style__options inline-flex items-center gap-1 p-0.5 rounded-lg">
+            <button
+              type="button"
+              onClick={() => onAnswerStyleChange("short")}
+              aria-pressed={answerStyle === "short"}
+              title="Short responses: concise and direct"
+              className={`chat-response-style__option flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium transition-all ${
+                answerStyle === "short"
+                  ? "chat-response-style__option--active"
+                  : ""
+              }`}
+            >
+              <AlignLeft size={12} className="shrink-0" />
+              <span>Short</span>
+            </button>
+            <span className="sr-only"> </span>
+            <button
+              type="button"
+              onClick={() => onAnswerStyleChange("long")}
+              aria-pressed={answerStyle === "long"}
+              title="Long responses: detailed and comprehensive"
+              className={`chat-response-style__option flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium transition-all ${
+                answerStyle === "long"
+                  ? "chat-response-style__option--active"
+                  : ""
+              }`}
+            >
+              <AlignJustify size={12} className="shrink-0" />
+              <span>Long</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="chat-input-row">
-        <textarea
-          ref={ref}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); }
-          }}
-          placeholder="Type a message…"
-          rows={1}
-          disabled={isLoading || disabled}
-          className="flex-1 resize-none outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent leading-relaxed max-h-28 overflow-y-auto"
-          style={{ minHeight: 24 }}
-        />
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button type="button" className="chat-input-row__mic text-gray-400 hover:text-gray-600 transition-colors p-1" aria-label="Use microphone">
-            <Mic size={16} />
+
+        {/* Action icons: Attachment, Microphone, and Send */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            className="chat-input-row__attach inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:text-indigo-600 hover:bg-white/50 transition-colors"
+            aria-label="Attach file"
+            title="Attach file"
+          >
+            <Paperclip size={14} />
+          </button>
+          <button
+            type="button"
+            className="chat-input-row__mic inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:text-indigo-600 hover:bg-white/50 transition-colors"
+            aria-label="Use microphone"
+            title="Use microphone"
+          >
+            <Mic size={14} />
           </button>
           <button
             type="button"
             onClick={submit}
             disabled={!text.trim() || isLoading || disabled}
-            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all
-              ${text.trim() && !isLoading
-                ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-              }`}
+            aria-label="Send message"
+            title="Send message"
+            className={`chat-input-row__send inline-flex items-center justify-center w-7 h-7 rounded-lg transition-all ${
+              text.trim() && !isLoading && !disabled
+                ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 shadow-xs active:scale-95 cursor-pointer"
+                : "bg-gray-200/50 text-gray-400 cursor-not-allowed"
+            }`}
           >
-            <Send size={13} />
+            <Send size={13} className="translate-x-px" />
           </button>
         </div>
       </div>
@@ -116,16 +174,12 @@ function ChatInputArea({ onSend, isLoading, disabled, answerStyle, onAnswerStyle
 
 export default function ChatPage() {
   const [answerStyle, setAnswerStyle] = useState("short");
+  const [headerExpanded, setHeaderExpanded] = useState(true);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [suggestedQuestions, setSuggestedQuestions] = useState([]);
   const [safetyStatus, setSafetyStatus] = useState(null);
   const [screeningLoading, setScreeningLoading] = useState(false);
   const [screeningError, setScreeningError] = useState("");
-  const [completionModalOpen, setCompletionModalOpen] = useState(false);
-  const [isRecommending, setIsRecommending] = useState(false);
-  const [recommendations, setRecommendations] = useState(null);
-  const [recommendationError, setRecommendationError] = useState("");
-  const [conversationFinished, setConversationFinished] = useState(false);
   const recommendationKeys = useRef(new Set());
   const activityCompletionInFlight = useRef(new Set());
   const requestInFlight = useRef(false);
@@ -140,75 +194,6 @@ export default function ChatPage() {
   } = useChatStore();
 
   const firstName = getFirstName(user);
-
-  const hasUserMessages = messages.some((m) => m.role === "user");
-
-  const handleOpenCompletion = () => {
-    setCompletionModalOpen(true);
-    setRecommendations(null);
-    setRecommendationError("");
-  };
-
-  const handleFinishConversation = () => {
-    setCompletionModalOpen(false);
-    setRecommendations(null);
-    setRecommendationError("");
-    setConversationFinished(true);
-  };
-
-  const handleExploreRecommendations = async () => {
-    setIsRecommending(true);
-    setRecommendationError("");
-    const historyPayload = messages
-      .filter((m) => m && m.content && typeof m.content === "string")
-      .map((m) => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.content,
-      }));
-
-    try {
-      const result = await getLearningRecommendations(historyPayload);
-      if (result?.safety) {
-        setCompletionModalOpen(false);
-        setRecommendations(null);
-        if (result.restrictionActive || result.screeningRequired) {
-          setSafetyStatus({
-            message: result.message,
-            restriction_active: result.restrictionActive,
-            screening_required: result.screeningRequired,
-            restriction_expires_at: result.restrictionExpiresAt,
-            counsellor_contacts: result.counsellorContacts,
-            urgent_guidance: result.urgentGuidance,
-          });
-        }
-        return;
-      }
-      setRecommendations(result?.recommendations || []);
-    } catch (error) {
-      const status = error?.response?.status;
-      if (status === 423) {
-        setCompletionModalOpen(false);
-        setRecommendations(null);
-        const safetyPayload = error?.response?.data || {};
-        setSafetyStatus({
-          message: safetyPayload.message,
-          error: safetyPayload.error,
-          restriction_active: Boolean(safetyPayload.restriction_active),
-          screening_required: Boolean(safetyPayload.screening_required),
-          restriction_expires_at: safetyPayload.restriction_expires_at,
-          counsellor_contacts: safetyPayload.counsellor_contacts,
-          urgent_guidance: safetyPayload.urgent_guidance,
-        });
-        return;
-      }
-      setRecommendationError(
-        error?.response?.data?.error ||
-          "Unable to load learning recommendations right now. Please try again.",
-      );
-    } finally {
-      setIsRecommending(false);
-    }
-  };
 
   // Personalize the seeded greeting once the user's name is known
   // (it's created generically at store-init time, before login happens).
@@ -515,7 +500,6 @@ export default function ChatPage() {
     setSuggestedQuestions([]);
     addUserMessage(question);
     setLoading(true);
-    setConversationFinished(false);
 
     try {
       const historyPayload = messages
@@ -904,31 +888,63 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="chat-page chat-page--seek flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="chat-page chat-page--seek flex h-full min-h-0 flex-col overflow-hidden p-2 sm:p-4">
+      {/* Unified Glassmorphism Chat & Message Composer Container */}
+      <div className="chat-unified-panel flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl backdrop-blur-md">
+        
+        {/* Chat Header - Integrated in panel's top header with collapse toggle */}
+        <div
+          className={`chat-panel__header shrink-0 backdrop-blur-md transition-all duration-300 ease-in-out ${
+            headerExpanded ? "py-2.5 px-4" : "py-1.5 px-3 chat-panel__header--collapsed"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            {headerExpanded ? (
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-[var(--app-accent-subtle)] text-[var(--app-accent)] flex items-center justify-center shrink-0 shadow-xs border border-[var(--app-border)]">
+                  <MessageSquare size={16} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h1 className="text-sm sm:text-base font-semibold text-[var(--app-text)] truncate">
+                      Chat With EmpathyGuru
+                    </h1>
+                    <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50/90 text-emerald-700 border border-emerald-200/80 shrink-0 shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Online Companion
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--app-text-muted)] truncate hidden sm:block">
+                    SEEK Learning &amp; Emotional Support
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-[var(--app-text-muted)] min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-[var(--app-accent-subtle)] text-[var(--app-accent)] flex items-center justify-center shrink-0">
+                  <MessageSquare size={13} />
+                </div>
+                <span className="font-semibold text-xs text-[var(--app-text)] truncate">Chat With EmpathyGuru</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Online" />
+              </div>
+            )}
 
-      {/* Chat area */}
-      <div className="chat-page__body flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="chat-page__header shrink-0 flex items-center justify-between pb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">💬</span>
-            <h1 className="text-xl font-bold text-gray-800">Chat With EmpathyGuru</h1>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setHeaderExpanded((prev) => !prev)}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-white/60 transition-colors"
+                title={headerExpanded ? "Collapse chat header" : "Expand chat header"}
+                aria-label={headerExpanded ? "Collapse chat header" : "Expand chat header"}
+              >
+                {headerExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+            </div>
           </div>
-          {hasUserMessages && !conversationFinished && (
-            <button
-              type="button"
-              data-testid="end-conversation-button"
-              onClick={handleOpenCompletion}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 hover:text-gray-900 transition-colors shadow-sm"
-              title="End conversation and explore learning recommendations"
-            >
-              <LogOut size={14} className="text-gray-500" />
-              <span>End Conversation</span>
-            </button>
-          )}
         </div>
 
-        {/* Messages */}
-        <div className="chat-surface chat-page__conversation flex min-h-0 flex-1 flex-col overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-sm">
+        {/* Messages History - Central flexible area, scrolls independently */}
+        <div className="chat-messages-area flex min-h-0 flex-1 flex-col overflow-hidden">
           <ChatWindow
             messages={messages}
             isLoading={isLoading}
@@ -939,8 +955,8 @@ export default function ChatPage() {
           />
         </div>
 
-        {/* Input */}
-        <div className="chat-composer shrink-0">
+        {/* Message Input Composer - Fixed at the bottom of the chat panel, matching message width */}
+        <div className="chat-composer-container shrink-0 px-3 sm:px-4 pb-2 sm:pb-2.5 pt-0">
           <ChatInputArea
             onSend={handleSend}
             isLoading={isLoading}
@@ -949,151 +965,6 @@ export default function ChatPage() {
           />
         </div>
       </div>
-
-      {/* End Conversation & Recommendation Bridge Modal */}
-      {completionModalOpen && (
-        <div
-          data-testid="completion-modal-backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-150"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            data-testid="completion-modal"
-            className="w-full max-w-lg rounded-2xl border border-gray-100 bg-white p-6 shadow-2xl relative"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-indigo-600" />
-                <h2 className="text-base font-semibold text-gray-900">
-                  {recommendations ? "Recommended SEEK Opportunities" : "End Conversation"}
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCompletionModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg transition-colors"
-                aria-label="Close dialog"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {isRecommending ? (
-              <div className="py-8 flex flex-col items-center justify-center gap-3 text-center">
-                <LoaderCircle className="animate-spin text-indigo-600" size={28} />
-                <p className="text-sm font-medium text-gray-700">
-                  Reviewing conversation for relevant SEEK learning connections...
-                </p>
-                <p className="text-xs text-gray-500">Checking canonical curriculum objectives</p>
-              </div>
-            ) : recommendations ? (
-              <div className="py-4 space-y-4">
-                {recommendations.length > 0 ? (
-                  <>
-                    <p className="text-xs text-gray-600">
-                      Based on what you shared, here are learning areas from the approved SEEK curriculum that connect with your conversation:
-                    </p>
-                    <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-                      {recommendations.map((rec) => (
-                        <div
-                          key={rec.skill_id}
-                          className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-4 transition text-left"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-                              {rec.skill_title}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCompletionModalOpen(false);
-                                setRecommendations(null);
-                                handleSend(`Can you teach me about ${rec.skill_title}?`);
-                              }}
-                              className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
-                            >
-                              Explore in chat
-                            </button>
-                          </div>
-                          <p className="mt-1.5 text-xs leading-5 text-gray-700">
-                            {rec.relevance_explanation}
-                          </p>
-                          <p className="mt-2 text-[11px] leading-4 text-gray-500 italic">
-                            {rec.learning_opportunity}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="py-4 text-center">
-                    <p className="text-sm font-medium text-gray-800">
-                      No specific learning recommendations found.
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      Thank you for taking time to reflect and talk things through today.
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
-                  <button
-                    type="button"
-                    onClick={handleFinishConversation}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Finish conversation
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCompletionModalOpen(false);
-                      setRecommendations(null);
-                    }}
-                    className="rounded-xl bg-gray-100 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="py-5 space-y-4">
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  Would you like to explore SEEK learning opportunities related to what you shared today, or finish this conversation?
-                </p>
-
-                {recommendationError && (
-                  <div
-                    className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
-                    role="alert"
-                  >
-                    <AlertCircle size={15} className="mt-0.5 shrink-0" />
-                    <span>{recommendationError}</span>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-3 border-t border-gray-100">
-                  <button
-                    type="button"
-                    onClick={handleFinishConversation}
-                    className="w-full sm:w-auto rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                  >
-                    Finish Conversation
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExploreRecommendations}
-                    className="w-full sm:w-auto rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  >
-                    Explore Learning Opportunities
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {safetyStatus && (
         <SafetyGate

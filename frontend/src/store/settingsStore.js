@@ -1,25 +1,48 @@
+// src/store/settingsStore.js
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { THEME_CONFIGS, DEFAULT_THEME_ID, getThemeConfig } from "../theme/themeConfig";
 
-export const themeOptions = [
-  { id: "ocean", label: "Ocean", accent: "#4f46e5", sidebar: "#1a237e" },
-  { id: "forest", label: "Forest", accent: "#16836a", sidebar: "#14532d" },
-  { id: "sunset", label: "Sunset", accent: "#ea580c", sidebar: "#9a3412" },
-  { id: "lavender", label: "Lavender", accent: "#9333ea", sidebar: "#581c87" },
-];
+// Export themeOptions for backward compatibility with existing components
+export const themeOptions = THEME_CONFIGS.map((t) => ({
+  id: t.themeId,
+  label: t.themeName,
+  accent: t.accentColor,
+  sidebar: t.sidebarBg,
+  soundLabel: t.soundLabel,
+  backgroundImage: t.backgroundImage,
+  ambientSound: t.ambientSound,
+}));
 
 export const useSettingsStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       colorMode: "light",
-      backgroundScene: "none",
-      theme: "ocean",
-      backgroundColor: "#f6f2ec",
+      // Selected single theme controls image, accent color, and ambient sound
+      theme: DEFAULT_THEME_ID,
+      isMuted: true, // Default muted to respect browser autoplay
+
       setColorMode: (colorMode) => set({ colorMode }),
-      setBackgroundScene: (backgroundScene) => set({ backgroundScene }),
-      setTheme: (theme) => set({ theme }),
-      setBackgroundColor: (backgroundColor) => set({ backgroundColor }),
+      setTheme: (themeId) => {
+        const config = getThemeConfig(themeId);
+        set({ theme: config.themeId });
+      },
+      setIsMuted: (isMuted) => set({ isMuted }),
+      toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
     }),
-    { name: "app-settings" }
+    {
+      name: "app-settings",
+      // Migrate old settings if present
+      migrate: (persistedState, version) => {
+        if (!persistedState) return persistedState;
+        const currentTheme = persistedState.theme;
+        const config = getThemeConfig(currentTheme);
+        return {
+          ...persistedState,
+          theme: config.themeId,
+          isMuted: persistedState.isMuted ?? true,
+        };
+      },
+    }
   )
 );

@@ -1,4 +1,4 @@
-//src/components/chat/chatInput.jsx
+//src/components/chat/ChatInput.jsx
 import { useState, useRef } from "react";
 import { Send, Play, Wind, Anchor } from "lucide-react";
  
@@ -41,7 +41,7 @@ export default function ChatInput({ onSend, isLoading = false }) {
   };
  
   return (
-    <div className="px-5 pb-5 pt-3 bg-white border-t border-gray-100">
+    <div className="px-5 pb-5 pt-3 bg-[var(--app-surface-translucent)] border-t border-[var(--app-border)] backdrop-blur-md">
       {/* Quick action buttons */}
       <div className="flex gap-3 mb-3">
         {quickActions.map(({ label, icon: Icon, color }) => (
@@ -49,7 +49,7 @@ export default function ChatInput({ onSend, isLoading = false }) {
             key={label}
             onClick={() => handleQuickAction(label)}
             disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-gray-600 disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-card)] hover:bg-[var(--app-accent-subtle)] transition-colors text-sm font-medium text-[var(--app-text)] disabled:opacity-50"
           >
             <Icon size={15} className={color} />
             <span>{label}</span>
@@ -59,7 +59,7 @@ export default function ChatInput({ onSend, isLoading = false }) {
  
       {/* Text input row */}
       <div className="flex items-end gap-3">
-        <div className="flex-1 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-50 transition-all">
+        <div className="flex-1 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface-card)] px-4 py-2.5 focus-within:border-[var(--app-accent)] focus-within:ring-2 focus-within:ring-[var(--app-focus-ring)] transition-all">
           <textarea
             ref={textareaRef}
             value={text}
@@ -68,7 +68,7 @@ export default function ChatInput({ onSend, isLoading = false }) {
             rows={1}
             disabled={isLoading}
             placeholder="Share your feelings or ask for guidance..."
-            className="w-full bg-transparent resize-none text-sm text-gray-700 placeholder-gray-400 outline-none leading-relaxed"
+            className="w-full bg-transparent resize-none text-sm text-[var(--app-text)] placeholder-[var(--app-text-muted)] outline-none leading-relaxed"
             style={{ maxHeight: "120px" }}
           />
         </div>
@@ -76,7 +76,8 @@ export default function ChatInput({ onSend, isLoading = false }) {
         <button
           onClick={handleSend}
           disabled={!text.trim() || isLoading}
-          className="w-11 h-11 rounded-2xl bg-[#1a237e] hover:bg-[#283593] disabled:opacity-40 flex items-center justify-center flex-shrink-0 transition-all shadow-md active:scale-95"
+          className="chat-send-btn w-11 h-11 rounded-2xl bg-[var(--chat-send-btn-bg,var(--app-accent))] hover:bg-[var(--chat-send-btn-hover,var(--app-accent-hover))] disabled:opacity-40 flex items-center justify-center flex-shrink-0 transition-all shadow-md active:scale-95"
+          aria-label="Send message"
         >
           <Send size={16} className="text-white ml-0.5" />
         </button>
@@ -84,4 +85,3 @@ export default function ChatInput({ onSend, isLoading = false }) {
     </div>
   );
 }
-

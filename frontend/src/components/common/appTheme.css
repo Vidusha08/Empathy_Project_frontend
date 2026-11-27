@@ -1,25 +1,265 @@
-.app-main {
-  background-position: center;
+/* Global Application Theme System - Frosted Glass Content Surfaces & Accessible Contrast */
+
+/* ==========================================================================
+   1. Root Centralized Variables & Default Theme (#4F46E5 - Original Empathy Guru)
+   ========================================================================== */
+:root {
+  /* Central Theme Tokens */
+  --theme-color: #4F46E5;
+  --theme-sidebar-bg: #1a237e;
+  --theme-topbar-bg: #ffffff;
+
+  /* Frosted White Glass Content Surfaces (Consistent across all custom themes) */
+  --content-surface-bg: rgba(255, 255, 255, 0.82);
+  --content-card-bg: rgba(255, 255, 255, 0.85);
+  --content-header-bg: rgba(255, 255, 255, 0.88);
+  --content-card-border: rgba(255, 255, 255, 0.65);
+  --content-card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+
+  /* Accessible High-Contrast Text System */
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-disabled: #9ca3af;
+
+  /* Aliases for legacy component consumption */
+  --app-theme: default;
+  --app-accent: var(--theme-color);
+  --app-accent-hover: #4338ca;
+  --app-accent-subtle: rgba(79, 70, 229, 0.12);
+  --app-focus-ring: color-mix(in srgb, var(--app-accent) 32%, transparent);
+
+  --app-surface: var(--content-card-bg);
+  --app-surface-soft: rgba(248, 250, 252, 0.85);
+  --app-surface-translucent: rgba(255, 255, 255, 0.82);
+  --app-surface-card: var(--content-card-bg);
+  --app-border: var(--content-card-border);
+  --app-border-subtle: rgba(229, 231, 235, 0.7);
+
+  --app-text: var(--text-primary);
+  --app-text-muted: var(--text-muted);
+
+  --app-header-bg: var(--content-header-bg);
+  --app-header-border: var(--content-card-border);
+  --app-bg: #f6f2ec;
+  --app-bg-image: none;
+
+  /* Sidebar Tokens */
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+  --app-sidebar-active: rgba(255, 255, 255, 0.22);
+  --app-sidebar-active-text: #ffffff;
+  --app-sidebar-hover: rgba(255, 255, 255, 0.14);
+  --app-sidebar-text: #ffffff;
+  --app-sidebar-text-muted: rgba(255, 255, 255, 0.82);
+  --app-sidebar-border: rgba(255, 255, 255, 0.18);
+  --app-sidebar-logo-bg: linear-gradient(135deg, #f472b6, #a855f7);
+
+  /* Chat Specific Tokens */
+  --chat-panel-bg: rgba(255, 255, 255, 0.82);
+  --chat-panel-border: rgba(255, 255, 255, 0.6);
+  --chat-user-bg: var(--app-accent);
+  --chat-user-text: #ffffff;
+  --chat-ai-bg: rgba(255, 255, 255, 0.92);
+  --chat-ai-border: rgba(255, 255, 255, 0.7);
+  --chat-ai-text: #1f2937;
+  --chat-send-btn-bg: var(--app-accent);
+  --chat-send-btn-hover: var(--app-accent-hover);
+  --chat-suggested-bg: rgba(255, 255, 255, 0.88);
+  --chat-suggested-border: var(--app-accent-subtle);
+  --chat-suggested-text: #1f2937;
+
+  /* Scrollbars */
+  --scrollbar-thumb: rgba(148, 163, 184, 0.45);
+  --scrollbar-track: transparent;
+}
+
+/* ==========================================================================
+   2. Centralized 11 Theme Definitions (Exact HEX Colours + 75% Nav Bars)
+   Sidebar & Topbar: 75% exact theme colour opacity
+   Content sections: Frosted translucent white (75-85% opacity) with dark text
+   ========================================================================== */
+
+/* 1. Default (Restores original Default UI) */
+[data-theme="default"],
+.app-shell[data-theme="default"] {
+  --theme-color: #4F46E5;
+  --theme-sidebar-bg: #1a237e;
+  --theme-topbar-bg: #ffffff;
+  --content-surface-bg: #ffffff;
+  --content-card-bg: #ffffff;
+  --content-header-bg: #ffffff;
+  --content-card-border: #e5e7eb;
+  --app-theme: default;
+  --app-accent: #4F46E5;
+  --app-accent-hover: #4338ca;
+  --app-accent-subtle: rgba(79, 70, 229, 0.12);
+  --app-sidebar-bg: #1a237e;
+  --app-sidebar-logo-bg: linear-gradient(135deg, #f472b6, #a855f7);
+  --app-surface-card: #ffffff;
+  --app-surface: #ffffff;
+  --app-bg: #f6f2ec;
+  --app-header-bg: #ffffff;
+  --app-border: #e5e7eb;
+}
+
+/* 2. Beach (#5F9CA2) */
+[data-theme="beach"],
+.app-shell[data-theme="beach"] {
+  --theme-color: #5F9CA2;
+  --theme-sidebar-bg: color-mix(in srgb, #5F9CA2 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #5F9CA2 75%, transparent);
+  --app-theme: beach;
+  --app-accent: #5F9CA2;
+  --app-accent-hover: #4d8288;
+  --app-accent-subtle: rgba(95, 156, 162, 0.18);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 3. Cloudy (#039BE5) */
+[data-theme="cloudy"],
+.app-shell[data-theme="cloudy"] {
+  --theme-color: #039BE5;
+  --theme-sidebar-bg: color-mix(in srgb, #039BE5 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #039BE5 75%, transparent);
+  --app-theme: cloudy;
+  --app-accent: #039BE5;
+  --app-accent-hover: #0288d1;
+  --app-accent-subtle: rgba(3, 155, 229, 0.2);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 4. Dreamy Night (#DBB1E1) */
+[data-theme="dreamy_night"],
+.app-shell[data-theme="dreamy_night"],
+[data-theme="lavender"],
+.app-shell[data-theme="lavender"] {
+  --theme-color: #DBB1E1;
+  --theme-sidebar-bg: color-mix(in srgb, #DBB1E1 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #DBB1E1 75%, transparent);
+  --app-theme: dreamy_night;
+  --app-accent: #DBB1E1;
+  --app-accent-hover: #c496cb;
+  --app-accent-subtle: rgba(219, 177, 225, 0.22);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 5. Forest (#046307) */
+[data-theme="forest"],
+.app-shell[data-theme="forest"] {
+  --theme-color: #046307;
+  --theme-sidebar-bg: color-mix(in srgb, #046307 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #046307 75%, transparent);
+  --app-theme: forest;
+  --app-accent: #046307;
+  --app-accent-hover: #034f05;
+  --app-accent-subtle: rgba(4, 99, 7, 0.2);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 6. Lantern (#F5B332) */
+[data-theme="lantern"],
+.app-shell[data-theme="lantern"],
+[data-theme="sunset"],
+.app-shell[data-theme="sunset"] {
+  --theme-color: #F5B332;
+  --theme-sidebar-bg: color-mix(in srgb, #F5B332 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #F5B332 75%, transparent);
+  --app-theme: lantern;
+  --app-accent: #F5B332;
+  --app-accent-hover: #db9c22;
+  --app-accent-subtle: rgba(245, 179, 50, 0.2);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 7. Rainy (#C4A484) */
+[data-theme="rainy"],
+.app-shell[data-theme="rainy"] {
+  --theme-color: #C4A484;
+  --theme-sidebar-bg: color-mix(in srgb, #C4A484 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #C4A484 75%, transparent);
+  --app-theme: rainy;
+  --app-accent: #C4A484;
+  --app-accent-hover: #af8d6b;
+  --app-accent-subtle: rgba(196, 164, 132, 0.2);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 8. Rich Town (#554433) */
+[data-theme="rich_town"],
+.app-shell[data-theme="rich_town"] {
+  --theme-color: #554433;
+  --theme-sidebar-bg: color-mix(in srgb, #554433 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #554433 75%, transparent);
+  --app-theme: rich_town;
+  --app-accent: #554433;
+  --app-accent-hover: #403224;
+  --app-accent-subtle: rgba(85, 68, 51, 0.2);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 9. Village (#89A577) */
+[data-theme="village"],
+.app-shell[data-theme="village"] {
+  --theme-color: #89A577;
+  --theme-sidebar-bg: color-mix(in srgb, #89A577 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #89A577 75%, transparent);
+  --app-theme: village;
+  --app-accent: #89A577;
+  --app-accent-hover: #739060;
+  --app-accent-subtle: rgba(137, 165, 119, 0.18);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 10. Winter (#C7C9CC) */
+[data-theme="winter"],
+.app-shell[data-theme="winter"] {
+  --theme-color: #C7C9CC;
+  --theme-sidebar-bg: color-mix(in srgb, #C7C9CC 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #C7C9CC 75%, transparent);
+  --app-theme: winter;
+  --app-accent: #C7C9CC;
+  --app-accent-hover: #adb0b5;
+  --app-accent-subtle: rgba(199, 201, 204, 0.24);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* 11. Zen Garden (#C0403E) */
+[data-theme="zen_garden"],
+.app-shell[data-theme="zen_garden"],
+[data-theme="dreaming"],
+.app-shell[data-theme="dreaming"] {
+  --theme-color: #C0403E;
+  --theme-sidebar-bg: color-mix(in srgb, #C0403E 75%, transparent);
+  --theme-topbar-bg: color-mix(in srgb, #C0403E 75%, transparent);
+  --app-theme: zen_garden;
+  --app-accent: #C0403E;
+  --app-accent-hover: #a53230;
+  --app-accent-subtle: rgba(192, 64, 62, 0.18);
+  --app-sidebar-bg: var(--theme-sidebar-bg);
+}
+
+/* ==========================================================================
+   3. Global App Shell & Full Viewport Background Image
+   ========================================================================== */
+.app-shell {
+  background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
+  color: var(--text-primary);
+  transition: background-image 400ms ease-in-out;
+}
+
+.app-main {
+  position: relative;
+  background-color: transparent !important;
+  color: var(--text-primary);
   scrollbar-gutter: stable;
 }
 
-.app-shell {
-  --app-surface: #ffffff;
-  --app-border: #e5e7eb;
-  --app-muted: #697586;
-}
-
-.app-topbar {
-  min-height: 72px;
-  background: var(--app-surface);
-  border-color: var(--app-border);
-  box-shadow: 0 1px 0 rgba(31, 41, 55, 0.03);
-}
-
 .app-main > * {
+  position: relative;
+  z-index: 1;
   animation: app-content-in 220ms ease both;
 }
 
@@ -28,26 +268,135 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.sidebar-mobile-trigger,
-.sidebar-backdrop,
-.sidebar-mobile-nav {
-  display: none;
+/* ==========================================================================
+   4. Topbar Component (75% Theme Tint + High Contrast Text)
+   ========================================================================== */
+.app-topbar {
+  min-height: 72px;
+  background-color: var(--theme-topbar-bg) !important;
+  border-bottom: 1px solid var(--app-border) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: background-color 200ms ease, border-color 200ms ease;
 }
 
-.app-shell [class~="bg-indigo-600"] {
-  background-color: var(--app-accent);
+.app-shell[data-theme="default"] .app-topbar {
+  color: var(--text-primary) !important;
 }
 
-.app-shell [class~="text-indigo-600"],
-.app-shell [class~="text-indigo-700"] {
-  color: var(--app-accent);
+.app-topbar p,
+.app-topbar span,
+.app-topbar button {
+  color: inherit;
 }
 
-.app-shell [class~="border-indigo-300"],
-.app-shell [class~="border-indigo-500"] {
-  border-color: var(--app-accent);
+.app-topbar [class~="text-gray-800"],
+.app-topbar [class~="text-gray-900"] {
+  color: #ffffff !important;
 }
 
+.app-shell[data-theme="default"] .app-topbar [class~="text-gray-800"],
+.app-shell[data-theme="default"] .app-topbar [class~="text-gray-900"] {
+  color: var(--text-primary) !important;
+}
+
+.app-topbar [class~="text-gray-500"],
+.app-topbar [class~="text-gray-600"],
+.app-topbar [class~="text-gray-700"] {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.app-shell[data-theme="default"] .app-topbar [class~="text-gray-500"],
+.app-shell[data-theme="default"] .app-topbar [class~="text-gray-600"],
+.app-shell[data-theme="default"] .app-topbar [class~="text-gray-700"] {
+  color: var(--text-muted) !important;
+}
+
+/* Menu popovers from Topbar */
+.app-menu-popover {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(229, 231, 235, 0.8) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.app-menu-popover p,
+.app-menu-popover li,
+.app-menu-popover strong {
+  color: var(--text-primary) !important;
+}
+
+.app-menu-popover .text-gray-400,
+.app-menu-popover .text-gray-500 {
+  color: var(--text-muted) !important;
+}
+
+.app-menu-popover li:hover,
+.app-menu-popover button:hover {
+  background-color: var(--app-accent-subtle) !important;
+}
+
+/* ==========================================================================
+   5. Sidebar Component (75% Theme Tint + High Contrast Text)
+   ========================================================================== */
+.app-sidebar {
+  background-color: var(--theme-sidebar-bg) !important;
+  border-right: 1px solid var(--app-border) !important;
+  color: #ffffff !important;
+  box-shadow: 2px 0 18px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-sidebar .app-sidebar__brand,
+.app-sidebar .app-sidebar__label,
+.app-sidebar .app-sidebar__icon {
+  color: #ffffff !important;
+}
+
+.app-sidebar__logo-badge {
+  background: var(--app-accent) !important;
+}
+
+.app-sidebar__link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.app-sidebar__link:hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.app-sidebar__link--active,
+.app-sidebar__link.active {
+  background-color: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-left: 3px solid #ffffff;
+}
+
+.app-sidebar__collapse-btn {
+  background-color: var(--theme-sidebar-bg) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.app-sidebar__collapse-btn:hover {
+  color: #ffffff !important;
+  transform: translateY(-50%) scale(1.08);
+}
+
+/* ==========================================================================
+   6. Frosted Glass Content Headers & Page Hero Sections
+   ========================================================================== */
 .app-shell main .student-dashboard__header,
 .app-shell main .admin-dashboard__header,
 .app-shell main .quiz-page__header,
@@ -56,308 +405,229 @@
 .app-shell main .content-page__header,
 .app-shell main .skill-detail__hero,
 .app-shell main .progress-header,
-.app-shell main .history-header {
+.app-shell main .history-header,
+.app-shell .dashboard-header {
   box-sizing: border-box;
   padding: 18px 20px;
-  border: 1px solid #e8e1d7;
+  border: 1px solid var(--content-card-border) !important;
   border-radius: 16px;
-  background: #f6f2ec;
+  background: var(--content-header-bg) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--content-card-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.app-shell main .student-dashboard__quick-action {
-  color: #3a342b;
+.app-shell main h1,
+.app-shell main h2,
+.app-shell main h3,
+.app-shell main h4 {
+  color: var(--text-primary) !important;
 }
 
-.app-shell main .quiz-page__header {
-  color: #202938;
+.app-shell main p {
+  color: var(--text-secondary);
 }
 
-.app-shell[data-color-mode="dark"] {
-  --app-surface: #1f2937;
-  --app-border: #374151;
-  --app-muted: #cbd5e1;
-  color-scheme: dark;
+/* ==========================================================================
+   7. Frosted Translucent White Glass Cards & Content Panels (75-85% White)
+   ========================================================================== */
+.app-shell .settings-card,
+.app-shell .dashboard-card,
+.app-shell .content-page__card,
+.app-shell .overall-progress-card,
+.app-shell .skill-card,
+.app-shell .history-list,
+.app-shell .history-count,
+.app-shell .history-state,
+.app-shell .quiz-card,
+.app-shell .chat-unified-panel,
+.app-shell .student-dashboard__card,
+.app-shell [class~="bg-white"],
+.app-shell [class~="bg-white/70"],
+.app-shell [class~="bg-white/80"],
+.app-shell [class~="bg-white/90"] {
+  background-color: var(--content-card-bg) !important;
+  border-color: var(--content-card-border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--content-card-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.app-shell[data-color-mode="dark"] .app-topbar {
-  color: #f3f4f6;
-  border-color: #374151;
-  background-color: #1f2937;
+/* ==========================================================================
+   8. Chat Interface Frosted Glass & Accessible Text Contrast
+   ========================================================================== */
+.app-shell .chat-unified-panel {
+  background: var(--chat-panel-bg) !important;
+  border: 1px solid var(--chat-panel-border) !important;
 }
 
-.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-800"],
-.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-700"],
-.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-600"],
-.app-shell[data-color-mode="dark"] .app-topbar [class~="text-gray-500"] {
-  color: #e5e7eb;
+.app-shell .chat-panel__header {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-bottom: 1px solid var(--content-card-border) !important;
+  color: var(--text-primary) !important;
 }
 
-.app-shell[data-color-mode="dark"] main [class~="bg-white"] {
-  color: #e5e7eb;
-  border-color: #374151;
-  background-color: #1f2937;
+.app-shell .chat-panel__header h1,
+.app-shell .chat-panel__header h2,
+.app-shell .chat-panel__header h3,
+.app-shell .chat-panel__header p {
+  color: var(--text-primary) !important;
 }
 
-.app-shell[data-color-mode="dark"] main [class~="bg-gray-50"],
-.app-shell[data-color-mode="dark"] main [class~="bg-gray-100"] {
-  background-color: #111827;
+.app-shell .chat-ai-message,
+.app-shell .chat-ai-bubble {
+  background-color: var(--chat-ai-bg) !important;
+  border: 1px solid var(--content-card-border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.app-shell[data-color-mode="dark"] main [class~="text-gray-900"],
-.app-shell[data-color-mode="dark"] main [class~="text-gray-800"],
-.app-shell[data-color-mode="dark"] main [class~="text-gray-700"],
-.app-shell[data-color-mode="dark"] main [class~="text-gray-600"],
-.app-shell[data-color-mode="dark"] main [class~="text-gray-500"] {
-  color: #e5e7eb;
+.app-shell .chat-ai-bubble * {
+  color: var(--text-primary);
 }
 
-.app-shell[data-color-mode="dark"] main [class~="border-gray-100"],
-.app-shell[data-color-mode="dark"] main [class~="border-gray-200"],
-.app-shell[data-color-mode="dark"] main [class~="border-gray-300"] {
-  border-color: #4b5563;
+/* User chat bubble uses theme accent colour with crisp white text */
+.app-shell .chat-user-bubble {
+  background: var(--app-accent) !important;
+  color: #ffffff !important;
 }
 
-.app-shell[data-color-mode="dark"] .student-dashboard {
-  color: #e5e7eb;
-  background: transparent;
+.app-shell .chat-user-bubble * {
+  color: #ffffff !important;
 }
 
-.app-shell[data-color-mode="dark"] .student-dashboard [class*="text-[#3A342B]"],
-.app-shell[data-color-mode="dark"] .student-dashboard [class*="text-[#6B6255]"],
-.app-shell[data-color-mode="dark"] .student-dashboard [class*="text-[#9B8E7E]"] {
-  color: #e5e7eb;
+/* Suggested questions */
+.app-shell .chat-suggested-btn {
+  background: var(--chat-suggested-bg) !important;
+  border-color: var(--app-accent-subtle) !important;
+  color: var(--text-primary) !important;
 }
 
-.app-shell[data-color-mode="dark"] .student-dashboard [class~="bg-white"] {
-  border-color: #374151;
-  background-color: #1f2937;
+/* Chat Input field container */
+.app-shell .chat-input-wrapper {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid var(--content-card-border) !important;
 }
 
-.app-shell[data-color-mode="dark"] main .student-dashboard__header,
-.app-shell[data-color-mode="dark"] main .admin-dashboard__header,
-.app-shell[data-color-mode="dark"] main .quiz-page__header,
-.app-shell[data-color-mode="dark"] main .chat-page__header,
-.app-shell[data-color-mode="dark"] main .settings-page__header,
-.app-shell[data-color-mode="dark"] main .content-page__header,
-.app-shell[data-color-mode="dark"] main .skill-detail__hero,
-.app-shell[data-color-mode="dark"] main .progress-header,
-.app-shell[data-color-mode="dark"] main .history-header {
-  border-color: #374151;
-  background: #1f2937;
+.app-shell .chat-input-wrapper textarea,
+.app-shell .chat-input-wrapper input {
+  color: var(--text-primary) !important;
 }
 
-.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action {
-  border-color: #374151;
-  background: #1f2937;
-  color: #f3f4f6;
+/* ==========================================================================
+   9. Buttons, Links, & Accent Elements (Theme Accent Only)
+   ========================================================================== */
+.app-shell [class~="bg-indigo-600"],
+.app-shell [class~="bg-[#4f46e5]"] {
+  background-color: var(--app-accent) !important;
 }
 
-.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action h3,
-.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action p {
-  color: #e5e7eb;
+.app-shell [class~="hover:bg-indigo-700"]:hover,
+.app-shell [class~="hover:bg-[#4338ca]"]:hover {
+  background-color: var(--app-accent-hover) !important;
 }
 
-.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action > div > span {
-  color: #ddd6fe;
-  background: #374151;
+.app-shell [class~="text-indigo-600"],
+.app-shell [class~="text-indigo-700"] {
+  color: var(--app-accent) !important;
 }
 
-.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action--chat button {
-  border: 1px solid #6d5bd0;
-  background: #4f46e5;
+.app-shell [class~="border-indigo-300"],
+.app-shell [class~="border-indigo-500"],
+.app-shell [class~="border-indigo-600"] {
+  border-color: var(--app-accent) !important;
+}
+
+/* Primary buttons use exact theme accent with white text */
+.btn-primary,
+button.primary-btn {
+  background-color: var(--app-accent) !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover,
+button.primary-btn:hover {
+  background-color: var(--app-accent-hover) !important;
+}
+
+/* Modals */
+.app-modal,
+.assessment-modal {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid var(--content-card-border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.app-modal h2,
+.app-modal h3,
+.assessment-modal h2 {
+  color: var(--text-primary) !important;
+}
+
+.app-modal input,
+.app-modal select,
+.app-modal textarea {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: var(--text-primary) !important;
+}
+
+.app-modal input:focus,
+.app-modal select:focus,
+.app-modal textarea:focus {
+  border-color: var(--app-accent) !important;
+  box-shadow: 0 0 0 3px var(--app-accent-subtle) !important;
+}
+
+/* Global scrollbar styling */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--app-accent);
+}
+
+/* Mobile Nav adaptations */
+.sidebar-mobile-trigger {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--app-accent);
   color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+  border: none;
+  cursor: pointer;
 }
 
-.app-shell[data-color-mode="dark"] main .student-dashboard__quick-action--content button {
-  border-color: #6b7280;
-  background: #374151;
-  color: #f3f4f6;
-}
-
-.app-shell[data-color-mode="dark"] main .history-heading h1 {
-  color: #f3f4f6;
-}
-
-.app-shell[data-color-mode="dark"] main .history-heading p {
-  color: #cbd5e1;
-}
-
-.app-shell[data-color-mode="dark"] main .quiz-page__header {
-  color: #f3f4f6;
-}
-
-.app-shell[data-color-mode="dark"] main .quiz-page__header p {
-  color: #cbd5e1;
-}
-
-.app-shell[data-color-mode="dark"] .chat-page,
-.app-shell[data-color-mode="dark"] .content-page,
-.app-shell[data-color-mode="dark"] .progress-page,
-.app-shell[data-color-mode="dark"] .history-page {
-  color: #e5e7eb;
-  background: transparent;
-}
-
-.app-shell[data-color-mode="dark"] .content-page,
-.app-shell[data-color-mode="dark"] .progress-page {
-  --progress-ink: #f3f4f6;
-  --progress-muted: #cbd5e1;
-  --progress-line: #4b5563;
-  --progress-panel: #1f2937;
-  --progress-soft: #273449;
-}
-
-.app-shell .content-page,
-.app-shell .progress-page {
-  --progress-accent: var(--app-accent);
-  --progress-accent-dark: var(--app-accent);
-}
-
-.app-shell[data-color-mode="dark"] .content-page__title,
-.app-shell[data-color-mode="dark"] .progress-header h1 {
-  color: #f3f4f6;
-}
-
-.app-shell[data-color-mode="dark"] .content-page__card,
-.app-shell[data-color-mode="dark"] .progress-page .overall-progress-card,
-.app-shell[data-color-mode="dark"] .progress-page .skill-card {
-  color: #e5e7eb;
-  background-color: #1f2937;
-}
-
-.app-shell[data-color-mode="dark"] .history-list,
-.app-shell[data-color-mode="dark"] .history-count,
-.app-shell[data-color-mode="dark"] .history-state {
-  color: #e5e7eb;
-  border-color: #4b5563;
-  background-color: #1f2937;
-}
-
-.app-shell[data-color-mode="dark"] .history-entry + .history-entry {
-  border-color: #374151;
-}
-
-.app-shell[data-color-mode="dark"] .history-question:hover,
-.app-shell[data-color-mode="dark"] .history-entry[open] .history-question,
-.app-shell[data-color-mode="dark"] .history-response {
-  background-color: #273449;
-}
-
-.app-shell[data-color-mode="dark"] .history-question__content strong,
-.app-shell[data-color-mode="dark"] .history-response p {
-  color: #e5e7eb;
-}
-
-.app-shell[data-background="beach"] .student-dashboard,
-.app-shell[data-background="forest"] .student-dashboard,
-.app-shell[data-background="beach"] .chat-page,
-.app-shell[data-background="forest"] .chat-page,
-.app-shell[data-background="beach"] .content-page,
-.app-shell[data-background="forest"] .content-page,
-.app-shell[data-background="beach"] .progress-page,
-.app-shell[data-background="forest"] .progress-page,
-.app-shell[data-background="beach"] .history-page,
-.app-shell[data-background="forest"] .history-page {
-  background: transparent;
-}
-
-@media (max-width: 767px) {
-  .app-sidebar {
-    position: fixed;
-    z-index: 60;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: min(82vw, 292px) !important;
-    min-width: 0 !important;
-    transform: translateX(-105%);
-    box-shadow: 12px 0 30px rgba(15, 23, 42, 0.18);
-  }
-
-  .app-sidebar.is-mobile-open {
-    transform: translateX(0);
-  }
-
-  .app-sidebar .absolute {
-    display: none;
-  }
-
+@media (min-width: 768px) {
   .sidebar-mobile-trigger {
-    position: fixed;
-    z-index: 40;
-    top: 14px;
-    left: 14px;
-    display: grid;
-    width: 40px;
-    height: 40px;
-    place-items: center;
-    color: var(--app-accent, #4f46e5);
-    border: 1px solid var(--app-border);
-    border-radius: 12px;
-    background: var(--app-surface);
-    box-shadow: var(--app-shadow);
-  }
-
-  .sidebar-backdrop {
-    position: fixed;
-    z-index: 50;
-    inset: 0;
-    display: block;
-    border: 0;
-    background: rgba(15, 23, 42, 0.38);
-  }
-
-  .sidebar-mobile-nav {
-    position: fixed;
-    z-index: 40;
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    padding: 8px;
-    border: 1px solid var(--app-border);
-    border-radius: 18px;
-    background: color-mix(in srgb, var(--app-surface) 94%, transparent);
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
-    backdrop-filter: blur(14px);
-  }
-
-  .app-shell[data-color-mode="dark"] .sidebar-mobile-nav,
-  .app-shell[data-color-mode="dark"] .sidebar-mobile-trigger {
-    color: #e5e7eb;
-    border-color: #374151;
-    background: #1f2937;
-  }
-
-  .sidebar-mobile-nav a,
-  .sidebar-mobile-nav button {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: 5px 2px;
-    color: var(--app-muted);
-    border: 0;
-    background: transparent;
-    font-size: 10px;
-    text-decoration: none;
-  }
-
-  .sidebar-mobile-nav a.active {
-    color: var(--app-accent, #4f46e5);
-    font-weight: 700;
-  }
-
-  .app-topbar {
-    min-height: 68px;
-    padding-left: 68px !important;
-  }
-
-  .app-main {
-    padding-bottom: 82px;
-    background-attachment: scroll;
+    display: none;
   }
 }
