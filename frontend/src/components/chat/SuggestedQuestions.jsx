@@ -19,7 +19,7 @@ export default function SuggestedQuestions({
       className="flex justify-start px-4 py-3"
     >
       <div className="w-full sm:max-w-[72%]">
-        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-indigo-700">
+        <p className="suggested-questions-title mb-2 flex items-center gap-1.5 text-xs font-semibold">
           <Sparkles size={14} aria-hidden="true" />
           Suggested questions
         </p>
@@ -29,7 +29,7 @@ export default function SuggestedQuestions({
               key={question}
               type="button"
               onClick={() => onSelect?.(question)}
-              className="w-full max-w-full whitespace-normal break-words rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-left text-sm leading-5 text-indigo-800 transition-colors hover:bg-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600"
+              className="chat-suggested-question-btn w-full max-w-full whitespace-normal break-words rounded-lg border backdrop-blur-xs px-3 py-2 text-left text-sm leading-5 transition-all hover:shadow-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--app-accent)]"
             >
               {question}
             </button>

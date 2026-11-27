@@ -1,19 +1,17 @@
 .progress-page {
-  --progress-ink: #1f2937;
-  --progress-muted: #64748b;
-  --progress-line: #e2e8f0;
-  --progress-panel: #ffffff;
-  --progress-soft: #f8fafc;
-  --progress-accent: #4f46e5;
-  --progress-accent-dark: #4338ca;
+  --progress-ink: var(--app-text, #1f2937);
+  --progress-muted: var(--app-text-muted, #64748b);
+  --progress-line: var(--app-border, #e2e8f0);
+  --progress-panel: var(--app-surface-card, #ffffff);
+  --progress-soft: var(--app-surface-soft, #f8fafc);
+  --progress-accent: var(--app-accent, #4f46e5);
+  --progress-accent-dark: var(--app-accent-hover, #4338ca);
   min-height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
   padding: clamp(24px, 4vw, 48px);
   color: var(--progress-ink);
-  background:
-    radial-gradient(circle at 92% 0%, rgba(206, 235, 220, 0.55), transparent 34%),
-    #f7f9f8;
+  background: transparent;
   font-family: var(--font-sans);
 }
 
@@ -129,7 +127,9 @@
   margin-bottom: 24px;
   padding: 26px 28px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #eef2ff 0%, rgba(255, 255, 255, 0.96) 48%);
+  background: var(--hero-card-bg, linear-gradient(135deg, #eef2ff 0%, rgba(255, 255, 255, 0.96) 48%));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .overall-progress-card::before {
@@ -188,7 +188,7 @@
 .progress-bar-fill,
 .mini-progress-bar div {
   height: 100%;
-  background: linear-gradient(90deg, var(--progress-accent), #818cf8);
+  background: var(--progress-bar-fill, linear-gradient(90deg, var(--progress-accent), #818cf8));
   border-radius: inherit;
   transition: width 0.45s ease;
 }

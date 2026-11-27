@@ -1,44 +1,53 @@
 // src/components/common/Layout.jsx
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { useSettingsStore } from "../../store/settingsStore";
-import beachBackground from "../../assets/images/beach_bg.jpg";
-import forestBackground from "../../assets/images/forest_bg.jpg";
+import { getThemeConfig } from "../../theme/themeConfig";
+import { ambientSoundManager } from "../../theme/ambientSoundManager";
 import "./appTheme.css";
 
 export default function Layout() {
   const colorMode = useSettingsStore((state) => state.colorMode);
-  const backgroundScene = useSettingsStore((state) => state.backgroundScene);
   const theme = useSettingsStore((state) => state.theme);
-  const backgroundColor = useSettingsStore((state) => state.backgroundColor);
-  const accent = {
-    ocean: "#4f46e5",
-    forest: "#16836a",
-    sunset: "#ea580c",
-    lavender: "#9333ea",
-  }[theme] ?? "#4f46e5";
-  const sceneImage = {
-    beach: beachBackground,
-    forest: forestBackground,
-  }[backgroundScene];
+  const isMuted = useSettingsStore((state) => state.isMuted);
+
+  const themeConfig = getThemeConfig(theme);
+  const isDefault = themeConfig.themeId === "default";
+  const accent = themeConfig.accentColor;
+  const backgroundImage = themeConfig.backgroundImage;
+
+  // Synchronize theme and color mode at the document root level
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", themeConfig.themeId);
+    document.documentElement.setAttribute("data-color-mode", colorMode);
+  }, [themeConfig.themeId, colorMode]);
+
+  // Synchronize ambient sound with the single theme selection and mute state
+  useEffect(() => {
+    ambientSoundManager.setMuted(isMuted);
+    if (!isMuted && themeConfig.ambientSound) {
+      ambientSoundManager.play(themeConfig.themeId, themeConfig.ambientSound);
+    }
+  }, [themeConfig.themeId, themeConfig.ambientSound, isMuted]);
 
   return (
     <div
       className="app-shell flex h-screen w-screen overflow-hidden"
+      data-theme={themeConfig.themeId}
       data-color-mode={colorMode}
-      data-background={backgroundScene}
-      style={{ "--app-accent": accent }}
+      style={{
+        backgroundImage: !isDefault && backgroundImage ? `url("${backgroundImage}")` : "none",
+        backgroundColor: isDefault ? (colorMode === "dark" ? "#111827" : "#f6f2ec") : "transparent",
+      }}
     >
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
         <Topbar />
         <main
-          className="app-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
-          style={{
-            backgroundColor: colorMode === "dark" ? "#111827" : backgroundColor,
-            backgroundImage: sceneImage ? `url("${sceneImage}")` : "none",
-          }}
+          className="app-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-transparent"
+          data-theme={themeConfig.themeId}
         >
           <Outlet />
         </main>
@@ -46,16 +55,3 @@ export default function Layout() {
     </div>
   );
 }
-/*import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
-
-export default function Layout() {
-  return (
-    <div className="flex h-screen w-screen overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 overflow-hidden">
-        <Outlet />
-      </main>
-    </div>
-  );
-}*/

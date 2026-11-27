@@ -1,28 +1,21 @@
 // src/components/common/Topbar.jsx
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { useSettingsStore } from "../../store/settingsStore";
-import beachSound from "../../assets/audio/beach_sound.mp3";
-import forestSound from "../../assets/audio/forest_sound.mp3";
-//import { useAuth } from "../../hooks/useAuth";
+import { getThemeConfig } from "../../theme/themeConfig";
+import { ambientSoundManager } from "../../theme/ambientSoundManager";
 import { getSkills } from "../../api/contentApi";
 import EditProfileModal from "./EditProfileModal";
 import {
   BookOpen, Volume2, VolumeX, User, LogOut, ArrowRight, Settings,
 } from "lucide-react";
 
-// Backend returns the student's full name at user.name (e.g. "Jane Doe").
-// This pulls just the first token for a friendlier greeting, falling back
-// to username, then a generic label, if name isn't available.
 function getUsername(user) {
   return user?.username ?? null;
 }
 
-
-
-// Hook: close a popover when clicking outside any of the given refs
 function useOnClickOutside(refs, handler) {
   useEffect(() => {
     const listener = (e) => {
@@ -36,8 +29,6 @@ function useOnClickOutside(refs, handler) {
     return () => document.removeEventListener("mousedown", listener);
   }, [refs, handler]);
 }
-
-// Content popover — icon-only trigger, lists the 8 skills with a "Read more" link
 
 function ContentMenu() {
   const [open, setOpen] = useState(false);
@@ -56,7 +47,7 @@ function ContentMenu() {
   useLayoutEffect(() => {
     if (open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 8, left: rect.right - 288 }); // 288px = w-72
+      setPos({ top: rect.bottom + 8, left: rect.right - 288 });
     }
   }, [open]);
 
@@ -66,8 +57,11 @@ function ContentMenu() {
         ref={buttonRef}
         onClick={() => setOpen((o) => !o)}
         title="Content"
-        className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all
-          ${open ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-100"}`}
+        className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all ${
+          open
+            ? "bg-[var(--app-accent-subtle)] text-[var(--app-accent)]"
+            : "text-[var(--app-text-muted)] hover:bg-[var(--app-surface-soft)]"
+        }`}
       >
         <BookOpen size={18} />
       </button>
@@ -76,23 +70,23 @@ function ContentMenu() {
         <div
           ref={menuRef}
           style={{ position: "fixed", top: pos.top, left: pos.left }}
-          className="w-72 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden z-[100]"
+          className="app-menu-popover w-72 rounded-2xl shadow-xl overflow-hidden z-[100]"
         >
-          <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-semibold text-gray-800">Skills Content</p>
-            <p className="text-xs text-gray-400">{skills.length} skills available</p>
+          <div className="px-4 py-3 border-b border-[var(--app-border)]">
+            <p className="text-sm font-semibold">Skills Content</p>
+            <p className="text-xs text-[var(--app-text-muted)]">{skills.length} skills available</p>
           </div>
-          <ul className="max-h-64 overflow-y-auto divide-y divide-gray-50">
+          <ul className="max-h-64 overflow-y-auto divide-y divide-[var(--app-border-subtle)]">
             {skills.map((skill) => (
-              <li key={skill.skill_id} className="px-4 py-2.5 hover:bg-gray-50 transition-colors">
-                <p className="text-sm font-medium text-gray-800">{skill.title}</p>
-                <p className="text-xs text-gray-400 truncate">{skill.description || skill.summary}</p>
+              <li key={skill.skill_id} className="px-4 py-2.5 transition-colors cursor-pointer">
+                <p className="text-sm font-medium">{skill.title}</p>
+                <p className="text-xs text-[var(--app-text-muted)] truncate">{skill.description || skill.summary}</p>
               </li>
             ))}
           </ul>
           <button
             onClick={() => { setOpen(false); navigate("/content"); }}
-            className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors border-t border-gray-100"
+            className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-medium text-[var(--app-accent)] hover:bg-[var(--app-accent-subtle)] transition-colors border-t border-[var(--app-border)]"
           >
             Read more <ArrowRight size={14} />
           </button>
@@ -103,90 +97,55 @@ function ContentMenu() {
   );
 }
 
-// Sound toggle — loops the ambient audio for the selected background scene.
-
 function SoundToggle() {
-  const [muted, setMuted] = useState(true);
-  const [playbackError, setPlaybackError] = useState("");
-  const backgroundScene = useSettingsStore((state) => state.backgroundScene);
-  const audioRef = useRef(null);
-  const mutedRef = useRef(muted);
-  const playbackAttemptRef = useRef(0);
+  const isMuted = useSettingsStore((state) => state.isMuted);
+  const toggleMute = useSettingsStore((state) => state.toggleMute);
+  const theme = useSettingsStore((state) => state.theme);
+  const [soundStatus, setSoundStatus] = useState({
+    muted: isMuted,
+    isPlaying: false,
+    isAutoplayBlocked: false,
+  });
 
-  const playScene = useCallback((scene) => {
-    const audio = audioRef.current ?? new Audio();
-    audioRef.current = audio;
-    audio.loop = true;
-    audio.volume = 0.4;
-
-    const sound = {
-      beach: beachSound,
-      forest: forestSound,
-    }[scene];
-
-    if (!sound) {
-      playbackAttemptRef.current += 1;
-      audio.pause();
-      audio.removeAttribute("src");
-      delete audio.dataset.scene;
-      audio.load();
-      setPlaybackError("");
-      return;
-    }
-
-    if (audio.dataset.scene !== scene) {
-      audio.pause();
-      audio.src = sound;
-      audio.dataset.scene = scene;
-      audio.currentTime = 0;
-    }
-
-    const attempt = ++playbackAttemptRef.current;
-    setPlaybackError("");
-    audio.play().catch(() => {
-      if (attempt === playbackAttemptRef.current) {
-        setPlaybackError("Audio could not be played. Select the speaker to try again.");
-      }
+  useEffect(() => {
+    return ambientSoundManager.subscribe((status) => {
+      setSoundStatus(status);
     });
   }, []);
 
-  useEffect(() => {
-    if (!mutedRef.current) playScene(backgroundScene);
-  }, [backgroundScene, playScene]);
-
-  useEffect(() => () => {
-    playbackAttemptRef.current += 1;
-    audioRef.current?.pause();
-  }, []);
-
-  const toggleSound = () => {
-    const nextMuted = !mutedRef.current;
-    mutedRef.current = nextMuted;
-    setMuted(nextMuted);
-
-    if (nextMuted) {
-      playbackAttemptRef.current += 1;
-      audioRef.current?.pause();
-      setPlaybackError("");
+  const handleToggle = () => {
+    const config = getThemeConfig(theme);
+    toggleMute();
+    if (isMuted) {
+      // Unmuting: user interaction fulfills browser autoplay requirement
+      ambientSoundManager.setMuted(false);
+      ambientSoundManager.play(config.themeId, config.ambientSound, true);
     } else {
-      playScene(backgroundScene);
+      ambientSoundManager.setMuted(true);
     }
   };
 
+  const config = getThemeConfig(theme);
+  const title = isMuted
+    ? `Unmute ambient sound (${config.soundLabel})`
+    : `Mute ambient sound (${config.soundLabel})`;
+
   return (
     <button
-      onClick={toggleSound}
-      aria-label={playbackError || (muted ? "Unmute ambient sounds" : "Mute ambient sounds")}
-      aria-pressed={!muted}
-      title={playbackError || (muted ? "Unmute ambient sounds" : "Mute ambient sounds")}
-      className="flex items-center justify-center w-9 h-9 rounded-xl text-gray-600 hover:bg-gray-100 transition-all"
+      onClick={handleToggle}
+      aria-label={title}
+      aria-pressed={!isMuted}
+      title={title}
+      className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all ${
+        !isMuted
+          ? "bg-[var(--app-accent-subtle)] text-[var(--app-accent)]"
+          : "text-[var(--app-text-muted)] hover:bg-[var(--app-surface-soft)]"
+      }`}
     >
-      {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+      {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
     </button>
   );
 }
-
-// Profile — icon-only avatar trigger, dropdown shows name + logout
 
 function ProfileMenu({ displayName, user }) {
   const [open, setOpen] = useState(false);
@@ -197,21 +156,18 @@ function ProfileMenu({ displayName, user }) {
   useOnClickOutside([buttonRef, menuRef], () => setOpen(false));
   const navigate = useNavigate();
   const { clearAuth } = useAuthStore();
-  //const { logout } = useAuth();
 
   useLayoutEffect(() => {
     if (open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 8, left: rect.right - 176 }); // 176px = w-44
+      setPos({ top: rect.bottom + 8, left: rect.right - 176 });
     }
   }, [open]);
 
-    const handleLogout = () => {
-  //const handleLogout = async () => {
+  const handleLogout = () => {
     setOpen(false);
     clearAuth();
     navigate("/");
-    //await logout();
   };
 
   return (
@@ -220,13 +176,14 @@ function ProfileMenu({ displayName, user }) {
         ref={buttonRef}
         onClick={() => setOpen((o) => !o)}
         title={displayName}
-        className={`flex items-center justify-center w-9 h-9 rounded-full transition-all
-          ${open ? "ring-2 ring-indigo-200" : ""}`}
+        className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${
+          open ? "ring-2 ring-[var(--app-accent)]" : ""
+        }`}
       >
         {user?.profileImage
           ? <img src={user.profileImage} alt="" className="h-8 w-8 rounded-full object-cover" />
-          : <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center flex-shrink-0">
-              <User size={15} className="text-white" />
+          : <div className="w-8 h-8 rounded-full bg-[var(--app-accent)] flex items-center justify-center flex-shrink-0 text-white">
+              <User size={15} />
             </div>}
       </button>
 
@@ -234,14 +191,14 @@ function ProfileMenu({ displayName, user }) {
         <div
           ref={menuRef}
           style={{ position: "fixed", top: pos.top, left: pos.left }}
-          className="w-44 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden z-[100]"
+          className="app-menu-popover w-44 rounded-2xl shadow-xl overflow-hidden z-[100]"
         >
-          <div className="px-4 py-2.5 border-b border-gray-50">
-            <p className="text-sm font-medium text-gray-700 truncate">{displayName}</p>
+          <div className="px-4 py-2.5 border-b border-[var(--app-border)]">
+            <p className="text-sm font-medium truncate">{displayName}</p>
           </div>
           <button
             onClick={() => { setOpen(false); setEditOpen(true); }}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--app-text)] hover:bg-[var(--app-accent-subtle)] transition-colors"
           >
             <Settings size={15} /> Edit profile
           </button>
@@ -264,8 +221,6 @@ function ProfileMenu({ displayName, user }) {
   );
 }
 
-// Main Topbar — common header shown on every page inside Layout
-
 export default function Topbar() {
   const user = useAuthStore((state) => state.user);
   const username = getUsername(user);
@@ -273,17 +228,17 @@ export default function Topbar() {
   const isDashboardPage = location.pathname === "/dashboard" || location.pathname.startsWith("/dashboard/");
 
   return (
-    <div className="app-topbar bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
+    <div className="app-topbar px-6 py-4 flex-shrink-0 flex items-center justify-between gap-4">
       {!isDashboardPage && (
         <div>
-          <p className="text-xs text-gray-500 mb-0.5">Welcome,</p>
-          <p className="font-bold text-gray-800 text-lg leading-tight">
+          <p className="text-xs mb-0.5 text-[var(--app-text-muted)]">Welcome,</p>
+          <p className="font-bold text-lg leading-tight text-[var(--app-text)]">
             {username ?? "—"}
           </p>
         </div>
-      )}                                                                                                                                           
+      )}
 
-      {/* Action bar: Content · Sound · Profile — icons only */}
+      {/* Action bar: Content · Sound · Profile */}
       <div className="ml-auto flex items-center gap-1">
         <ContentMenu />
         <SoundToggle />
