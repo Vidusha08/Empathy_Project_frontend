@@ -1,5 +1,6 @@
 // src/components/chat/RabbitIdle.jsx
-import rabbit from "../../assets/images/rabbit.webp";
+import rabbit from "../../assets/images/robot_welcoming.png";
+//import rabbit from "../../assets/images/rabbit.webp";
 import "./RabbitIdle.css";
 
 // Dashboard-only variant of the chatbot character: just the animated

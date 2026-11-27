@@ -8,6 +8,33 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import robotWelcoming from "../../assets/images/robot_welcoming.png";
+import robotRelaxing from "../../assets/images/robot_relaxing.png";
+import robotListening from "../../assets/images/robot_listening.png";
+import robotComforting from "../../assets/images/robot_comforting.png";
+import robotCelebrating from "../../assets/images/robot_celebrating.png";
+
+function getRobotExpression(message) {
+  if (message.id === 1 || message.id === "welcome") {
+    return { image: robotWelcoming, label: "welcoming" };
+  }
+
+  const emotion = String(message.emotion || "").trim().toLowerCase();
+
+  if (["happy", "joy", "joyful", "excited", "proud", "grateful", "celebrating"].includes(emotion)) {
+    return { image: robotCelebrating, label: "celebrating" };
+  }
+  if (["anxious", "stressed", "tense", "nervous", "worried", "afraid"].includes(emotion)) {
+    return { image: robotRelaxing, label: "relaxing" };
+  }
+  if (["sad", "concerned", "angry", "fearful", "lonely", "upset", "overwhelmed", "disappointed"].includes(emotion)) {
+    return { image: robotComforting, label: "comforting" };
+  }
+  if (["calm", "neutral"].includes(emotion)) {
+    return { image: robotRelaxing, label: "relaxing" };
+  }
+  return { image: robotListening, label: "listening" };
+}
 
 function ActionButton({
   children,
@@ -161,9 +188,16 @@ export default function ChatMessage({
     );
   }
 
+  const robotExpression = getRobotExpression(message);
+
   return (
-    <div className="flex justify-start px-4 py-2">
-      <div className="w-full max-w-[72%] rounded-2xl rounded-bl-sm border border-gray-100 bg-white text-gray-800 shadow-sm">
+    <div className="flex items-end justify-start gap-2 px-4 py-2">
+      <img
+        src={robotExpression.image}
+        alt={`Empathy Guide ${robotExpression.label}`}
+        className="chat-response-robot h-12 w-12 shrink-0 object-contain"
+      />
+      <div className="w-full min-w-0 max-w-[72%] rounded-2xl rounded-bl-sm border border-gray-100 bg-white text-gray-800 shadow-sm">
         {content && <div className="px-4 pt-4"><p className="whitespace-pre-line text-sm leading-6 text-gray-700">{content}</p></div>}
         <div className="px-4 pb-4">
           <StepContent step={step} skill={skill} />
